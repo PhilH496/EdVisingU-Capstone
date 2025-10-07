@@ -15,6 +15,12 @@ import { FormData } from "@/types/bswd";
 import { FormLayout } from "@/components/bswd/FormLayout";
 import { StudentInfoStep } from "@/components/bswd/steps/StudentInfoStep";
 import { FormNavigation } from "@/components/bswd/navigation/FormNavigation";
+import { ProgramInfoStep } from "@/components/bswd/steps/ProgramInfoStep";
+import { OsapInfoStep } from "@/components/bswd/steps/OsapInfoStep";
+import { DisabilityInfoStep } from "@/components/bswd/steps/DisabilityInfoStep";
+import { DocumentsStep } from "@/components/bswd/steps/DocumentsStep";
+import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
+import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
 
 // Store all form data in a single state object
 // Initial values are set to empty strings, zeros, or false depending on field type
@@ -74,14 +80,26 @@ export default function BSWDApplicationPage() {
     }
   };
 
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return <StudentInfoStep formData={formData} setFormData={setFormData} />;
-      default:
-        return <div>Step {currentStep} - Coming soon</div>;
-    }
-  };
+   const renderStep = () => {
+     switch (currentStep) {
+       case 1:
+         return <StudentInfoStep formData={formData} setFormData={setFormData} />;
+       case 2:
+         return <ProgramInfoStep formData={formData} setFormData={setFormData} />;
+       case 3:
+         return <OsapInfoStep formData={formData} setFormData={setFormData} />;
+       case 4:
+         return <DisabilityInfoStep formData={formData} setFormData={setFormData} />;
+       case 5:
+         return <DocumentsStep formData={formData} setFormData={setFormData} />;
+       case 6:
+         return <ServiceAndEquip formData={formData} setFormData={setFormData} />;
+       case 7:
+         return <ReviewAndSubmit formData={formData} setFormData={setFormData} />;
+       default:
+         return <div>Step {currentStep} - Coming soon</div>;
+     }
+   };
 
   return (
     <FormLayout
