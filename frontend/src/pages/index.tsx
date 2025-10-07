@@ -1,9 +1,23 @@
+/**
+ * BSWDApplicationPage Component
+ * 
+ * Main page component for the BSWD (Bursary for Students with Disabilities) application form.
+ * Manages the multi-step form flow and overall form state.
+ * 
+ * Features:
+ * - Multi-step form navigation (7 total steps)
+ * - Form data state management
+ * - Step validation before allowing progression
+ * - Conditional rendering of form steps - CHANGE to form PAGES?
+ */
 import { useState } from "react";
 import { FormData } from "@/types/bswd";
 import { FormLayout } from "@/components/bswd/FormLayout";
 import { StudentInfoStep } from "@/components/bswd/steps/StudentInfoStep";
 import { FormNavigation } from "@/components/bswd/navigation/FormNavigation";
 
+// Store all form data in a single state object
+// Initial values are set to empty strings, zeros, or false depending on field type
 export default function BSWDApplicationPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({

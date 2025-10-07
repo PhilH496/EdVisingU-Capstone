@@ -1,3 +1,21 @@
+/**
+ * FormNavigation Component
+ * 
+ * Provides Previous/Next navigation buttons for multi-step forms.
+ * 
+ * Features:
+ * - Disables "Previous" on the first step
+ * - Shows "Submit Application" button on the last step instead of "Next"
+ * - Disables "Next" button when required fields are incomplete
+ * - Visual feedback with disabled states and different colors for each action
+ * 
+ * @param currentStep - The step the user is currently on
+ * @param totalSteps - Total number of steps in the form
+ * @param onNext - Callback function when advancing forward
+ * @param onPrevious - Callback function when going back
+ * @param canProceed - Whether the current step's validation allows moving forward
+ */
+
 interface FormNavigationProps {
   currentStep: number;
   totalSteps: number;

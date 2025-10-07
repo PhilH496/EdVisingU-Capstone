@@ -1,9 +1,26 @@
+/**
+ * FormLayout Component
+ * 
+ * Provides a consistent visual container/wrapper for form pages.
+ * 
+ * Features:
+ * - Centered white content card with shadow
+ * - Responsive max-width container
+ * - Header section with title and description
+ * - Flexible children content area
+ * 
+ * @param children - The form content to display (typically form steps)
+ * @param title - Main title shown at the top of the form
+ * @param description - Descriptive text explaining the form's purpose
+ */
+
 interface FormLayoutProps {
   children: React.ReactNode;
   title: string;
   description: string;
 }
 
+//Box layout for page(s)
 export function FormLayout({ children, title, description }: FormLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
