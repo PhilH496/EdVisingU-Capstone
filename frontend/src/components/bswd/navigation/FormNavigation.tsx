@@ -17,11 +17,11 @@
  */
 
 interface FormNavigationProps {
-  currentStep: number;
-  totalSteps: number;
-  onNext: () => void;
-  onPrevious: () => void;
-  canProceed: boolean;
+  currentStep: number;     
+  totalSteps: number;       
+  onNext: () => void;       
+  onPrevious: () => void;  
+  canProceed: boolean;     
 }
 
 export function FormNavigation({ 
@@ -31,39 +31,52 @@ export function FormNavigation({
   onPrevious, 
   canProceed 
 }: FormNavigationProps) {
+  // Check if we're on the first step (Previous button should be disabled)
   const isFirstStep = currentStep === 1;
+  
+  // Check if we're on the last step (show "Submit" instead of "Next")
   const isLastStep = currentStep === totalSteps;
 
   return (
     <div className="flex justify-between pt-4 border-t">
+      {/* Previous Button */}
       <button
         onClick={onPrevious}
         disabled={isFirstStep}
         className={`px-6 py-2 rounded-md ${
           isFirstStep
+            // Disabled state: gray with no-click cursor
             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            : 'bg-gray-600 text-white hover:bg-gray-700'
+            // Active state: dark gray with hover effect06c
+            : 'bg-[#0d6efd] text-white hover:bg-[#0b5ed7]'
         }`}
       >
         Previous
       </button>
       
+      {/* Conditional rendering: Show either "Next" or "Submit" button */}
       {!isLastStep ? (
+        // Next Button (shown on all steps except the last)
         <button
           onClick={onNext}
           disabled={!canProceed}
           className={`px-6 py-2 rounded-md ${
             !canProceed
+              // Disabled state: gray when validation fails
               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
+              // Active state: blue with hover effect
+              : 'bg-[#0071a9] text-white hover:bg-[#005580]'
           }`}
         >
           Next
         </button>
       ) : (
+        // Submit Button (shown only on the final step)
+        // Green color indicates final action
+        // Note: This button is never disabled on the last step
         <button
           onClick={onNext}
-          className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+          className="px-6 py-2 bg-[#e6fad2] text-black border border-[#d0e6b8] rounded-md hover:bg-[#d0e6b8]"
         >
           Submit Application
         </button>
