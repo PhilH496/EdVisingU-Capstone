@@ -21,7 +21,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="studentId" className="block text-sm font-medium mb-1">
+          <label htmlFor="studentId" className="block text-sm font-medium mb-1 text-brand-text-gray">
             Student ID *
           </label>
           <input
@@ -31,13 +31,13 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
               setFormData(prev => ({ ...prev, studentId: e.target.value }))
             }
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
             placeholder="Enter student ID"
           />
         </div>
 
         <div>
-          <label htmlFor="oen" className="block text-sm font-medium mb-1">
+          <label htmlFor="oen" className="block text-sm font-medium mb-1 text-brand-text-gray">
             Ontario Education Number (OEN) *
           </label>
           <input
@@ -50,7 +50,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 setFormData(prev => ({ ...prev, oen: value }));
               }
             }}
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
             placeholder="9-digit OEN"
             maxLength={9}
           />
@@ -62,7 +62,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="fullName" className="block text-sm font-medium mb-1">
+          <label htmlFor="fullName" className="block text-sm font-medium mb-1 text-brand-text-gray">
             Full Legal Name *
           </label>
           <input
@@ -72,13 +72,13 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
               setFormData(prev => ({ ...prev, fullName: e.target.value }))
             }
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
             placeholder="Enter full legal name"
           />
         </div>
 
         <div>
-          <label htmlFor="dateOfBirth" className="block text-sm font-medium mb-1">
+          <label htmlFor="dateOfBirth" className="block text-sm font-medium mb-1 text-brand-text-gray">
             Date of Birth *
           </label>
           <input
@@ -88,14 +88,14 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
               setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))
             }
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
           />
         </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="sin" className="block text-sm font-medium mb-1">
+          <label htmlFor="sin" className="block text-sm font-medium mb-1 text-brand-text-gray">
             Social Insurance Number
           </label>
           <input
@@ -105,14 +105,14 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
               setFormData(prev => ({ ...prev, sin: e.target.value }))
             }
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
             placeholder="XXX-XXX-XXX"
             maxLength={11}
           />
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium mb-1">
+          <label htmlFor="email" className="block text-sm font-medium mb-1 text-brand-text-gray">
             Email Address *
           </label>
           <input
@@ -122,7 +122,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
               setFormData(prev => ({ ...prev, email: e.target.value }))
             }
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
             placeholder="student@institution.edu"
           />
         </div>
@@ -130,7 +130,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="phone" className="block text-sm font-medium mb-1">
+          <label htmlFor="phone" className="block text-sm font-medium mb-1 text-brand-text-gray">
             Phone Number
           </label>
           <input
@@ -140,14 +140,14 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
               setFormData(prev => ({ ...prev, phone: e.target.value }))
             }
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
             placeholder="(xxx) xxx-xxxx"
           />
         </div>
       </div>
 
       <div>
-        <label htmlFor="address" className="block text-sm font-medium mb-1">
+        <label htmlFor="address" className="block text-sm font-medium mb-1 text-brand-text-gray">
           Mailing Address
         </label>
         <textarea
@@ -156,7 +156,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => 
             setFormData(prev => ({ ...prev, address: e.target.value }))
           }
-          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
           rows={3}
           placeholder="Enter complete mailing address"
         />

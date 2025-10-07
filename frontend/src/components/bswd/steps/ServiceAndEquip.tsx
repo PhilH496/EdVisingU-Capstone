@@ -6,7 +6,7 @@
 // - setFormData: Updates form data using: setFormData(prev => ({ ...prev, fieldName: value }))
 // - Reference StudentInfoStep.tsx for examples
 // - Add validation in index.tsx > isStepComplete() function
-// 6. Consider using functionalLimitations array and requestedItems array from formData
+// - Use brand colors located in tailwind.config.js; reference StudentInfoStep.tsx
 
 import { FormData } from "@/types/bswd";
 
