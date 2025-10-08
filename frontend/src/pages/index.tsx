@@ -1,123 +1,190 @@
-import Head from "next/head";
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
-import styles from "@/styles/Home.module.css";
+/**
+ * BSWDApplicationPage Component
+ * 
+ * Main page component for the BSWD (Bursary for Students with Disabilities) application form.
+ * Manages the multi-step form flow and overall form state.
+ * 
+ * Features:
+ * - Multi-step form navigation (7 total steps)
+ * - Form data state management
+ * - Step validation before allowing progression
+ * - Saves data to Supabase after each step - REASSESS
+ * - Dev mode: Skip to any step without saving (development only)
+ */
+import { useState } from "react";
+import { FormData } from "@/types/bswd";
+import { FormLayout } from "@/components/bswd/FormLayout";
+import { StudentInfoStep } from "@/components/bswd/steps/StudentInfoStep";
+import { FormNavigation } from "@/components/bswd/navigation/FormNavigation";
+import { ProgramInfoStep } from "@/components/bswd/steps/ProgramInfoStep";
+import { OsapInfoStep } from "@/components/bswd/steps/OsapInfoStep";
+import { DisabilityInfoStep } from "@/components/bswd/steps/DisabilityInfoStep";
+import { DocumentsStep } from "@/components/bswd/steps/DocumentsStep";
+import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
+import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
+//import { saveStudentInfo, saveProgramInfo } from "@/lib/database"; // Database use later
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const DEV_MODE = process.env.NODE_ENV === 'development';
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// Store all form data in a single state object
+// Initial values are set to empty strings, zeros, or false depending on field type
+export default function BSWDApplicationPage() {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [dbStudentId, setDbStudentId] = useState<number | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const [formData, setFormData] = useState<FormData>({
+    studentId: '',
+    oen: '',
+    fullName: '',
+    dateOfBirth: '',
+    sin: '',
+    email: '',
+    phone: '',
+    address: '',
+    institution: '',
+    institutionType: 'public-ontario',
+    program: '',
+    studyPeriodStart: '',
+    studyPeriodEnd: '',
+    studyType: 'full-time',
+    osapApplication: 'full-time',
+    federalNeed: 0,
+    provincialNeed: 0,
+    hasOSAPRestrictions: false,
+    restrictionDetails: '',
+    hasVerifiedDisability: false,
+    disabilityType: 'not-verified',
+    disabilityVerificationDate: '',
+    functionalLimitations: [],
+    needsPsychoEdAssessment: false,
+    requestedItems: []
+  });
 
-export default function Home() {
+  const TOTAL_STEPS = 7;
+
+  const isStepComplete = (): boolean => {
+    switch (currentStep) {
+      case 1: return Boolean(formData.studentId && formData.fullName && formData.email && formData.oen.length === 9);
+      case 2: return Boolean(formData.institution && formData.program);
+      default: return true;
+    }
+  };
+
+  const handleNext = async () => {
+    /*
+    try {
+      setSaving(true);
+      setError(null);
+
+      if (currentStep === 1) {
+        // Save student data and get back the student_id to link future data
+        const studentId = await saveStudentInfo(formData);
+        setDbStudentId(studentId);
+      } else if (currentStep === 2) {
+        // Use student_id from Step 1 to link this program info to the correct student
+        if (!dbStudentId) throw new Error('Student ID not found. Please go back to Step 1.');
+        await saveProgramInfo(dbStudentId, formData);
+      }
+        */
+
+      if (currentStep < TOTAL_STEPS) {
+        setCurrentStep(prev => prev + 1);
+      } else {
+        alert('Form submitted!');
+      }
+      /*
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save');
+    } finally {
+      setSaving(false);
+    }
+      */
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 1) {
+      setCurrentStep(prev => prev - 1);
+    }
+  };
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return <StudentInfoStep formData={formData} setFormData={setFormData} />;
+      case 2:
+        return <ProgramInfoStep formData={formData} setFormData={setFormData} />;
+      case 3:
+        return <OsapInfoStep formData={formData} setFormData={setFormData} />;
+      case 4:
+        return <DisabilityInfoStep formData={formData} setFormData={setFormData} />;
+      case 5:
+        return <DocumentsStep formData={formData} setFormData={setFormData} />;
+      case 6:
+        return <ServiceAndEquip formData={formData} setFormData={setFormData} />;
+      case 7:
+        return <ReviewAndSubmit formData={formData} setFormData={setFormData} />;
+      default:
+        return <div>Step {currentStep} - Coming soon</div>;
+    }
+  };
+
   return (
-    <>
-      <Head>
-        <title>Create Next App</title>
-        <meta name="description" content="Generated by create next app" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <div
-        className={`${styles.page} ${geistSans.variable} ${geistMono.variable}`}
-      >
-        <main className={styles.main}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js logo"
-            width={180}
-            height={38}
-            priority
-          />
-          <ol>
-            <li>
-              Get started by editing <code>src/pages/index.tsx</code>.
-            </li>
-            <li>Save and see your changes instantly.</li>
-          </ol>
-
-          {/* Tailwind CSS test box */}
-          <div className="bg-blue-500 text-white p-4 rounded-lg mb-4">
-            <h2 className="text-xl font-bold">Tailwind CSS Test</h2>
-            <p className="text-sm">If you can see this blue box with white text, Tailwind is working!</p>
-          </div>
-
-          <div className={styles.ctas}>
-            <a
-              className={styles.primary}
-              href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Image
-                className={styles.logo}
-                src="/vercel.svg"
-                alt="Vercel logomark"
-                width={20}
-                height={20}
-              />
-              Deploy now
-            </a>
-            <a
-              href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.secondary}
-            >
-              Read our docs
-            </a>
-          </div>
-        </main>
-        <footer className={styles.footer}>
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              aria-hidden
-              src="/file.svg"
-              alt="File icon"
-              width={16}
-              height={16}
-            />
-            Learn
-          </a>
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              aria-hidden
-              src="/window.svg"
-              alt="Window icon"
-              width={16}
-              height={16}
-            />
-            Examples
-          </a>
-          <a
-            href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              aria-hidden
-              src="/globe.svg"
-              alt="Globe icon"
-              width={16}
-              height={16}
-            />
-            Go to nextjs.org →
-          </a>
-        </footer>
+    <FormLayout
+      title="BSWD/CSG-DSE Application Form"
+      description="Complete application for Bursary for Students with Disabilities (BSWD) and Canada Student Grant for Services and Equipment"
+    >
+      <div className="mb-6">
+        <p className="text-sm text-gray-600">Step {currentStep} of {TOTAL_STEPS}</p>
       </div>
-    </>
+
+      {DEV_MODE && (
+        <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+          <p className="text-sm font-medium text-yellow-800 mb-1">Dev Mode - Quick Navigation</p>
+          <p className="text-xs text-yellow-700 mb-3">Click any step to skip directly</p>
+          <div className="flex gap-2">
+            {[1, 2, 3, 4, 5, 6, 7].map(step => (
+              <button 
+                key={step} 
+                onClick={() => { 
+                  setCurrentStep(step); 
+                  if (step > 1) setDbStudentId(999); //testing for later
+                }}
+                className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                  currentStep === step 
+                    ? 'bg-yellow-400 text-yellow-900' 
+                    : 'bg-yellow-200 text-yellow-800 hover:bg-yellow-300'
+                }`}
+              >
+                {step}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+
+      {saving && (
+        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
+          <p className="text-sm text-blue-600">Saving...</p>
+        </div>
+      )}
+
+      {renderStep()}
+
+      <FormNavigation
+        currentStep={currentStep}
+        totalSteps={TOTAL_STEPS}
+        onNext={handleNext}
+        onPrevious={handlePrevious}
+        canProceed={isStepComplete() && !saving}
+      />
+    </FormLayout>
   );
 }
