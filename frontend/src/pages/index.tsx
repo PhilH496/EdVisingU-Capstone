@@ -68,6 +68,14 @@ export default function BSWDApplicationPage() {
     switch (currentStep) {
       case 1: return Boolean(formData.studentId && formData.fullName && formData.email && formData.oen.length === 9);
       case 2: return Boolean(formData.institution && formData.program);
+      case 3: {
+        // Step 3 (OSAP): require application type; if not 'none', needs must be >= 0
+        // If restrictions are checked, details must be provided
+        const hasType = !!formData.osapApplication; // 'full-time' | 'part-time' | 'none'
+        const needsOk = formData.osapApplication === "none" || (!Number.isNaN(Number(formData.federalNeed)) && !Number.isNaN(Number(formData.provincialNeed)) && Number(formData.federalNeed) >= 0 && Number(formData.provincialNeed) >= 0);
+        const restrictionsOk = !formData.hasOSAPRestrictions || String(formData.restrictionDetails ?? "").trim().length > 0;
+        return hasType && needsOk && restrictionsOk;
+      }
       default: return true;
     }
   };
