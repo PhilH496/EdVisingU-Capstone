@@ -9,7 +9,7 @@
 // - Use brand colors located in tailwind.config.js; reference StudentInfoStep.tsx
 
 import { FormData } from "@/types/bswd";
-import React from "react";
+import React, { useState } from "react";
 
 interface DisabilityInfoStepProps {
   formData: FormData;
@@ -17,6 +17,9 @@ interface DisabilityInfoStepProps {
 }
 
 export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStepProps) {
+  // Local state for the psycho-educational assessment checkbox
+  const [requiresPsychoEducational, setRequiresPsychoEducational] = useState(false);
+
   // Handler for the multi-select functional limitations checkboxes
   const handleLimitationsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
@@ -146,8 +149,8 @@ checked={(formData.functionalLimitations as any)?.[limitation.name] || false}
             id="requiresPsychoEducational"
             name="requiresPsychoEducational"
             type="checkbox"
-            checked={false}
-            onChange={() => {}}
+            checked={requiresPsychoEducational}
+            onChange={e => setRequiresPsychoEducational(e.target.checked)}
             className="h-5 w-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 focus:ring-2 mt-0.5"
           />
           <label htmlFor="requiresPsychoEducational" className="ml-3 text-gray-700 leading-tight">
