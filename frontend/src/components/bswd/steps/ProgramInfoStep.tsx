@@ -53,7 +53,7 @@ interface ProgramInfoStepProps {
   setFormData: (data: FormData | ((prev: FormData) => FormData)) => void;
 }
 
-export function ProgramInfoStep() {
+export function ProgramInfoStep( { formData, setFormData }: ProgramInfoStepProps) {
   const [value, setValue] = React.useState("")
   const [open, setOpen] = React.useState(false)
   const [startDate, setStartDate] = React.useState<Date | null>(null)
