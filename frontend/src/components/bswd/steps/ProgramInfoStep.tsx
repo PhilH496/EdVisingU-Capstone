@@ -83,7 +83,7 @@ export function ProgramInfoStep( { formData, setFormData }: ProgramInfoStepProps
 
         {/* Institution Name div */}
         <div>
-          <label htmlFor="institutionName" className="block text-sm">
+          <label htmlFor="institutionName" className="fontSize block text-md font-medium mb-1 text-brand-text-gray">
             Institution Name
           </label>
           <Popover open={open} onOpenChange={setOpen}>
@@ -92,7 +92,7 @@ export function ProgramInfoStep( { formData, setFormData }: ProgramInfoStepProps
                 variant="outline"
                 role="combobox"
                 aria-expanded={open}
-                className="w-[200px] justify-between"
+                className="mx-auto justify-between"
               >
                 {value
                   ? institutions.find((institution) => institution.value === value)?.label
@@ -133,10 +133,10 @@ export function ProgramInfoStep( { formData, setFormData }: ProgramInfoStepProps
 
         {/* Institution Type div */}
         <div>
-          <label htmlFor="institutionType" className="block text-sm font-medium mb-1 text-brand-text-gray">
+          <label htmlFor="institutionType" className="block text-base font-medium mb-1 text-brand-text-gray">
             Institution Type *
             <Select>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="mx-auto">
                 <SelectValue placeholder="Public" />
               </SelectTrigger>
               <SelectContent id="institutionType">
@@ -152,7 +152,7 @@ export function ProgramInfoStep( { formData, setFormData }: ProgramInfoStepProps
 
         {/* Program Cost Code div */}
         <div>
-          <label htmlFor="code" className="block text-sm font-medium mb-1 text-brand-text-gray">
+          <label htmlFor="code" className="block text-base font-medium mb-1 text-brand-text-gray">
             Program Cost Code
           </label>
           <Input
@@ -164,22 +164,23 @@ export function ProgramInfoStep( { formData, setFormData }: ProgramInfoStepProps
 
         {/* Program of Study div*/}
         <div>
-          <label htmlFor="program" className="block text-sm font-medium mb-1 text-brand-text-gray">
+          <label htmlFor="program" className="block text-base font-medium mb-1 text-brand-text-gray">
             Program of Study
           </label>
           <Input
             id="program"
             type="text"
-            placeholder="Enter program name" />
+            placeholder="Enter program name" 
+            />
         </div>
 
         {/* Study Type div*/}
         <div>
-          <label className="block text-sm">
+          <label className="block text-base font-medium mb-1 text-brand-text-gray">
             Study Type
           </label>
           <Select>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="mx-auto">
               <SelectValue placeholder="Full-Time" />
             </SelectTrigger>
             <SelectContent id="studyType">
@@ -194,7 +195,7 @@ export function ProgramInfoStep( { formData, setFormData }: ProgramInfoStepProps
 
         {/* Study Start Date div */}
         <div>
-          <label htmlFor="studyPeriodStart" className="block text-sm font-medium mb-1 text-brand-text-gray">
+          <label htmlFor="studyPeriodStart" className="block text-base font-medium mb-1 text-brand-text-gray">
             Study Start Date *
           </label>
           <Popover>
@@ -234,7 +235,7 @@ export function ProgramInfoStep( { formData, setFormData }: ProgramInfoStepProps
 
         {/* Study End Date div */}
         <div>
-          <label htmlFor="studyPeriodEnd" className="block text-sm font-medium mb-1 text-brand-text-gray">
+          <label htmlFor="studyPeriodEnd" className="block text-base font-medium mb-1 text-brand-text-gray">
             Study End Date *
           </label>
           <Popover>
