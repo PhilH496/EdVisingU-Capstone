@@ -6,7 +6,7 @@
  * Provides a consistent visual container/wrapper for form pages.
  * 
  * Features:
- * - Ontario header bar (left-aligned logo)
+ * - Ontario header bar (black background, left-aligned logo)
  * - Left-aligned white content card with shadow
  * - Responsive max-width container
  * - Header section with title and description aligned left
@@ -27,8 +27,8 @@ interface FormLayoutProps {
 export function FormLayout({ children, title, description }: FormLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Ontario header bar (left-aligned) */}
-      <header className="bg-gray-100 border-b">
+      {/* Ontario header bar (black background, left-aligned logo) */}
+      <header className="bg-black border-b border-black">
         <div className="mx-auto max-w-6xl px-6 py-3 flex items-center">
           <Image
             src="/ontario-logo.png"
@@ -36,6 +36,7 @@ export function FormLayout({ children, title, description }: FormLayoutProps) {
             width={130}
             height={30}
             priority
+            className="filter invert" 
           />
         </div>
       </header>
