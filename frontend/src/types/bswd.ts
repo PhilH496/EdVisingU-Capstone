@@ -5,7 +5,8 @@ export interface FormData {
   // Student Information
   studentId: string;
   oen: string;
-  fullName: string;
+  firstName: string;
+  lastName: string;
   dateOfBirth: string;
   sin: string;
   email: string;
