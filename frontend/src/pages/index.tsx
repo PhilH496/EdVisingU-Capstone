@@ -47,6 +47,7 @@ export default function BSWDApplicationPage() {
     institution: '',
     institutionType: 'public-ontario',
     program: '',
+    code: '',
     studyPeriodStart: '',
     studyPeriodEnd: '',
     studyType: 'full-time',

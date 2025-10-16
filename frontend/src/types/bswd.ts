@@ -18,6 +18,7 @@ export interface FormData {
   institution: string;
   institutionType: 'public-ontario' | 'private-ontario';
   program: string;
+  code: string;
   studyPeriodStart: string;
   studyPeriodEnd: string;
   studyType: 'full-time' | 'part-time';
