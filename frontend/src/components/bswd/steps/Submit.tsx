@@ -1,10 +1,5 @@
-// Step 7: Review all information and submit application
-// ReviewAndSubmit Component
-// 
-// Displays a summary of the application and handles final submission
-
 import { FormData } from "@/types/bswd";
-import { CheckCircle, FileText, User, GraduationCap, DollarSign, Heart } from "lucide-react";
+import { FileText, User, GraduationCap, DollarSign, Heart } from "lucide-react";
 
 interface ReviewAndSubmitProps {
   formData: FormData;

@@ -1,32 +1,17 @@
-/**
- * Application Status Page
- * 
- * Displays the current status of a submitted BSWD application.
- * Shows different states: submitted, in-review, in-progress, accepted, or denied
- * 
- * Features:
- * - Color-coded status badges
- * - Application details summary
- * - Timeline of status updates
- * - Next steps information
- */
-
 import { useState, useEffect } from 'react';
 import { Application, ApplicationStatus } from '@/types/bswd';
 import { CheckCircle, Clock, FileText, XCircle, AlertCircle } from 'lucide-react';
-import Link from 'next/link';
+import Image from 'next/image';
 
 export default function ApplicationStatusPage() {
   const [application, setApplication] = useState<Application | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Load application data from localStorage
     const storedData = localStorage.getItem('currentApplication');
     if (storedData) {
       try {
-        const parsedData = JSON.parse(storedData);
-        setApplication(parsedData);
+        setApplication(JSON.parse(storedData));
       } catch (error) {
         console.error('Error parsing application data:', error);
       }
@@ -86,22 +71,33 @@ export default function ApplicationStatusPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <Link href="/" className="text-brand-dark-blue hover:underline mb-4 inline-block">
-              ← Back to Application
-            </Link>
-            <h1 className="text-3xl font-bold text-gray-900">Application Status</h1>
-            <p className="mt-2 text-gray-600">
-              Track the progress of your BSWD/CSG-DSE application
-            </p>
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-black border-b border-black">
+          <div className="mx-auto max-w-6xl px-6 py-3 flex items-center">
+            <Image
+              src="/ontario-logo.png"
+              alt="Government of Ontario"
+              width={130}
+              height={30}
+              priority
+              className="filter invert" 
+            />
           </div>
-          <div className="flex justify-center items-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-dark-blue mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading application status...</p>
+        </header>
+
+        <div className="py-8 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">Application Status</h1>
+              <p className="mt-2 text-gray-600">
+                Track the progress of your BSWD/CSG-DSE application
+              </p>
+            </div>
+            <div className="flex justify-center items-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-dark-blue mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading application status...</p>
+              </div>
             </div>
           </div>
         </div>
@@ -111,23 +107,31 @@ export default function ApplicationStatusPage() {
 
   if (!application) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <Link href="/" className="text-brand-dark-blue hover:underline mb-4 inline-block">
-              ← Back to Application
-            </Link>
-            <h1 className="text-3xl font-bold text-gray-900">Application Status</h1>
-            <p className="mt-2 text-gray-600">
-              Track the progress of your BSWD/CSG-DSE application
-            </p>
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-black border-b border-black">
+          <div className="mx-auto max-w-6xl px-6 py-3 flex items-center">
+            <Image
+              src="/ontario-logo.png"
+              alt="Government of Ontario"
+              width={130}
+              height={30}
+              priority
+              className="filter invert" 
+            />
           </div>
-          <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">No application found.</p>
-            <Link href="/" className="text-brand-dark-blue hover:underline">
-              Return to application form
-            </Link>
+        </header>
+
+        <div className="py-8 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">Application Status</h1>
+              <p className="mt-2 text-gray-600">
+                Track the progress of your BSWD/CSG-DSE application
+              </p>
+            </div>
+            <div className="text-center py-12">
+              <p className="text-gray-600">No application found.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -138,18 +142,28 @@ export default function ApplicationStatusPage() {
   const StatusIcon = statusConfig.icon;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <Link href="/" className="text-brand-dark-blue hover:underline mb-4 inline-block">
-            ← Back to Application
-          </Link>
-          <h1 className="text-3xl font-bold text-gray-900">Application Status</h1>
-          <p className="mt-2 text-gray-600">
-            Track the progress of your BSWD/CSG-DSE application
-          </p>
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-black border-b border-black">
+        <div className="mx-auto max-w-6xl px-6 py-3 flex items-center">
+          <Image
+            src="/ontario-logo.png"
+            alt="Government of Ontario"
+            width={130}
+            height={30}
+            priority
+            className="filter invert" 
+          />
         </div>
+      </header>
+
+      <div className="py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Application Status</h1>
+            <p className="mt-2 text-gray-600">
+              Track the progress of your BSWD/CSG-DSE application
+            </p>
+          </div>
 
         {/* Status Card */}
         <div className={`bg-white rounded-lg shadow-md border-l-4 ${statusConfig.borderColor} p-6 mb-6`}>
@@ -212,7 +226,6 @@ export default function ApplicationStatusPage() {
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h3 className="text-xl font-semibold text-gray-900 mb-4">Application Timeline</h3>
           <div className="space-y-4">
-            {/* Timeline items */}
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0">
                 <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
@@ -309,7 +322,6 @@ export default function ApplicationStatusPage() {
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="mt-6">
           <button 
             className="px-6 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors font-medium"
@@ -317,6 +329,7 @@ export default function ApplicationStatusPage() {
           >
             Print Application Status
           </button>
+        </div>
         </div>
       </div>
     </div>
