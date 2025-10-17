@@ -135,8 +135,7 @@ export default function BSWDApplicationPage() {
             studyPeriod: formData.studyPeriodStart && formData.studyPeriodEnd 
               ? `${formData.studyPeriodStart} - ${formData.studyPeriodEnd}`
               : 'Not specified',
-            statusUpdatedDate: currentDateTime.toISOString(),
-            reviewNotes: 'Your application has been successfully submitted and is in queue for review.'
+            statusUpdatedDate: currentDateTime.toISOString()
           };
           
           localStorage.setItem('currentApplication', JSON.stringify(applicationData));

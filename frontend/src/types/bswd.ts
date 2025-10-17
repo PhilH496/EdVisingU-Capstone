@@ -64,5 +64,4 @@ export interface Application {
   institution: string;
   studyPeriod: string;
   statusUpdatedDate: string;
-  reviewNotes?: string;
 }

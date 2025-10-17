@@ -14,27 +14,14 @@
 import { useState, useEffect } from 'react';
 import { Application, ApplicationStatus } from '@/types/bswd';
 import { CheckCircle, Clock, FileText, XCircle, AlertCircle } from 'lucide-react';
-
-// Default mock data 
-const defaultMockApplication: Application = {
-  id: 'APP-2024-001234',
-  studentName: 'Rui Zeng',
-  studentId: 'ST123456',
-  submittedDate: '2024-10-01',
-  status: 'in-review',
-  program: 'Computer Science',
-  institution: 'Arizona State University',
-  studyPeriod: 'Fall 2023 - Spring 2026',
-  statusUpdatedDate: '2024-10-10',
-  reviewNotes: 'Your application is currently under review by our assessment team.'
-};
+import Link from 'next/link';
 
 export default function ApplicationStatusPage() {
-  const [application, setApplication] = useState<Application>(defaultMockApplication);
+  const [application, setApplication] = useState<Application | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Try to load application data from localStorage
+    // Load application data from localStorage
     const storedData = localStorage.getItem('currentApplication');
     if (storedData) {
       try {
@@ -97,13 +84,20 @@ export default function ApplicationStatusPage() {
     }
   };
 
-  const statusConfig = getStatusConfig(application.status);
-  const StatusIcon = statusConfig.icon;
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <Link href="/" className="text-brand-dark-blue hover:underline mb-4 inline-block">
+              ← Back to Application
+            </Link>
+            <h1 className="text-3xl font-bold text-gray-900">Application Status</h1>
+            <p className="mt-2 text-gray-600">
+              Track the progress of your BSWD/CSG-DSE application
+            </p>
+          </div>
           <div className="flex justify-center items-center h-64">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-dark-blue mx-auto mb-4"></div>
@@ -115,11 +109,42 @@ export default function ApplicationStatusPage() {
     );
   }
 
+  if (!application) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <Link href="/" className="text-brand-dark-blue hover:underline mb-4 inline-block">
+              ← Back to Application
+            </Link>
+            <h1 className="text-3xl font-bold text-gray-900">Application Status</h1>
+            <p className="mt-2 text-gray-600">
+              Track the progress of your BSWD/CSG-DSE application
+            </p>
+          </div>
+          <div className="text-center py-12">
+            <p className="text-gray-600 mb-4">No application found.</p>
+            <Link href="/" className="text-brand-dark-blue hover:underline">
+              Return to application form
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const statusConfig = getStatusConfig(application.status);
+  const StatusIcon = statusConfig.icon;
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
+          <Link href="/" className="text-brand-dark-blue hover:underline mb-4 inline-block">
+            ← Back to Application
+          </Link>
           <h1 className="text-3xl font-bold text-gray-900">Application Status</h1>
           <p className="mt-2 text-gray-600">
             Track the progress of your BSWD/CSG-DSE application
@@ -142,14 +167,6 @@ export default function ApplicationStatusPage() {
                 </span>
               </div>
               <p className="mt-2 text-gray-700">{statusConfig.description}</p>
-              {application.reviewNotes && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-md">
-                  <p className="text-sm text-gray-700">
-                    <span className="font-semibold">Note: </span>
-                    {application.reviewNotes}
-                  </p>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -293,13 +310,7 @@ export default function ApplicationStatusPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-6 flex flex-col sm:flex-row gap-4">
-          <button 
-            className="px-6 py-3 bg-brand-dark-blue text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
-            onClick={() => window.location.href = '/'}
-          >
-            Return to Home
-          </button>
+        <div className="mt-6">
           <button 
             className="px-6 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors font-medium"
             onClick={() => window.print()}
