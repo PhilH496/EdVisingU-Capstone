@@ -1,6 +1,8 @@
 // types/bswd.ts
 // Type definitions for BSWD/CSG-DSE application form
 
+export type ApplicationStatus = 'submitted' | 'in-review' | 'in-progress' | 'accepted' | 'denied';
+
 export interface FormData {
   // Student Information
   studentId: string;
@@ -51,4 +53,16 @@ export interface RiskAssessment {
   score: number;
   level: 'Low' | 'Medium' | 'High';
   factors: string[];
+}
+
+export interface Application {
+  id: string;
+  studentName: string;
+  studentId: string;
+  submittedDate: string;
+  status: ApplicationStatus;
+  program: string;
+  institution: string;
+  studyPeriod: string;
+  statusUpdatedDate: string;
 }

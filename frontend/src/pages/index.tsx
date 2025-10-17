@@ -11,7 +11,7 @@
  * - Saves data to Supabase after each step - REASSESS
  * - Dev mode: Skip to any step without saving (development only)
  */
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { FormData } from "@/types/bswd";
 import { FormLayout } from "@/components/bswd/FormLayout";
 import { StudentInfoStep } from "@/components/bswd/steps/StudentInfoStep";
@@ -33,6 +33,7 @@ export default function BSWDApplicationPage() {
   const [dbStudentId, setDbStudentId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isConfirmed, setIsConfirmed] = useState(false);
   
   const [formData, setFormData] = useState<FormData>({
     studentId: '',
@@ -77,11 +78,25 @@ export default function BSWDApplicationPage() {
         const restrictionsOk = !formData.hasOSAPRestrictions || String(formData.restrictionDetails ?? "").trim().length > 0;
         return hasType && needsOk && restrictionsOk;
       }
+      case 7: {
+        // Step 7 (Review and Submit): Check if confirmation checkbox is checked
+        return isConfirmed;
+      }
       default: return true;
     }
   };
 
+  // Memoize canProceed to ensure it updates when isConfirmed changes
+  const canProceed = useMemo(() => {
+    return isStepComplete() && !saving;
+  }, [currentStep, formData, isConfirmed, saving]);
+
   const handleNext = async () => {
+    // Check if current step is complete before proceeding
+    if (!isStepComplete()) {
+      return;
+    }
+
     /*
     try {
       setSaving(true);
@@ -101,7 +116,36 @@ export default function BSWDApplicationPage() {
       if (currentStep < TOTAL_STEPS) {
         setCurrentStep(prev => prev + 1);
       } else {
-        alert('Form submitted!');
+        // On the last step, handle submission
+        setSaving(true);
+        
+        // Simulate API call to submit application
+        setTimeout(() => {
+          // Capture the exact submission time
+          const currentDateTime = new Date();
+          
+          // Save form data to localStorage for the status page
+          const applicationData = {
+            id: `APP-${currentDateTime.getFullYear()}-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`,
+            studentName: formData.fullName,
+            studentId: formData.studentId,
+            submittedDate: currentDateTime.toISOString(),
+            status: 'submitted' as const,
+            program: formData.program,
+            institution: formData.institution,
+            studyPeriod: formData.studyPeriodStart && formData.studyPeriodEnd 
+              ? `${formData.studyPeriodStart} - ${formData.studyPeriodEnd}`
+              : 'Not specified',
+            statusUpdatedDate: currentDateTime.toISOString()
+          };
+          
+          localStorage.setItem('currentApplication', JSON.stringify(applicationData));
+          
+          setSaving(false);
+          
+          // Redirect to status page
+          window.location.href = '/application-status';
+        }, 2000);
       }
       /*
     } catch (err) {
@@ -133,7 +177,7 @@ export default function BSWDApplicationPage() {
       case 6:
         return <ServiceAndEquip formData={formData} setFormData={setFormData} />;
       case 7:
-        return <ReviewAndSubmit formData={formData} setFormData={setFormData} />;
+        return <ReviewAndSubmit formData={formData} setFormData={setFormData} isConfirmed={isConfirmed} setIsConfirmed={setIsConfirmed} />;
       default:
         return <div>Step {currentStep} - Coming soon</div>;
     }
@@ -192,7 +236,7 @@ export default function BSWDApplicationPage() {
         totalSteps={TOTAL_STEPS}
         onNext={handleNext}
         onPrevious={handlePrevious}
-        canProceed={isStepComplete() && !saving}
+        canProceed={canProceed}
       />
     </FormLayout>
   );
