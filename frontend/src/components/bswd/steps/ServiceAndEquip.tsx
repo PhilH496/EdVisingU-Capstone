@@ -75,7 +75,7 @@ export function ServiceAndEquip({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold mb-4">Services and Equipment</h2>
+      <h2 className="text-xl font-semibold mb-4">Section F: Services and Equipment</h2>
       {/* 
         Display TabBar component based on focus status
         < Focusing on Equipment or Services > 
