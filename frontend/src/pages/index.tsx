@@ -44,13 +44,16 @@ export default function BSWDApplicationPage() {
     phone: '',
     address: '',
     institution: '',
-    institutionType: 'public-ontario',
+    institutionType: '',
     program: '',
     code: '',
     studyPeriodStart: '',
     studyPeriodEnd: '',
-    studyType: 'full-time',
+    studyType: '',
+    submittedDisabilityElsewhere: 'no',
+    previousInstitution: '',
     osapApplication: 'full-time',
+    
     federalNeed: 0,
     provincialNeed: 0,
     hasOSAPRestrictions: false,
@@ -68,7 +71,13 @@ export default function BSWDApplicationPage() {
   const isStepComplete = (): boolean => {
     switch (currentStep) {
       case 1: return Boolean(formData.studentId && formData.fullName && formData.email && formData.oen.length === 9);
-      case 2: return Boolean(formData.institution && formData.program);
+      case 2: {
+        if (formData.submittedDisabilityElsewhere === 'yes') {
+          formData.previousInstitution
+          return Boolean(formData.institution && formData.institutionType && formData.studyType && formData.studyPeriodStart && formData.studyPeriodEnd && formData.previousInstitution)
+        }
+        return Boolean(formData.institution && formData.institutionType && formData.studyType && formData.studyPeriodStart && formData.studyPeriodEnd)
+      }
       case 3: {
         // Step 3 (OSAP): require application type; if not 'none', needs must be >= 0
         // If restrictions are checked, details must be provided
