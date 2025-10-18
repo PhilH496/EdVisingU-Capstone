@@ -19,8 +19,9 @@ export interface FormData {
   code: string;
   studyPeriodStart: string;
   studyPeriodEnd: string;
-  studyType: '' | 'full-time' | 'part-time';
-
+  studyType: '' | 'full-time' | 'part-time' | 'institution-funded-SB';
+  submittedDisabilityElsewhere: 'yes' | 'no';
+  previousInstitution: string;
   // OSAP Information
   osapApplication: 'full-time' | 'part-time' | 'none';
   federalNeed: number;

@@ -20,6 +20,8 @@ import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 const institutions = [
   {
     value: "algoma",
@@ -145,7 +147,7 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
   return (
     <div className="space-y-4">
 
-      <h2 className="text-xl font-semibold mb-4">Step 2: Program Information</h2>
+      <h2 className="text-xl font-semibold mb-4">Section B: Information about your school and program</h2>
       <div className="grid md:grid-cols-2 gap-4 text-brand-text-gray">
 
         {/* Institution Name div */}
@@ -238,7 +240,7 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
             value={formData.code}
             onChange={(e) => {
               const value = e.target.value;
-              if (/^[\d\s]*$/.test(value)) { // needs to match this regex pattern to be inputted
+              if (/^[\d\s]*$/.test(value)) { // user input can be numbers, spaces
                 setFormData(prev => ({ ...prev, code: value }));
               }
             }}
@@ -259,7 +261,7 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
             value={formData.program}
             onChange={(e) => {
               const value = e.target.value;
-              if (/^[A-Za-z\s]*$/.test(value)) {
+              if (/^[A-Za-z\s]*$/.test(value)) { // user input can be alphabetic, spaces
                 setFormData(prev => ({ ...prev, program: value }));
               }
             }}
@@ -284,6 +286,7 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
             <SelectContent>
               <SelectItem value="full-time">Full-Time</SelectItem>
               <SelectItem value="part-time">Part-Time</SelectItem>
+              <SelectItem value="part-time">Institution-funded Special Bursary</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -375,6 +378,82 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
             </div>
           </Popover>
         </div>
+      </div>
+
+      <div className="mt-4">
+        {/* Previous institution disability documentation div */}
+        <label className="block text-base font-medium mb-2 text-left text-brand-text-gray">
+          Has the student submitted a completed OSAP Disability Verification Form 
+          or other disability documentation while attending another institution? *
+        </label>
+          <RadioGroup
+            value={formData.submittedDisabilityElsewhere || "no"}
+            onValueChange={(value) => 
+              setFormData(prev => ({ ...prev, submittedDisabilityElsewhere: value as 'yes'}))}
+            className="flex items-center justify-center space-x-6 mb-3"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="yes" id="submitted-yes" />
+              <Label htmlFor="submitted-yes">Yes</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="no" id="submitted-no" />
+              <Label htmlFor="submitted-no">No</Label>
+            </div>
+          </RadioGroup>
+
+        {/* Previous institution combobox (used when "Yes") */}
+        {formData.submittedDisabilityElsewhere === "yes" && (
+          <div className="max-w-md mx-auto mb-3">
+            <label className="block text-sm font-medium mb-1 text-brand-text-gray">
+              Previous institution *
+            </label>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={false}
+                  className="w-full justify-start text-left"
+                >
+                  {formData.previousInstitution
+                    ? institutions.find((inst) => inst.value === formData.previousInstitution)?.label
+                    : "Search previous institution..."}
+                  <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+
+              <PopoverContent className="mx-auto p-0">
+                <Command>
+                  <CommandInput placeholder="Search institution..." className="h-9" />
+                  <CommandList>
+                    <CommandEmpty>No institution found.</CommandEmpty>
+                    <CommandGroup>
+                      {institutions.map((inst) => (
+                        <CommandItem
+                          key={inst.value}
+                          value={inst.value}
+                          onSelect={(currentValue) =>
+                            setFormData(prev => ({ ...prev, previousInstitution: currentValue }))
+                          }
+                        >
+                          {inst.label}
+                          <CheckIcon
+                            className={cn(
+                              "ml-auto",
+                              formData.previousInstitution === inst.value ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
+        )}
       </div>
 
     </div>
