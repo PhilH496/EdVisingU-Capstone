@@ -232,7 +232,7 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
         </div>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-4">
+      <div className="border-t pt-4 grid md:grid-cols-3 gap-4">
 
         {/* Program Cost Code div */}
         <div>
@@ -254,7 +254,6 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
             className="w-full"
           />
         </div>
-
         {/* Program of Study div*/}
         <div>
           <label htmlFor="program" className="block text-base font-medium mb-1 text-brand-text-gray">
@@ -299,7 +298,7 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="border-t pt-4 grid md:grid-cols-2 gap-4 ">
 
         {/* Study Start Date div */}
         <div>
@@ -397,7 +396,7 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
             value={formData.submittedDisabilityElsewhere || "no"}
             onValueChange={(value) => 
               setFormData(prev => ({ ...prev, submittedDisabilityElsewhere: value as 'yes'}))}
-            className="flex items-center justify-center space-x-6 mb-3"
+            className="flex items-center justify-left space-x-6 mb-3"
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="yes" id="submitted-yes" />
@@ -411,7 +410,7 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
 
         {/* Previous institution combobox (used when "Yes") */}
         {formData.submittedDisabilityElsewhere === "yes" && (
-          <div className="max-w-md mx-auto mb-3">
+          <div className="mb-3 text-left">
             <label className="block text-sm font-medium mb-1 text-brand-text-gray">
               Previous institution *
             </label>
@@ -422,7 +421,7 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
                   variant="outline"
                   role="combobox"
                   aria-expanded={false}
-                  className="w-full justify-start text-left"
+                  className="md:w-1/2 justify-start text-left"
                 >
                   {formData.previousInstitution
                     ? institutions.find((inst) => inst.value === formData.previousInstitution)?.label
