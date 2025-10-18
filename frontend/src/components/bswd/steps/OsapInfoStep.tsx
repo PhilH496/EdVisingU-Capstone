@@ -38,12 +38,12 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
   // simple eligibility caps for summary card (adjust if moved to config)
   const FED_CAP = 20000;
   const PROV_CAP = 2000;
-  const eligible = applicationType !== "none" && !hasRestrictions;
+  const eligible = applicationType !== "" && !hasRestrictions;
   const combinedMax = eligible ? FED_CAP + PROV_CAP : 0;
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold mb-4">OSAP Information</h2>
+      <h2 className="text-xl font-semibold mb-4">Section C: OSAP Information</h2>
       
       {/* OSAP Application Type */}
       <div className="space-y-2">
@@ -54,18 +54,13 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
           className="w-full rounded-lg border border-gray-300 p-2"
           value={applicationType}
           onChange={(e) => {
-            const v = e.currentTarget.value as "full-time" | "part-time" | "none" | "";
+            const v = e.currentTarget.value as "full-time" | "part-time" | "";
             setField("osapApplication" as any, v as any);
-            if (v === "none") {
-              setField("federalNeed" as any, 0 as any);
-              setField("provincialNeed" as any, 0 as any);
-            }
           }}
         >
           <option value="">Select type</option>
           <option value="full-time">Full-Time OSAP</option>
           <option value="part-time">Part-Time OSAP</option>
-          <option value="none">No OSAP Application</option>
         </select>
       </div>
 
@@ -81,7 +76,6 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
             className="w-full rounded-lg border border-gray-300 p-2"
             value={Number.isNaN(federalNeed) ? "" : federalNeed}
             onChange={(e) => setField("federalNeed" as any, Number(e.currentTarget.value) as any)}
-            disabled={applicationType === "none"}
           />
         </div>
 
@@ -95,7 +89,6 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
             className="w-full rounded-lg border border-gray-300 p-2"
             value={Number.isNaN(provincialNeed) ? "" : provincialNeed}
             onChange={(e) => setField("provincialNeed" as any, Number(e.currentTarget.value) as any)}
-            disabled={applicationType === "none"}
           />
         </div>
       </div>

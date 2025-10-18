@@ -7,12 +7,18 @@ export interface FormData {
   // Student Information
   studentId: string;
   oen: string;
-  fullName: string;
+  firstName: string;
+  lastName: string;
   dateOfBirth: string;
   sin: string;
   email: string;
   phone: string;
   address: string;
+  city: string;
+  province: string;
+  postalCode: string;
+  country: string;
+  hasOsapApplication: boolean | null;
   
   // Program Information
   institution: string;
@@ -39,6 +45,19 @@ export interface FormData {
   
   // Requested Services & Equipment
   requestedItems: RequestedItem[];
+
+  // Documents Information
+  osapApplicationFiles?: File[];
+  disabilityVerificationFiles?: File[];
+  serviceRecommendationsFiles?: File[];
+  psychoEdAssessmentSent: boolean | null;
+  psychoEdAssessmentDate: string;
+  restrictionSatisfied: boolean | null;
+  restrictionSatisfiedDate: string;
+  osapVerificationReceived: boolean | null;
+  osapVerificationReceivedDate: string;
+  osapApplicationActive: boolean | null;
+  osapApplicationActiveDate: string;
 }
 
 export interface RequestedItem {

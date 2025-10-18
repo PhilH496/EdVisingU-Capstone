@@ -27,7 +27,7 @@ export function ReviewAndSubmit({ formData, setFormData, isConfirmed, setIsConfi
         <div className="grid md:grid-cols-2 gap-4 text-sm">
           <div>
             <p className="text-gray-500">Full Name</p>
-            <p className="font-medium text-gray-900">{formData.fullName || 'Not provided'}</p>
+            <p className="font-medium text-gray-900">{(formData.firstName + " " + formData.lastName).trim() || 'Not provided'}</p>
           </div>
           <div>
             <p className="text-gray-500">Student ID</p>
