@@ -8,20 +8,27 @@
 // - Add validation in index.tsx > isStepComplete() function
 // - Use brand colors located in tailwind.config.js; reference StudentInfoStep.tsx
 
+// Base React imports
+import { useState, useRef } from "react";
+
+// shadcn UI components
+import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
+// Icons
+import { CheckIcon, ChevronsUpDownIcon, CalendarIcon } from "lucide-react";
+
+// Utilities & types
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { FormData } from "@/types/bswd";
-import { Input } from "@/components/ui/input"
-import * as React from "react"
-import { format } from "date-fns"
-import { Calendar } from "@/components/ui/calendar"
-import { CheckIcon, ChevronsUpDownIcon } from "lucide-react"
-import { CalendarIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+
 const institutions = [
   {
     value: "algoma",
@@ -123,12 +130,12 @@ interface ProgramInfoStepProps {
 }
 
 export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps) {
-  const [value, setValue] = React.useState("")
-  const [open, setOpen] = React.useState(false)
-  const [startDate, setStartDate] = React.useState<Date | null>(null)
-  const [endDate, setEndDate] = React.useState<Date | null>(null)
-  const startRef = React.useRef<HTMLInputElement>(null)
-  const endRef = React.useRef<HTMLInputElement>(null)
+  const [value, setValue] = useState("")
+  const [open, setOpen] = useState(false)
+  const [startDate, setStartDate] = useState<Date | null>(null)
+  const [endDate, setEndDate] = useState<Date | null>(null)
+  const startRef = useRef<HTMLInputElement>(null)
+  const endRef = useRef<HTMLInputElement>(null)
 
   const handleSelectStart = (selected: Date | undefined) => {
     if (!selected) return
