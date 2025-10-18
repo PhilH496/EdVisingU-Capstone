@@ -44,6 +44,10 @@ export default function BSWDApplicationPage() {
     email: '',
     phone: '',
     address: '',
+    city: '',
+    province: '',
+    postalCode: '',
+    country: 'Canada',
     hasOsapApplication: null,
     institution: '',
     institutionType: 'public-ontario',
@@ -66,13 +70,35 @@ export default function BSWDApplicationPage() {
     osapApplicationFiles: [],
     disabilityVerificationFiles: [],
     serviceRecommendationsFiles: [],
+    psychoEdAssessmentSent: null,
+    psychoEdAssessmentDate: '',
+    restrictionSatisfied: null,
+    restrictionSatisfiedDate: '',
+    osapVerificationReceived: null,
+    osapVerificationReceivedDate: '',
+    osapApplicationActive: null,
+    osapApplicationActiveDate: '',
   });
 
   const TOTAL_STEPS = 7;
 
   const isStepComplete = (): boolean => {
     switch (currentStep) {
-      case 1: return Boolean(formData.studentId && formData.firstName && formData.lastName && formData.email && formData.oen.length === 9) && formData.sin.length === 9;
+    case 1: return Boolean(
+      formData.studentId && 
+      formData.firstName && 
+      formData.lastName && 
+      formData.email && 
+      formData.dateOfBirth && 
+      formData.oen.length === 9 && 
+      formData.sin.replace(/\D/g, '').length === 9 &&
+      formData.address &&
+      formData.city &&
+      formData.province &&
+      formData.postalCode &&
+      formData.country &&
+      formData.hasOsapApplication !== null
+    );
       case 2: return Boolean(formData.institution && formData.program);
       case 3: {
         // Step 3 (OSAP): require application type; if not 'none', needs must be >= 0
@@ -136,14 +162,6 @@ export default function BSWDApplicationPage() {
           window.location.href = '/application-status';
         }, 2000);
       }
-      /*
-    } catch (err) {
-      console.error('Error saving:', err);
-      setError(err instanceof Error ? err.message : 'Failed to save (reused same data? no duplicates for now, delete in supabase or use diff OEN and SSN)');
-    } finally {
-      setSaving(false);
-    }
-      */
   };
 
   const handlePrevious = () => {

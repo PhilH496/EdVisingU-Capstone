@@ -43,7 +43,7 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold mb-4">OSAP Information</h2>
+      <h2 className="text-xl font-semibold mb-4">Section C: OSAP Information</h2>
       
       {/* OSAP Application Type */}
       <div className="space-y-2">

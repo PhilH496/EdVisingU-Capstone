@@ -78,7 +78,7 @@ export function ProgramInfoStep( { formData, setFormData }: ProgramInfoStepProps
   return (
     <div className="space-y-4">
 
-      <h2 className="text-xl font-semibold mb-4">Step 2: Program Information</h2>
+      <h2 className="text-xl font-semibold mb-4">Section B: Program Information</h2>
       <div className="grid md:grid-cols-2 gap-4 text-brand-text-gray">
 
         {/* Institution Name div */}

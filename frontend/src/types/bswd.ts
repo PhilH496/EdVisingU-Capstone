@@ -14,6 +14,10 @@ export interface FormData {
   email: string;
   phone: string;
   address: string;
+  city: string;
+  province: string;
+  postalCode: string;
+  country: string;
   hasOsapApplication: boolean | null;
   
   // Program Information
@@ -46,6 +50,14 @@ export interface FormData {
   osapApplicationFiles?: File[];
   disabilityVerificationFiles?: File[];
   serviceRecommendationsFiles?: File[];
+  psychoEdAssessmentSent: boolean | null;
+  psychoEdAssessmentDate: string;
+  restrictionSatisfied: boolean | null;
+  restrictionSatisfiedDate: string;
+  osapVerificationReceived: boolean | null;
+  osapVerificationReceivedDate: string;
+  osapApplicationActive: boolean | null;
+  osapApplicationActiveDate: string;
 }
 
 export interface RequestedItem {
