@@ -22,27 +22,28 @@ export interface FormData {
   
   // Program Information
   institution: string;
-  institutionType: 'public-ontario' | 'private-ontario';
+  institutionType: '' | 'public-ontario' | 'private-ontario';
   program: string;
   code: string;
   studyPeriodStart: string;
   studyPeriodEnd: string;
-  studyType: 'full-time' | 'part-time';
-  
+  studyType: '' | 'full-time' | 'part-time' | 'institution-funded-SB';
+  submittedDisabilityElsewhere: 'yes' | 'no';
+  previousInstitution: string;
   // OSAP Information
   osapApplication: 'full-time' | 'part-time' | 'none';
   federalNeed: number;
   provincialNeed: number;
   hasOSAPRestrictions: boolean;
   restrictionDetails: string;
-  
+
   // Disability Information
   hasVerifiedDisability: boolean;
   disabilityType: 'permanent' | 'persistent-prolonged' | 'not-verified';
   disabilityVerificationDate: string;
   functionalLimitations: string[];
   needsPsychoEdAssessment: boolean;
-  
+
   // Requested Services & Equipment
   requestedItems: RequestedItem[];
 
