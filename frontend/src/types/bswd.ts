@@ -41,6 +41,11 @@ export interface FormData {
   
   // Requested Services & Equipment
   requestedItems: RequestedItem[];
+
+  // Documents Information
+  osapApplicationFiles?: File[];
+  disabilityVerificationFiles?: File[];
+  serviceRecommendationsFiles?: File[];
 }
 
 export interface RequestedItem {

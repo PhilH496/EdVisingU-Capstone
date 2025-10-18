@@ -62,7 +62,10 @@ export default function BSWDApplicationPage() {
     disabilityVerificationDate: '',
     functionalLimitations: [],
     needsPsychoEdAssessment: false,
-    requestedItems: []
+    requestedItems: [],
+    osapApplicationFiles: [],
+    disabilityVerificationFiles: [],
+    serviceRecommendationsFiles: [],
   });
 
   const TOTAL_STEPS = 7;
