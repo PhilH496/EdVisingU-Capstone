@@ -11,7 +11,7 @@
  * - Saves data to Supabase ONLY on final submission (Step 7)
  * - Dev mode: Skip to any step (development only)
  */
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { FormData } from "@/types/bswd";
 import { FormLayout } from "@/components/bswd/FormLayout";
 import { StudentInfoStep } from "@/components/bswd/steps/StudentInfoStep";
@@ -31,8 +31,7 @@ export default function BSWDApplicationPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState(false);
-  const router = useRouter();
+  const [isConfirmed, setIsConfirmed] = useState(false);
   
   const [formData, setFormData] = useState<FormData>({
     studentId: '',
@@ -78,31 +77,76 @@ export default function BSWDApplicationPage() {
         const restrictionsOk = !formData.hasOSAPRestrictions || String(formData.restrictionDetails ?? "").trim().length > 0;
         return hasType && needsOk && restrictionsOk;
       }
+      case 7: {
+        // Step 7 (Review and Submit): Check if confirmation checkbox is checked
+        return isConfirmed;
+      }
       default: return true;
     }
   };
 
-  const handleNext = async () => {
-    if (currentStep === TOTAL_STEPS) {
-      await handleFinalSubmit();
-    } else {
-      setCurrentStep(prev => prev + 1);
-    }
-  };
+  // Memoize canProceed to ensure it updates when isConfirmed changes
+  const canProceed = useMemo(() => {
+    return isStepComplete() && !saving;
+  }, [currentStep, formData, isConfirmed, saving]);
 
-  const handleFinalSubmit = async () => {
+  const handleNext = async () => {
+    // Check if current step is complete before proceeding
+    if (!isStepComplete()) {
+      return;
+    }
+
+    /*
     try {
       setSaving(true);
       setError(null);
 
-      // Step 1: Save student info into DATABASE
-      const studentId = await saveStudentInfo(formData);
+      if (currentStep === 1) {
+        // Save student data and get back the student_id to link future data
+        const studentId = await saveStudentInfo(formData);
+        setDbStudentId(studentId);
+      } else if (currentStep === 2) {
+        // Use student_id from Step 1 to link this program info to the correct student
+        if (!dbStudentId) throw new Error('Student ID not found. Please go back to Step 1.');
+        await saveProgramInfo(dbStudentId, formData);
+      }
+        */
 
-      // Step 2 - 7: Add rest here to save info into DATABASE
-
-
-      setSubmitted(true);
-      router.push(`/confirmation?applicationId=${studentId}`);
+      if (currentStep < TOTAL_STEPS) {
+        setCurrentStep(prev => prev + 1);
+      } else {
+        // On the last step, handle submission
+        setSaving(true);
+        
+        // Simulate API call to submit application
+        setTimeout(() => {
+          // Capture the exact submission time
+          const currentDateTime = new Date();
+          
+          // Save form data to localStorage for the status page
+          const applicationData = {
+            id: `APP-${currentDateTime.getFullYear()}-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`,
+            studentName: formData.fullName,
+            studentId: formData.studentId,
+            submittedDate: currentDateTime.toISOString(),
+            status: 'submitted' as const,
+            program: formData.program,
+            institution: formData.institution,
+            studyPeriod: formData.studyPeriodStart && formData.studyPeriodEnd 
+              ? `${formData.studyPeriodStart} - ${formData.studyPeriodEnd}`
+              : 'Not specified',
+            statusUpdatedDate: currentDateTime.toISOString()
+          };
+          
+          localStorage.setItem('currentApplication', JSON.stringify(applicationData));
+          
+          setSaving(false);
+          
+          // Redirect to status page
+          window.location.href = '/application-status';
+        }, 2000);
+      }
+      /*
     } catch (err) {
       console.error('Error saving:', err);
       setError(err instanceof Error ? err.message : 'Failed to save (reused same data? no duplicates for now, delete in supabase or use diff OEN and SSN)');
@@ -132,7 +176,7 @@ export default function BSWDApplicationPage() {
       case 6:
         return <ServiceAndEquip formData={formData} setFormData={setFormData} />;
       case 7:
-        return <ReviewAndSubmit formData={formData} setFormData={setFormData} />;
+        return <ReviewAndSubmit formData={formData} setFormData={setFormData} isConfirmed={isConfirmed} setIsConfirmed={setIsConfirmed} />;
       default:
         return <div>Step {currentStep} - Coming soon</div>;
     }
@@ -188,7 +232,7 @@ export default function BSWDApplicationPage() {
         totalSteps={TOTAL_STEPS}
         onNext={handleNext}
         onPrevious={handlePrevious}
-        canProceed={isStepComplete() && !saving}
+        canProceed={canProceed}
       />
     </FormLayout>
   );
