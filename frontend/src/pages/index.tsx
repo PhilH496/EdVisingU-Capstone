@@ -50,7 +50,10 @@ export default function BSWDApplicationPage() {
     studyPeriodStart: '',
     studyPeriodEnd: '',
     studyType: '',
+    submittedDisabilityElsewhere: 'no',
+    previousInstitution: '',
     osapApplication: 'full-time',
+    
     federalNeed: 0,
     provincialNeed: 0,
     hasOSAPRestrictions: false,
