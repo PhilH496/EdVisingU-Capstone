@@ -39,6 +39,27 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
 
   return (
     <div className="space-y-4">
+      <div>
+        <label htmlFor="hasOsapApplication" className="block text-sm font-medium mb-1 text-brand-text-gray">
+          Do you have an OSAP application? *
+        </label>
+        <select
+          id="hasOsapApplication"
+          value={formData.hasOsapApplication === null ? '' : (formData.hasOsapApplication ? 'yes' : 'no')}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => 
+            setFormData(prev => ({ 
+              ...prev, 
+              hasOsapApplication: e.target.value === 'yes',
+              osapApplication: e.target.value === 'yes' ? prev.osapApplication : 'none'
+            }))
+          }
+          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
+        >
+          <option value="">Select an option</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>    
       <h2 className="text-xl font-semibold mb-4">Student Information</h2>
       
       <div className="grid md:grid-cols-2 gap-4">
@@ -172,16 +193,22 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             type="text"
             value={formData.sin}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              const value = e.target.value.replace(/\D/g, ''); 
+              let value = e.target.value.replace(/\D/g, '');
               if (value.length <= 9) {
-                setFormData(prev => ({ ...prev, sin: value }));
+                // Format as XXX-XXX-XXX
+                if (value.length > 6) {
+                  value = `${value.slice(0, 3)}-${value.slice(3, 6)}-${value.slice(6)}`;
+                } else if (value.length > 3) {
+                  value = `${value.slice(0, 3)}-${value.slice(3)}`;
+                }
+                setFormData(prev => ({ ...prev, sin: value })); // Store WITH dashes
               }
             }}
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
             placeholder="XXX-XXX-XXX"
             maxLength={11}
           />
-          {formData.sin && formData.sin.length !== 9 && (
+          {formData.sin && formData.sin.replace(/\D/g, '').length !== 9 && (
             <p className="text-sm text-red-600 mt-1">SIN must be exactly 9 digits</p>
           )}
         </div>
@@ -212,11 +239,22 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             id="phone"
             type="tel"
             value={formData.phone}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-              setFormData(prev => ({ ...prev, phone: e.target.value }))
-            }
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              let value = e.target.value.replace(/\D/g, '');
+              if (value.length <= 10) {
+                if (value.length > 6) {
+                  value = `(${value.slice(0, 3)}) ${value.slice(3, 6)}-${value.slice(6)}`;
+                } else if (value.length > 3) {
+                  value = `(${value.slice(0, 3)}) ${value.slice(3)}`;
+                } else if (value.length > 0) {
+                  value = `(${value}`;
+                }
+                setFormData(prev => ({ ...prev, phone: value }));
+              }
+            }}
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
-            placeholder="(xxx) xxx-xxxx"
+            placeholder="(XXX) XXX-XXXX"
+            maxLength={14}
           />
         </div>
       </div>

@@ -22,11 +22,12 @@ import { DisabilityInfoStep } from "@/components/bswd/steps/DisabilityInfoStep";
 import { DocumentsStep } from "@/components/bswd/steps/DocumentsStep";
 import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
 import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
-import { saveStudentInfo, saveProgramInfo } from "@/lib/database"; //Add database functions here from database.ts
-import { useRouter } from 'next/router';
+//import { saveStudentInfo, saveProgramInfo } from "@/lib/database"; // Database use later - create functions in database.ts, take a look and edit if needed SQL in supabase. 
 
 const DEV_MODE = process.env.NODE_ENV === 'development';
 
+// Store all form data in a single state object
+// Initial values are set to empty strings, zeros, or false depending on field type
 export default function BSWDApplicationPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [saving, setSaving] = useState(false);
@@ -43,6 +44,7 @@ export default function BSWDApplicationPage() {
     email: '',
     phone: '',
     address: '',
+    hasOsapApplication: null,
     institution: '',
     institutionType: 'public-ontario',
     program: '',
@@ -90,27 +92,12 @@ export default function BSWDApplicationPage() {
     return isStepComplete() && !saving;
   }, [currentStep, formData, isConfirmed, saving]);
 
+  
   const handleNext = async () => {
     // Check if current step is complete before proceeding
     if (!isStepComplete()) {
       return;
     }
-
-    /*
-    try {
-      setSaving(true);
-      setError(null);
-
-      if (currentStep === 1) {
-        // Save student data and get back the student_id to link future data
-        const studentId = await saveStudentInfo(formData);
-        setDbStudentId(studentId);
-      } else if (currentStep === 2) {
-        // Use student_id from Step 1 to link this program info to the correct student
-        if (!dbStudentId) throw new Error('Student ID not found. Please go back to Step 1.');
-        await saveProgramInfo(dbStudentId, formData);
-      }
-        */
 
       if (currentStep < TOTAL_STEPS) {
         setCurrentStep(prev => prev + 1);
@@ -126,7 +113,7 @@ export default function BSWDApplicationPage() {
           // Save form data to localStorage for the status page
           const applicationData = {
             id: `APP-${currentDateTime.getFullYear()}-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`,
-            studentName: formData.fullName,
+            studentName: `${formData.firstName} ${formData.lastName}`,
             studentId: formData.studentId,
             submittedDate: currentDateTime.toISOString(),
             status: 'submitted' as const,
@@ -153,6 +140,7 @@ export default function BSWDApplicationPage() {
     } finally {
       setSaving(false);
     }
+      */
   };
 
   const handlePrevious = () => {

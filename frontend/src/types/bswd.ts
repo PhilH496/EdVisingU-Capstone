@@ -14,6 +14,7 @@ export interface FormData {
   email: string;
   phone: string;
   address: string;
+  hasOsapApplication: boolean | null;
   
   // Program Information
   institution: string;
