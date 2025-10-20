@@ -1,4 +1,4 @@
-#EdVisingU
+# EdVisingU
 
 This repository contains a Next.js frontend and a FastAPI backend. The instructions below show how to set up both projects locally on Windows PowerShell. 
 
