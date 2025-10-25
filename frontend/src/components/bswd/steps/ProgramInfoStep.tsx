@@ -368,7 +368,11 @@ export function ProgramInfoStep({
                 id="studyPeriodStart"
                 ref={startRef}
                 type="date"
-                defaultValue={startDate ? format(startDate, "yyyy-MM-dd") : ""}
+                defaultValue={
+                  formData.studyPeriodStart
+                    ? format(formData.studyPeriodStart, "yyyy-MM-dd")
+                    : ""
+                }
                 className="w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm"
                 onChange={(e) => {
                   const value = e.target.value;
@@ -424,7 +428,11 @@ export function ProgramInfoStep({
                 id="studyPeriodEnd"
                 ref={endRef}
                 type="date"
-                defaultValue={endDate ? format(endDate, "yyyy-MM-dd") : ""}
+                defaultValue={
+                  formData.studyPeriodEnd
+                    ? format(formData.studyPeriodEnd, "yyyy-MM-dd")
+                    : ""
+                }
                 onChange={(e) => {
                   const value = e.target.value;
                   if (value) {
