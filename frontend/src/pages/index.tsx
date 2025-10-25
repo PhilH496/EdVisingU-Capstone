@@ -102,13 +102,14 @@ export default function BSWDApplicationPage() {
       stepIconFaClass: "fa-brands fa-accessible-icon",
     },
     {
-      stepName: "Service & Equipment",
-      stepIconFaClass: "fa-solid fa-wrench",
-    },
-    {
       stepName: "Documents",
       stepIconFaClass: "fa-solid fa-file",
     },
+    {
+      stepName: "Service & Equipment",
+      stepIconFaClass: "fa-solid fa-wrench",
+    },
+
     {
       stepName: "Review & Submit",
       stepIconFaClass: "fa-solid fa-receipt",
