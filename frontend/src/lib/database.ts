@@ -7,7 +7,8 @@ export const saveStudentInfo = async (formData: FormData) => {
     .from('student')
     .insert({
       oen: parseInt(formData.oen),
-      name: formData.fullName,
+      first_name: formData.firstName,
+      last_name: formData.lastName, 
       dob: formData.dateOfBirth,
       sin: formData.sin || null,
       phone_number: formData.phone || null
@@ -19,7 +20,7 @@ export const saveStudentInfo = async (formData: FormData) => {
   return data.student_id;
 };
 
-//StepOne + part of StepTwo
+//StepTwo - (Not used in index.tsx for now, check if format is correct to save into database)
 export const saveProgramInfo = async (studentId: number, formData: FormData) => {
   const { error } = await supabase
     .from('program_info')
