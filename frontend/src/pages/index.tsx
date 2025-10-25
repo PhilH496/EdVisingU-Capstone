@@ -22,6 +22,8 @@ import { DisabilityInfoStep } from "@/components/bswd/steps/DisabilityInfoStep";
 import { DocumentsStep } from "@/components/bswd/steps/DocumentsStep";
 import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
 import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
+import { StudentInfoSchema } from "@/schemas/StudentInfoSchema";
+import { saveStudentInfo } from "@/lib/database";
 //import { saveStudentInfo, saveProgramInfo } from "@/lib/database"; // Database use later - create functions in database.ts, take a look and edit if needed SQL in supabase.
 
 const DEV_MODE = process.env.NODE_ENV === "development";
@@ -247,6 +249,40 @@ export default function BSWDApplicationPage() {
     }
   };
 
+  const handleStudentSubmit = async () => {
+    console.log(formData.sin);
+    const [day, month, year] = formData.dateOfBirth.split("/").map(Number);
+    const birthDate = new Date(year, month - 1, day);
+    const sin = formData.sin.replace(/-/g, "");
+    const phone = formData.phone.replace(/\D/g, "");
+    console.log(phone);
+    const studentInfoData = {
+      studentId: +formData.studentId,
+      oen: formData.oen,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      dateOfBirth: birthDate,
+      sin,
+      phone,
+    };
+    const parsedStudentInfo = StudentInfoSchema.safeParse(studentInfoData);
+    if (!parsedStudentInfo.success) {
+      console.error("Validation Error:", parsedStudentInfo.error);
+      return;
+    }
+    saveStudentInfo(formData);
+    console.log("Submitted");
+  };
+
+  const handleSubmit = async () => {
+    setSaving(true);
+    // Mimic delaying when user submits [REMOVE LATER]
+    await new Promise((r) => setTimeout(r, 2000));
+    const results = await Promise.all([handleStudentSubmit()]);
+    console.log(results);
+    setSaving(false);
+  };
+
   const handleStepClick = (step: number) => {
     if (step > maxStep) return;
     setCurrentStep(step);
@@ -378,6 +414,7 @@ export default function BSWDApplicationPage() {
         totalSteps={TOTAL_STEPS}
         onNext={handleNext}
         onPrevious={handlePrevious}
+        onSubmit={handleSubmit}
         canProceed={canProceed}
       />
     </FormLayout>
