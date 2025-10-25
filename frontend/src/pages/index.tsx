@@ -11,7 +11,7 @@
  * - Saves data to Supabase ONLY on final submission (Step 7)
  * - Dev mode: Skip to any step (development only)
  */
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { FormData } from "@/types/bswd";
 import { FormLayout } from "@/components/bswd/FormLayout";
 import { StudentInfoStep } from "@/components/bswd/steps/StudentInfoStep";
@@ -30,6 +30,7 @@ const DEV_MODE = process.env.NODE_ENV === "development";
 // Initial values are set to empty strings, zeros, or false depending on field type
 export default function BSWDApplicationPage() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [maxStep, setMaxStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
@@ -192,6 +193,11 @@ export default function BSWDApplicationPage() {
 
     if (currentStep < TOTAL_STEPS) {
       setCurrentStep((prev) => prev + 1);
+      // Increase max step when user processes to the next step
+      // ** Only unlock new step when you click next on the last unlocked step **
+      if (currentStep === maxStep) {
+        setMaxStep((m) => m + 1);
+      }
     } else {
       // On the last step, handle submission
       setSaving(true);
@@ -240,6 +246,11 @@ export default function BSWDApplicationPage() {
     }
   };
 
+  const handleStepClick = (step: number) => {
+    if (step > maxStep) return;
+    setCurrentStep(step);
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -276,6 +287,62 @@ export default function BSWDApplicationPage() {
     }
   };
 
+  // Client component for step bar
+  function StepBar() {
+    "use client";
+    const scrollRef = useRef<HTMLDivElement | null>(null);
+    const stepRefs = useRef<(HTMLButtonElement | null)[]>([]);
+    useEffect(() => {
+      const el = scrollRef.current;
+      const target = stepRefs.current[currentStep - 1];
+      if (el && target) {
+        target.scrollIntoView({
+          behavior: "smooth",
+          inline: "end",
+          block: "nearest",
+        });
+      }
+    }, [currentStep]);
+    return (
+      <div
+        className="overflow-x-scroll"
+        id="scrollable_step_bar"
+        ref={scrollRef}
+      >
+        <div className="flex gap-10 w-max">
+          {stepsInfo.map((stepInfo, index) => (
+            <button
+              key={stepInfo.stepName}
+              onClick={() => handleStepClick(index + 1)}
+              disabled={index >= maxStep}
+              ref={(el) => {
+                stepRefs.current[index] = el;
+              }}
+              className="flex flex-col items-center"
+            >
+              <span
+                className={`flex rounded-full  justify-center items-center h-14 w-14 transition-colors font-medium ${
+                  currentStep === index + 1
+                    ? "bg-cyan-800 text-white"
+                    : "bg-gray-100 text-black"
+                } ${
+                  index + 1 > maxStep
+                    ? "opacity-40 cursor-not-allowed"
+                    : "hover:bg-cyan-700 hover:text-white"
+                }`}
+              >
+                <i className={`${stepInfo.stepIconFaClass} text-[150%]`}></i>
+              </span>
+              <span className={index >= maxStep ? "opacity-40" : ""}>
+                {stepInfo.stepName}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <FormLayout
       title="BSWD/CSG-DSE Application Form"
@@ -287,28 +354,7 @@ export default function BSWDApplicationPage() {
         </p>
       </div>
       <div className="mb-4 p-4 border rounded-md">
-        <div className="overflow-x-scroll">
-          <div className="flex gap-10 w-max">
-            {stepsInfo.map((stepInfo, index) => (
-              <button
-                key={stepInfo.stepName}
-                onClick={() => setCurrentStep(index + 1)}
-                className="flex flex-col items-center"
-              >
-                <span
-                  className={`flex rounded-full  justify-center items-center h-14 w-14 transition-colors font-medium ${
-                    currentStep === index + 1
-                      ? "bg-cyan-800 text-white"
-                      : "bg-gray-100 text-black hover:bg-cyan-700 hover:text-white"
-                  }`}
-                >
-                  <i className={`${stepInfo.stepIconFaClass} text-[150%]`}></i>
-                </span>
-                {stepInfo.stepName}
-              </button>
-            ))}
-          </div>
-        </div>
+        <StepBar />
       </div>
       {error && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
