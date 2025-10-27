@@ -162,17 +162,13 @@ export default function BSWDApplicationPage() {
       case 3: {
         // Step 3 (OSAP): require application type; if not 'none', needs must be >= 0
         // If restrictions are checked, details must be provided
-        const hasType = !!formData.osapApplication; // 'full-time' | 'part-time' | 'none'
-        const needsOk =
-          formData.osapApplication === "none" ||
-          (!Number.isNaN(Number(formData.federalNeed)) &&
-            !Number.isNaN(Number(formData.provincialNeed)) &&
-            Number(formData.federalNeed) >= 0 &&
-            Number(formData.provincialNeed) >= 0);
-        const restrictionsOk =
-          !formData.hasOSAPRestrictions ||
-          String(formData.restrictionDetails ?? "").trim().length > 0;
-        return hasType && needsOk && restrictionsOk;
+        // Step 3 (OSAP): require application type; if not 'none', needs must be >= 0
+        // If restrictions are checked, details must be provided
+        const hasChosenOnFile = formData.osapOnFileStatus === "APPROVED" || formData.osapOnFileStatus === "NONE";
+        const appTypeOk = formData.osapOnFileStatus === "APPROVED" ? formData.osapApplication !== "none" : true;
+        const needsOk = formData.osapOnFileStatus === "APPROVED" ? (!Number.isNaN(Number(formData.federalNeed)) && !Number.isNaN(Number(formData.provincialNeed)) && Number(formData.federalNeed) >= 0 && Number(formData.provincialNeed) >= 0) : true;
+        const restrictionsOk = true; // Restrictions never block navigation
+        return hasChosenOnFile && appTypeOk && needsOk && restrictionsOk;
       }
       case 7: {
         // Step 7 (Review and Submit): Check if confirmation checkbox is checked

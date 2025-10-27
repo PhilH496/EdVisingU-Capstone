@@ -36,6 +36,9 @@ export interface FormData {
   provincialNeed: number;
   hasOSAPRestrictions: boolean;
   restrictionDetails: string;
+  osapOnFileStatus?: 'APPROVED' | 'NONE' | '';
+  queuedForManualReview?: boolean;
+  restrictionType?: 'DEFAULT' | 'OVERPAYMENT' | 'BANKRUPTCY' | 'FALSE_INFO' | 'LOAN_FORGIVENESS_REVIEW' | 'OTHER';
 
   // Disability Information
   hasVerifiedDisability: boolean;
