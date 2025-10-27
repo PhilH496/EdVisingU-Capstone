@@ -31,8 +31,8 @@ const DEV_MODE = process.env.NODE_ENV === "development";
 // Store all form data in a single state object
 // Initial values are set to empty strings, zeros, or false depending on field type
 export default function BSWDApplicationPage() {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [maxStep, setMaxStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(4);
+  const [maxStep, setMaxStep] = useState(4);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
@@ -101,7 +101,7 @@ export default function BSWDApplicationPage() {
     },
     {
       stepName: "Disability Info",
-      stepIconFaClass: "fa-brands fa-accessible-icon",
+      stepIconFaClass: "fa-solid fa-wheelchair",
     },
     {
       stepName: "Documents",
@@ -342,7 +342,7 @@ export default function BSWDApplicationPage() {
     }, [currentStep]);
     return (
       <div
-        className="overflow-x-scroll"
+        className="overflow-x-scroll pb-4"
         id="scrollable_step_bar"
         ref={scrollRef}
       >
@@ -390,7 +390,7 @@ export default function BSWDApplicationPage() {
           Step {currentStep} of {TOTAL_STEPS}
         </p>
       </div>
-      <div className="mb-4 p-4 border rounded-md">
+      <div className="mb-4 p-4 pb-2 py-6 border rounded-md">
         <StepBar />
       </div>
       {error && (
