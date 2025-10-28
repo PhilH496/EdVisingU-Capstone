@@ -157,6 +157,53 @@ checked={(formData.functionalLimitations as any)?.[limitation.name] || false}
             Requires psycho-educational assessment for learning disability verification
           </label>
         </div>
+
+        {/* Conditional Email Input - Only shows when checkbox is checked */}
+        {requiresPsychoEducational && (
+          <div className="mt-6 ml-8 p-6 bg-blue-50 border-l-4 border-blue-500 rounded-r-md">
+            <div className="flex items-start mb-4">
+              <div className="flex-shrink-0">
+                <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-blue-800">
+                  Psycho-Educational Assessment Referral
+                </h3>
+                <div className="mt-2 text-sm text-blue-700">
+                  <p>
+                    You will be automatically connected with a qualified assessment provider in your geographical area 
+                    who has a referral contract with us, or with a provider at your institution at a discounted rate.
+                  </p>
+                  <p className="mt-2">
+                    The assessment fee will be reviewed for approval and submitted to your institution's finance office 
+                    for direct payment via EFT.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label htmlFor="psychoEdEmail" className="block text-sm font-medium text-gray-700 mb-2">
+                Contact Email for Assessment Referral <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                id="psychoEdEmail"
+                name="psychoEdEmail"
+                placeholder="Enter your email address"
+                value={formData.email || ''}
+                onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                className="w-full max-w-md px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:ring-1"
+                required={requiresPsychoEducational}
+              />
+              <p className="mt-2 text-xs text-gray-600">
+                We will send assessment provider information and next steps to this email address.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
