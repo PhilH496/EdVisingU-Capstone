@@ -160,18 +160,18 @@ checked={(formData.functionalLimitations as any)?.[limitation.name] || false}
 
         {/* Conditional Email Input - Only shows when checkbox is checked */}
         {requiresPsychoEducational && (
-          <div className="mt-6 ml-8 p-6 bg-blue-50 border-l-4 border-blue-500 rounded-r-md">
+          <div className="mt-6 ml-8 p-6 bg-brand-light-green border-l-4 border-green-600 rounded-r-md">
             <div className="flex items-start mb-4">
               <div className="flex-shrink-0">
-                <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-6 w-6 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-blue-800">
+                <h3 className="text-sm font-medium text-green-900">
                   Psycho-Educational Assessment Referral
                 </h3>
-                <div className="mt-2 text-sm text-blue-700">
+                <div className="mt-2 text-sm text-green-800">
                   <p>
                     You will be automatically connected with a qualified assessment provider in your geographical area 
                     who has a referral contract with us, or with a provider at your institution at a discounted rate.
@@ -195,7 +195,7 @@ checked={(formData.functionalLimitations as any)?.[limitation.name] || false}
                 placeholder="Enter your email address"
                 value={formData.email || ''}
                 onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full max-w-md px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:ring-1"
+                className="w-full max-w-md px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:border-green-600 focus:ring-green-600 focus:ring-1"
                 required={requiresPsychoEducational}
               />
               <p className="mt-2 text-xs text-gray-600">
