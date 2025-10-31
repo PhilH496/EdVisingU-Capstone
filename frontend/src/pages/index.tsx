@@ -11,7 +11,7 @@
  * - Saves data to Supabase ONLY on final submission (Step 7)
  * - Dev mode: Skip to any step (development only)
  */
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { FormData } from "@/types/bswd";
 import { FormLayout } from "@/components/bswd/FormLayout";
 import { StudentInfoStep } from "@/components/bswd/steps/StudentInfoStep";
@@ -22,6 +22,8 @@ import { DisabilityInfoStep } from "@/components/bswd/steps/DisabilityInfoStep";
 import { DocumentsStep } from "@/components/bswd/steps/DocumentsStep";
 import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
 import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
+import { StudentInfoSchema } from "@/schemas/StudentInfoSchema";
+import { saveStudentInfo } from "@/lib/database";
 //import { saveStudentInfo, saveProgramInfo } from "@/lib/database"; // Database use later - create functions in database.ts, take a look and edit if needed SQL in supabase.
 
 const DEV_MODE = process.env.NODE_ENV === "development";
@@ -30,6 +32,7 @@ const DEV_MODE = process.env.NODE_ENV === "development";
 // Initial values are set to empty strings, zeros, or false depending on field type
 export default function BSWDApplicationPage() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [maxStep, setMaxStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
@@ -98,16 +101,17 @@ export default function BSWDApplicationPage() {
     },
     {
       stepName: "Disability Info",
-      stepIconFaClass: "fa-brands fa-accessible-icon",
-    },
-    {
-      stepName: "Service & Equipment",
-      stepIconFaClass: "fa-solid fa-wrench",
+      stepIconFaClass: "fa-solid fa-wheelchair",
     },
     {
       stepName: "Documents",
       stepIconFaClass: "fa-solid fa-file",
     },
+    {
+      stepName: "Service & Equipment",
+      stepIconFaClass: "fa-solid fa-wrench",
+    },
+
     {
       stepName: "Review & Submit",
       stepIconFaClass: "fa-solid fa-receipt",
@@ -158,8 +162,6 @@ export default function BSWDApplicationPage() {
       case 3: {
         // Step 3 (OSAP): require application type; if not 'none', needs must be >= 0
         // If restrictions are checked, details must be provided
-        // Step 3 (OSAP): require application type; if not 'none', needs must be >= 0
-        // If restrictions are checked, details must be provided
         const hasChosenOnFile = formData.osapOnFileStatus === "APPROVED" || formData.osapOnFileStatus === "NONE";
         const appTypeOk = formData.osapOnFileStatus === "APPROVED" ? formData.osapApplication !== "none" : true;
         const needsOk = formData.osapOnFileStatus === "APPROVED" ? (!Number.isNaN(Number(formData.federalNeed)) && !Number.isNaN(Number(formData.provincialNeed)) && Number(formData.federalNeed) >= 0 && Number(formData.provincialNeed) >= 0) : true;
@@ -188,6 +190,11 @@ export default function BSWDApplicationPage() {
 
     if (currentStep < TOTAL_STEPS) {
       setCurrentStep((prev) => prev + 1);
+      // Increase max step when user processes to the next step
+      // ** Only unlock new step when you click next on the last unlocked step **
+      if (currentStep === maxStep) {
+        setMaxStep((m) => m + 1);
+      }
     } else {
       // On the last step, handle submission
       setSaving(true);
@@ -236,6 +243,45 @@ export default function BSWDApplicationPage() {
     }
   };
 
+  const handleStudentSubmit = async () => {
+    console.log(formData.sin);
+    const [day, month, year] = formData.dateOfBirth.split("/").map(Number);
+    const birthDate = new Date(year, month - 1, day);
+    const sin = formData.sin.replace(/-/g, "");
+    const phone = formData.phone.replace(/\D/g, "");
+    console.log(phone);
+    const studentInfoData = {
+      studentId: +formData.studentId,
+      oen: formData.oen,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      dateOfBirth: birthDate,
+      sin,
+      phone,
+    };
+    const parsedStudentInfo = StudentInfoSchema.safeParse(studentInfoData);
+    if (!parsedStudentInfo.success) {
+      console.error("Validation Error:", parsedStudentInfo.error);
+      return;
+    }
+    saveStudentInfo(formData);
+    console.log("Submitted");
+  };
+
+  const handleSubmit = async () => {
+    setSaving(true);
+    // Mimic delaying when user submits [REMOVE LATER]
+    await new Promise((r) => setTimeout(r, 2000));
+    const results = await Promise.all([handleStudentSubmit()]);
+    console.log(results);
+    setSaving(false);
+  };
+
+  const handleStepClick = (step: number) => {
+    if (step > maxStep) return;
+    setCurrentStep(step);
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -272,6 +318,62 @@ export default function BSWDApplicationPage() {
     }
   };
 
+  // Client component for step bar
+  function StepBar() {
+    "use client";
+    const scrollRef = useRef<HTMLDivElement | null>(null);
+    const stepRefs = useRef<(HTMLButtonElement | null)[]>([]);
+    useEffect(() => {
+      const el = scrollRef.current;
+      const target = stepRefs.current[currentStep - 1];
+      if (el && target) {
+        target.scrollIntoView({
+          behavior: "smooth",
+          inline: "end",
+          block: "nearest",
+        });
+      }
+    }, [currentStep]);
+    return (
+      <div
+        className="overflow-x-scroll pb-4"
+        id="scrollable_step_bar"
+        ref={scrollRef}
+      >
+        <div className="flex gap-10 w-max">
+          {stepsInfo.map((stepInfo, index) => (
+            <button
+              key={stepInfo.stepName}
+              onClick={() => handleStepClick(index + 1)}
+              disabled={index >= maxStep}
+              ref={(el) => {
+                stepRefs.current[index] = el;
+              }}
+              className="flex flex-col items-center"
+            >
+              <span
+                className={`flex rounded-full  justify-center items-center h-14 w-14 transition-colors font-medium ${
+                  currentStep === index + 1
+                    ? "bg-cyan-800 text-white"
+                    : "bg-gray-100 text-black"
+                } ${
+                  index + 1 > maxStep
+                    ? "opacity-40 cursor-not-allowed"
+                    : "hover:bg-cyan-700 hover:text-white"
+                }`}
+              >
+                <i className={`${stepInfo.stepIconFaClass} text-[150%]`}></i>
+              </span>
+              <span className={index >= maxStep ? "opacity-40" : ""}>
+                {stepInfo.stepName}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <FormLayout
       title="BSWD/CSG-DSE Application Form"
@@ -282,29 +384,8 @@ export default function BSWDApplicationPage() {
           Step {currentStep} of {TOTAL_STEPS}
         </p>
       </div>
-      <div className="mb-4 p-4 border rounded-md">
-        <div className="overflow-x-scroll">
-          <div className="flex gap-10 w-max">
-            {stepsInfo.map((stepInfo, index) => (
-              <button
-                key={stepInfo.stepName}
-                onClick={() => setCurrentStep(index + 1)}
-                className="flex flex-col items-center"
-              >
-                <span
-                  className={`flex rounded-full  justify-center items-center h-14 w-14 transition-colors font-medium ${
-                    currentStep === index + 1
-                      ? "bg-cyan-800 text-white"
-                      : "bg-gray-100 text-black hover:bg-cyan-700 hover:text-white"
-                  }`}
-                >
-                  <i className={`${stepInfo.stepIconFaClass} text-[150%]`}></i>
-                </span>
-                {stepInfo.stepName}
-              </button>
-            ))}
-          </div>
-        </div>
+      <div className="mb-4 p-4 pb-2 py-6 border rounded-md">
+        <StepBar />
       </div>
       {error && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
@@ -327,6 +408,7 @@ export default function BSWDApplicationPage() {
         totalSteps={TOTAL_STEPS}
         onNext={handleNext}
         onPrevious={handlePrevious}
+        onSubmit={handleSubmit}
         canProceed={canProceed}
       />
     </FormLayout>
