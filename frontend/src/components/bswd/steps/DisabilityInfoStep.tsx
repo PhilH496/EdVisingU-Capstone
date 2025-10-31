@@ -1,6 +1,6 @@
 // Step 4: Disability verification and documentation
 // DisabilityInfoStep Component Goes Here
-// 
+//
 // HELPFUL INFO:
 // - formData: Object containing all form data (see @/types/bswd.ts for available fields)
 // - setFormData: Updates form data using: setFormData(prev => ({ ...prev, fieldName: value }))
@@ -16,21 +16,25 @@ interface DisabilityInfoStepProps {
   setFormData: (data: FormData | ((prev: FormData) => FormData)) => void;
 }
 
-export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStepProps) {
+export function DisabilityInfoStep({
+  formData,
+  setFormData,
+}: DisabilityInfoStepProps) {
   // Local state for the psycho-educational assessment checkbox
-  const [requiresPsychoEducational, setRequiresPsychoEducational] = useState(
-    Boolean((formData as any).needsPsychoEdAssessment)
-  );
+  const [requiresPsychoEducational, setRequiresPsychoEducational] =
+    useState(false);
 
   // Handler for the multi-select functional limitations checkboxes
   const handleLimitationsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    setFormData(prev => ({
+    const idx = formData.functionalLimitations.findIndex(
+      (limit) => limit.name === name
+    );
+    setFormData((prev) => ({
       ...prev,
-      functionalLimitations: {
-        ...prev.functionalLimitations,
-        [name as keyof typeof prev.functionalLimitations]: checked,
-      },
+      functionalLimitations: prev.functionalLimitations.map((limit) =>
+        limit.name !== name ? limit : { ...limit, checked }
+      ),
     }));
   };
 
@@ -41,11 +45,11 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
   return (
     <div
       className="space-y-4"
-      style={{ fontFamily: `"Raleway", "Helvetica Neue", Helvetica, Arial, sans-serif` }}
+      style={{
+        fontFamily: `"Raleway", "Helvetica Neue", Helvetica, Arial, sans-serif`,
+      }}
     >
-      <h2 className="text-xl font-semibold mb-4">
-        Section D: Disability Info
-      </h2>
+      <h2 className="text-xl font-semibold mb-4">Section D: Disability Info</h2>
 
       {/* Verified Status Checkbox */}
       <div>
@@ -55,11 +59,17 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
             name="isDisabilityVerified"
             type="checkbox"
             checked={formData.disabilityType !== "not-verified"}
-            onChange={e => {
+            onChange={(e) => {
               if (e.target.checked) {
-                setFormData(prev => ({ ...prev, disabilityType: "permanent" }));
+                setFormData((prev) => ({
+                  ...prev,
+                  disabilityType: "permanent",
+                }));
               } else {
-                setFormData(prev => ({ ...prev, disabilityType: "not-verified" }));
+                setFormData((prev) => ({
+                  ...prev,
+                  disabilityType: "not-verified",
+                }));
               }
             }}
             className="h-4 w-4 border-gray-300 rounded focus:ring-[#0071a9]"
@@ -87,8 +97,8 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
             id="disabilityVerificationDate"
             name="disabilityVerificationDate"
             value={formData.disabilityVerificationDate || ""}
-            onChange={e =>
-              setFormData(prev => ({
+            onChange={(e) =>
+              setFormData((prev) => ({
                 ...prev,
                 disabilityVerificationDate: e.target.value,
               }))
@@ -117,7 +127,7 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
                 label: "Persistent or Prolonged Disability",
               },
               { value: "not-verified" as const, label: "Not Yet Verified" },
-            ].map(type => (
+            ].map((type) => (
               <div key={type.value} className="flex items-center">
                 <input
                   id={type.value}
@@ -125,10 +135,11 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
                   type="radio"
                   value={type.value}
                   checked={formData.disabilityType === type.value}
-                  onChange={e =>
-                    setFormData(prev => ({
+                  onChange={(e) =>
+                    setFormData((prev) => ({
                       ...prev,
-                      disabilityType: e.target.value as typeof prev.disabilityType,
+                      disabilityType: e.target
+                        .value as typeof prev.disabilityType,
                     }))
                   }
                   className="h-4 w-4 border-gray-300 focus:ring-[#0071a9]"
@@ -152,26 +163,13 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
             Functional Limitations (optional - check all that apply)
           </legend>
           <div className="grid grid-cols-2 gap-x-8 gap-y-3">
-            {[
-              { name: "mobility" as const, label: "Mobility" },
-              { name: "vision" as const, label: "Vision" },
-              { name: "hearing" as const, label: "Hearing" },
-              { name: "learning" as const, label: "Learning" },
-              { name: "cognitive" as const, label: "Cognitive" },
-              { name: "mentalHealth" as const, label: "Mental Health" },
-              { name: "communication" as const, label: "Communication" },
-              { name: "dexterity" as const, label: "Dexterity" },
-              { name: "chronicPain" as const, label: "Chronic Pain" },
-              { name: "attention" as const, label: "Attention/Concentration" },
-            ].map(limitation => (
+            {formData.functionalLimitations.map((limitation) => (
               <div key={limitation.name} className="flex items-center">
                 <input
                   id={limitation.name}
                   name={limitation.name}
                   type="checkbox"
-                  checked={
-                    (formData.functionalLimitations as any)?.[limitation.name] || false
-                  }
+                  checked={limitation.checked}
                   onChange={handleLimitationsChange}
                   className="h-4 w-4 border-gray-300 rounded focus:ring-[#0071a9]"
                 />
@@ -195,14 +193,15 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
             name="requiresPsychoEducational"
             type="checkbox"
             checked={requiresPsychoEducational}
-            onChange={e => setRequiresPsychoEducational(e.target.checked)}
+            onChange={(e) => setRequiresPsychoEducational(e.target.checked)}
             className="h-5 w-5 border-gray-300 rounded focus:ring-[#0071a9]"
           />
           <label
             htmlFor="requiresPsychoEducational"
             className="ml-3 text-[15px] font-medium text-[#4e4e4e] leading-snug"
           >
-            Requires Psycho-Educational Assessment for Learning Disability Verification
+            Requires Psycho-Educational Assessment for Learning Disability
+            Verification
           </label>
         </div>
 
@@ -231,12 +230,15 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
                 </h3>
                 <div className="mt-2 text-sm text-[#4e4e4e]">
                   <p>
-                    You will be automatically connected with a qualified assessment provider in your geographical area 
-                    who has a referral contract with us, or with a provider at your institution at a discounted rate.
+                    You will be automatically connected with a qualified
+                    assessment provider in your geographical area who has a
+                    referral contract with us, or with a provider at your
+                    institution at a discounted rate.
                   </p>
                   <p className="mt-2">
-                    The assessment fee will be reviewed for approval and submitted to your institution&apos;s finance office 
-                    for direct payment via EFT.
+                    The assessment fee will be reviewed for approval and
+                    submitted to your institution&apos;s finance office for
+                    direct payment via EFT.
                   </p>
                 </div>
               </div>
@@ -256,15 +258,15 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
                 name="psychoEdEmail"
                 placeholder="Enter your email address"
                 value={formData.email || ""}
-                onChange={e =>
-                  setFormData(prev => ({ ...prev, email: e.target.value }))
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, email: e.target.value }))
                 }
                 className="w-full max-w-md px-4 py-2 border rounded-md text-sm text-[#4e4e4e] focus:outline-none focus:ring-2 focus:ring-[#0071a9]"
                 required={requiresPsychoEducational}
               />
               <p className="mt-2 text-xs text-[#4e4e4e]">
-                We will send assessment provider information and next steps to this
-                email address.
+                We will send assessment provider information and next steps to
+                this email address.
               </p>
             </div>
           </div>

@@ -28,8 +28,8 @@ const DEV_MODE = process.env.NODE_ENV === "development";
 // Store all form data in a single state object
 // Initial values are set to empty strings, zeros, or false depending on field type
 export default function BSWDApplicationPage() {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [maxStep, setMaxStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(4);
+  const [maxStep, setMaxStep] = useState(4);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
@@ -67,7 +67,18 @@ export default function BSWDApplicationPage() {
     hasVerifiedDisability: false,
     disabilityType: "not-verified",
     disabilityVerificationDate: "",
-    functionalLimitations: [],
+    functionalLimitations: [
+      { name: "mobility", label: "Mobility", checked: false },
+      { name: "vision", label: "Vision", checked: false },
+      { name: "hearing", label: "Hearing", checked: false },
+      { name: "learning", label: "Learning", checked: false },
+      { name: "cognitive", label: "Cognitive", checked: false },
+      { name: "mentalHealth", label: "Mental Health", checked: false },
+      { name: "communication", label: "Communication", checked: false },
+      { name: "dexterity", label: "Dexterity", checked: false },
+      { name: "chronicPain", label: "Chronic Pain", checked: false },
+      { name: "attention", label: "Attention/Concentration", checked: false },
+    ],
     needsPsychoEdAssessment: false,
     requestedItems: [],
   });
