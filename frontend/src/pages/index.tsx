@@ -59,7 +59,7 @@ export default function BSWDApplicationPage() {
     submittedDisabilityElsewhere: "no",
     previousInstitution: "",
     osapApplication: "full-time",
-
+    queuedForManualReview: false,
     federalNeed: 0,
     provincialNeed: 0,
     hasOSAPRestrictions: false,

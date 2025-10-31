@@ -42,8 +42,8 @@ export interface FormData {
   hasOSAPRestrictions: boolean;
   restrictionDetails: string;
   osapOnFileStatus?: "APPROVED" | "NONE" | "";
-  queuedForManualReview?: boolean;
-  restrictionType?:
+  queuedForManualReview: boolean;
+  restrictionType:
     | "DEFAULT"
     | "OVERPAYMENT"
     | "BANKRUPTCY"
