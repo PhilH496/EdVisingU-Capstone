@@ -32,6 +32,10 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
     }));
   };
 
+  // Disable verification date if no type or "not yet verified"
+  const isVerificationDisabled =
+    !formData.disabilityType || formData.disabilityType === "not-verified";
+
   return (
     <div
       className="space-y-4"
@@ -53,7 +57,7 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
               if (e.target.checked) {
                 setFormData(prev => ({ ...prev, disabilityType: "permanent" }));
               } else {
-                setFormData(prev => ({ ...prev, disabilityType: "not-verified" }));
+                setFormData(prev => ({ ...prev, disabilityType: "" }));
               }
             }}
             className="h-4 w-4 border-gray-300 rounded focus:ring-[#0071a9]"
@@ -87,7 +91,12 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
                 disabilityVerificationDate: e.target.value,
               }))
             }
-            className="w-full max-w-xs px-3 py-2 border rounded-md text-sm text-[#4e4e4e] focus:outline-none focus:ring-2 focus:ring-[#0071a9]"
+            disabled={isVerificationDisabled}
+            className={`w-full max-w-xs px-3 py-2 border rounded-md text-sm text-[#4e4e4e] focus:outline-none focus:ring-2 ${
+              isVerificationDisabled
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200"
+                : "focus:ring-[#0071a9]"
+            }`}
           />
         </div>
       </div>
@@ -113,10 +122,7 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
                   name="disabilityType"
                   type="radio"
                   value={type.value}
-                  checked={
-                    formData.disabilityType === type.value ||
-                    (type.value === "permanent" && !formData.disabilityType)
-                  }
+                  checked={formData.disabilityType === type.value}
                   onChange={e =>
                     setFormData(prev => ({
                       ...prev,
