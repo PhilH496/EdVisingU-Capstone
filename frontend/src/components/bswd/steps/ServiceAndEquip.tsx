@@ -22,6 +22,7 @@ export function ServiceAndEquip({
   setFormData,
 }: ServiceAndEquipProps) {
   const [tabFocus, setTabFocus] = useState("equipment");
+  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
 
   // Database mock up
   const availableEquip = [
@@ -73,9 +74,74 @@ export function ServiceAndEquip({
     },
   ];
 
+  const handleAddAll = () => {
+    const currentItems = tabFocus === "equipment" ? availableEquip : availableServies;
+    const itemType = tabFocus === "equipment" ? "Equipment" : "Service";
+    
+    // Check if items from this category already exist
+    const existingItemsFromCategory = formData.requestedItems.filter(
+      item => item.category === itemType
+    );
+    
+    // Check if all items are already added
+    const allItemsAlreadyAdded = currentItems.every(currentItem =>
+      existingItemsFromCategory.some(existing => existing.item === currentItem.name)
+    );
+    
+    if (allItemsAlreadyAdded && existingItemsFromCategory.length > 0) {
+      // Show warning message
+      setShowDuplicateWarning(true);
+      // Hide warning after 3 seconds
+      setTimeout(() => setShowDuplicateWarning(false), 3000);
+      return;
+    }
+    
+    // Create RequestedItem objects for items that don't exist yet
+    const newItems = currentItems
+      .filter(item => !existingItemsFromCategory.some(existing => existing.item === item.name))
+      .map(item => ({
+        category: itemType,
+        item: item.name,
+        cost: typeof item.cap === 'number' ? item.cap : 0,
+        justification: `${itemType} requested for disability support`,
+        fundingSource: (item.bswdEligible && item.csgdseEligible) ? 'both' : 
+                       (item.bswdEligible ? 'bswd' : 'csg-dse') as 'bswd' | 'csg-dse' | 'both'
+      }));
+    
+    console.log('Adding items:', newItems);
+    
+    setFormData(prev => {
+      const updated = {
+        ...prev,
+        requestedItems: [...prev.requestedItems, ...newItems]
+      };
+      console.log('Updated formData:', updated.requestedItems);
+      return updated;
+    });
+  };
+
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold mb-4">Section F: Services and Equipment</h2>
+      
+      {/* Display duplicate warning */}
+      {showDuplicateWarning && (
+        <div className="bg-yellow-50 border border-yellow-400 rounded-md p-3 mb-4">
+          <p className="text-sm text-yellow-800">
+            ⚠️ All {tabFocus === "equipment" ? "equipment" : "services"} have already been added. Cannot add duplicates.
+          </p>
+        </div>
+      )}
+      
+      {/* Display current requested items count */}
+      {formData.requestedItems && formData.requestedItems.length > 0 && (
+        <div className="bg-green-50 border border-green-200 rounded-md p-3 mb-4">
+          <p className="text-sm text-green-800">
+            <strong>{formData.requestedItems.length}</strong> item(s) currently requested
+          </p>
+        </div>
+      )}
+      
       {/* 
         Display TabBar component based on focus status
         < Focusing on Equipment or Services > 
@@ -83,18 +149,34 @@ export function ServiceAndEquip({
       {<TabBar tabFocus={tabFocus} setTabFocus={setTabFocus} />}
       {tabFocus === "equipment" ? (
         <>
-          <h2 className="text-lg font-semibold mb-4">
-            Disability-Related Equipment
-          </h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">
+              Disability-Related Equipment
+            </h2>
+            <button 
+              onClick={handleAddAll}
+              className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-4 py-2 rounded-md transition-colors"
+            >
+              Add All Equipment
+            </button>
+          </div>
           {availableEquip.map((equip) => {
             return <Item key={equip.id} itemInfo={equip} type={tabFocus} />;
           })}
         </>
       ) : (
         <>
-          <h2 className="text-lg font-semibold mb-4">
-            Disability-Related Services
-          </h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">
+              Disability-Related Services
+            </h2>
+            <button 
+              onClick={handleAddAll}
+              className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-4 py-2 rounded-md transition-colors"
+            >
+              Add All Services
+            </button>
+          </div>
           {availableServies.map((equip) => {
             return <Item key={equip.id} itemInfo={equip} type={tabFocus} />;
           })}
