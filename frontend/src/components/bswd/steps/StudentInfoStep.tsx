@@ -71,11 +71,15 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             id="studentId"
             type="text"
             value={formData.studentId}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-              setFormData(prev => ({ ...prev, studentId: e.target.value }))
-            }
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const value = e.target.value.replace(/\D/g, '');
+              if (value.length <= 15) { //For versatility incase ID not always 8 numbers
+                setFormData(prev => ({ ...prev, studentId: value }));
+              }
+            }}
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
             placeholder="Enter student ID"
+            maxLength={15}
           />
         </div>
 
@@ -291,7 +295,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
 
             <div>
               <label htmlFor="province" className="block text-sm font-medium mb-1 text-brand-text-gray">
-                Province *
+                Province/Territory *
               </label>
               <select
                 id="province"
@@ -301,7 +305,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 }
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
               >
-                <option value="">Select Province</option>
+                <option value="">Select Province/Territory</option>
                 <option value="ON">Ontario</option>
                 <option value="AB">Alberta</option>
                 <option value="BC">British Columbia</option>
