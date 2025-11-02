@@ -161,7 +161,7 @@ export function ServiceAndEquip({
             </button>
           </div>
           {availableEquip.map((equip) => {
-            return <Item key={equip.id} itemInfo={equip} type={tabFocus} />;
+            return <Item key={equip.id} itemInfo={equip} type={tabFocus} formData={formData} setFormData={setFormData} />;
           })}
         </>
       ) : (
@@ -178,7 +178,7 @@ export function ServiceAndEquip({
             </button>
           </div>
           {availableServies.map((equip) => {
-            return <Item key={equip.id} itemInfo={equip} type={tabFocus} />;
+            return <Item key={equip.id} itemInfo={equip} type={tabFocus} formData={formData} setFormData={setFormData} />;
           })}
         </>
       )}
@@ -228,8 +228,45 @@ interface ItemInfo {
   bswdEligible: boolean;
   csgdseEligible: boolean;
 }
+
+interface ItemProps {
+  itemInfo: ItemInfo;
+  type: string;
+  formData: FormData;
+  setFormData: (data: FormData | ((prev: FormData) => FormData)) => void;
+}
+
 // Create equipment item / service item component
-const Item = ({ itemInfo, type }: { itemInfo: ItemInfo; type: string }) => {
+const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
+  const itemType = type === "equipment" ? "Equipment" : "Service";
+  
+  // Check if this item is already added
+  const isAdded = formData.requestedItems.some(
+    item => item.category === itemType && item.item === itemInfo.name
+  );
+  
+  const handleAddItem = () => {
+    // Check if item already exists
+    if (isAdded) {
+      return;
+    }
+    
+    // Create new RequestedItem
+    const newItem = {
+      category: itemType,
+      item: itemInfo.name,
+      cost: typeof itemInfo.cap === 'number' ? itemInfo.cap : 0,
+      justification: `${itemType} requested for disability support`,
+      fundingSource: (itemInfo.bswdEligible && itemInfo.csgdseEligible) ? 'both' : 
+                     (itemInfo.bswdEligible ? 'bswd' : 'csg-dse') as 'bswd' | 'csg-dse' | 'both'
+    };
+    
+    setFormData(prev => ({
+      ...prev,
+      requestedItems: [...prev.requestedItems, newItem]
+    }));
+  };
+  
   return (
     <div className="border rounded-lg p-4 flex justify-between items-center">
       <div>
@@ -252,8 +289,16 @@ const Item = ({ itemInfo, type }: { itemInfo: ItemInfo; type: string }) => {
           )}
         </p>
       </div>
-      <button className="border rounded-md px-2 font-semibold text-sm h-10">
-        Add {type === "equipment" ? "Item" : "Service"}
+      <button 
+        onClick={handleAddItem}
+        disabled={isAdded}
+        className={`border rounded-md px-2 font-semibold text-sm h-10 transition-colors ${
+          isAdded 
+            ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+            : 'bg-white hover:bg-teal-50 hover:border-teal-600 hover:text-teal-600'
+        }`}
+      >
+        {isAdded ? 'Added ✓' : `Add ${type === "equipment" ? "Item" : "Service"}`}
       </button>
     </div>
   );
