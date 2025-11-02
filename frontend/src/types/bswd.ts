@@ -50,18 +50,6 @@ export interface FormData {
   // Requested Services & Equipment
   requestedItems: RequestedItem[];
 
-  // Documents Information
-  osapApplicationFiles?: File[];
-  disabilityVerificationFiles?: File[];
-  serviceRecommendationsFiles?: File[];
-  psychoEdAssessmentSent: boolean | null;
-  psychoEdAssessmentDate: string;
-  restrictionSatisfied: boolean | null;
-  restrictionSatisfiedDate: string;
-  osapVerificationReceived: boolean | null;
-  osapVerificationReceivedDate: string;
-  osapApplicationActive: boolean | null;
-  osapApplicationActiveDate: string;
 }
 
 export interface RequestedItem {
