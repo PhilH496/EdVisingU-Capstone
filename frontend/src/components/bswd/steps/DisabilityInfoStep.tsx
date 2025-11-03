@@ -41,7 +41,7 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
       className="space-y-4"
       style={{ fontFamily: `"Raleway", "Helvetica Neue", Helvetica, Arial, sans-serif` }}
     >
-      <h2 className="text-xl font-semibold mb-4 text-[#4e4e4e]">
+      <h2 className="text-xl font-semibold mb-4">
         Section D: Disability Info
       </h2>
 
@@ -57,7 +57,7 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
               if (e.target.checked) {
                 setFormData(prev => ({ ...prev, disabilityType: "permanent" }));
               } else {
-                setFormData(prev => ({ ...prev, disabilityType: "" }));
+                setFormData(prev => ({ ...prev, disabilityType: undefined }));
               }
             }}
             className="h-4 w-4 border-gray-300 rounded focus:ring-[#0071a9]"
@@ -196,7 +196,7 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
             onChange={e => setRequiresPsychoEducational(e.target.checked)}
             className="h-5 w-5 border-gray-300 rounded focus:ring-[#0071a9] mt-1"
           />
-          <label
+        <label
             htmlFor="requiresPsychoEducational"
             className="ml-3 text-[15px] font-medium text-[#4e4e4e] leading-snug"
           >
