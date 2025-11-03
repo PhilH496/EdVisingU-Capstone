@@ -22,7 +22,7 @@ export function ServiceAndEquip({
   setFormData,
 }: ServiceAndEquipProps) {
   const [tabFocus, setTabFocus] = useState("equipment");
-  const [allItemsAddedWarning, setAllItemsAddedWarning] = useState(false);
+  
 
   // Database mock up
   const availableEquip = [
@@ -89,8 +89,7 @@ export function ServiceAndEquip({
     );
     
     if (allItemsAlreadyAdded && existingItemsFromCategory.length > 0) {
-      // Show warning message permanently
-      setAllItemsAddedWarning(true);
+      // All items already added for this category — nothing to do
       return;
     }
     
@@ -128,24 +127,16 @@ export function ServiceAndEquip({
     );
   };
   
-  // Reset warning when switching tabs
+  // Handle tab change
   const handleTabChange = (newTab: string) => {
     setTabFocus(newTab);
-    setAllItemsAddedWarning(false);
   };
 
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold mb-4">Section F: Services and Equipment</h2>
       
-      {/* Display duplicate warning */}
-      {allItemsAddedWarning && (
-        <div className="bg-yellow-50 border border-yellow-400 rounded-md p-3 mb-4">
-          <p className="text-base text-yellow-800">
-            ⚠️ All {tabFocus === "equipment" ? "equipment" : "services"} have already been added. Cannot add duplicates.
-          </p>
-        </div>
-      )}
+      {/* duplicate warning removed — condition is unreachable */}
       
       {/* Display current requested items count */}
       {formData.requestedItems && formData.requestedItems.length > 0 && (
@@ -269,6 +260,9 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
     item => item.category === itemType && item.item === itemInfo.name
   );
   
+  // Hover state to change text to 'Remove Item' when hovering an already-added item
+  const [hovered, setHovered] = useState(false);
+  
   const handleAddItem = () => {
     if (isAdded) {
       // Remove item if already added
@@ -318,15 +312,17 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
           )}
         </p>
       </div>
-      <button 
+      <button
         onClick={handleAddItem}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         className={`border rounded-md px-2 font-semibold text-sm h-10 transition-colors ${
           isAdded 
             ? 'bg-green-100 text-green-700 border-green-400 hover:bg-red-100 hover:text-red-700 hover:border-red-400' 
             : 'bg-white hover:bg-teal-50 hover:border-teal-600 hover:text-teal-600'
         }`}
       >
-        {isAdded ? 'Added ✓' : `Add ${type === "equipment" ? "Item" : "Service"}`}
+        {isAdded ? (hovered ? 'Remove Item' : 'Added ✓') : `Add ${type === "equipment" ? "Item" : "Service"}`}
       </button>
     </div>
   );
