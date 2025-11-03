@@ -32,7 +32,7 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
     }));
   };
 
-  // Disable verification date if no type or "not yet verified"
+  // Disable verification date if not verified or not selected
   const isVerificationDisabled =
     !formData.disabilityType || formData.disabilityType === "not-verified";
 
@@ -52,12 +52,12 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
             id="isDisabilityVerified"
             name="isDisabilityVerified"
             type="checkbox"
-            checked={!!formData.disabilityType && formData.disabilityType !== "not-verified"}
+            checked={formData.disabilityType !== "not-verified"}
             onChange={e => {
               if (e.target.checked) {
                 setFormData(prev => ({ ...prev, disabilityType: "permanent" }));
               } else {
-                setFormData(prev => ({ ...prev, disabilityType: undefined }));
+                setFormData(prev => ({ ...prev, disabilityType: "not-verified" }));
               }
             }}
             className="h-4 w-4 border-gray-300 rounded focus:ring-[#0071a9]"
@@ -196,7 +196,7 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
             onChange={e => setRequiresPsychoEducational(e.target.checked)}
             className="h-5 w-5 border-gray-300 rounded focus:ring-[#0071a9] mt-1"
           />
-        <label
+          <label
             htmlFor="requiresPsychoEducational"
             className="ml-3 text-[15px] font-medium text-[#4e4e4e] leading-snug"
           >
