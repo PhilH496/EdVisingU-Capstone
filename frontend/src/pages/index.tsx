@@ -19,7 +19,6 @@ import { FormNavigation } from "@/components/bswd/navigation/FormNavigation";
 import { ProgramInfoStep } from "@/components/bswd/steps/ProgramInfoStep";
 import { OsapInfoStep } from "@/components/bswd/steps/OsapInfoStep";
 import { DisabilityInfoStep } from "@/components/bswd/steps/DisabilityInfoStep";
-import { DocumentsStep } from "@/components/bswd/steps/DocumentsStep";
 import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
 import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
 import { StudentInfoSchema } from "@/schemas/StudentInfoSchema";
@@ -73,17 +72,6 @@ export default function BSWDApplicationPage() {
     functionalLimitations: [],
     needsPsychoEdAssessment: false,
     requestedItems: [],
-    osapApplicationFiles: [],
-    disabilityVerificationFiles: [],
-    serviceRecommendationsFiles: [],
-    psychoEdAssessmentSent: null,
-    psychoEdAssessmentDate: "",
-    restrictionSatisfied: null,
-    restrictionSatisfiedDate: "",
-    osapVerificationReceived: null,
-    osapVerificationReceivedDate: "",
-    osapApplicationActive: null,
-    osapApplicationActiveDate: "",
   });
 
   const stepsInfo = [
@@ -102,10 +90,6 @@ export default function BSWDApplicationPage() {
     {
       stepName: "Disability Info",
       stepIconFaClass: "fa-solid fa-wheelchair",
-    },
-    {
-      stepName: "Documents",
-      stepIconFaClass: "fa-solid fa-file",
     },
     {
       stepName: "Service & Equipment",
@@ -299,12 +283,10 @@ export default function BSWDApplicationPage() {
           <DisabilityInfoStep formData={formData} setFormData={setFormData} />
         );
       case 5:
-        return <DocumentsStep formData={formData} setFormData={setFormData} />;
-      case 6:
         return (
           <ServiceAndEquip formData={formData} setFormData={setFormData} />
         );
-      case 7:
+      case 6:
         return (
           <ReviewAndSubmit
             formData={formData}

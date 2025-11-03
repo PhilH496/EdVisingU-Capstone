@@ -2,11 +2,10 @@ import * as z from "zod";
 
 export const StudentInfoSchema = z.object({
   studentId: z
-    .number()
-    .int("Must be an interger")
-    .refine((val) => val >= 10000000 && val < 99999999, {
-      message: "Must contain 8 numbers",
-    }),
+    .string()
+    .min(7, "Student ID must be at least 7 digits")
+    .max(15, "Student ID must be 15 digits or less")
+    .regex(/^\d+$/, "Student ID must contain only numbers"),
   oen: z
     .string()
     .regex(/^\d+$/, { message: "Must contain only numbers" })
