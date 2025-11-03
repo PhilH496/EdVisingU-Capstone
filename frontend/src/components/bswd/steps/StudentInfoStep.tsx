@@ -27,6 +27,10 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
   const [dateOfBirth, setDateOfBirth] = React.useState<Date | null>(null);
   const dobRef = React.useRef<HTMLInputElement>(null);
 
+  // Lock all fields on this page when OSAP application = "No"
+  const isLocked = formData.hasOsapApplication === false;
+  const lockCls = (base: string) => base + " " + (isLocked ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200" : "focus:outline-none focus:ring-2 focus:ring-brand-dark-blue");
+
   const handleSelectDOB = (selected: Date | undefined) => {
     if (!selected) return;
     setDateOfBirth(selected);
@@ -71,13 +75,14 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             id="studentId"
             type="text"
             value={formData.studentId}
+            disabled={isLocked}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               const value = e.target.value.replace(/\D/g, '');
               if (value.length <= 15) { //For versatility incase ID not always 8 numbers
                 setFormData(prev => ({ ...prev, studentId: value }));
               }
             }}
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
+            className={lockCls("w-full px-3 py-2 border rounded-md")}
             placeholder="Enter student ID"
             maxLength={15}
           />
@@ -91,13 +96,14 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             id="oen"
             type="text"
             value={formData.oen}
+            disabled={isLocked}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               const value = e.target.value.replace(/\D/g, '');
               if (value.length <= 9) {
                 setFormData(prev => ({ ...prev, oen: value }));
               }
             }}
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
+            className={lockCls("w-full px-3 py-2 border rounded-md")}
             placeholder="9-digit OEN"
             maxLength={9}
           />
@@ -116,10 +122,11 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             id="firstName"
             type="text"
             value={formData.firstName}
+            disabled={isLocked}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
               setFormData(prev => ({ ...prev, firstName: e.target.value }))
             }
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
+            className={lockCls("w-full px-3 py-2 border rounded-md")}
             placeholder="Enter first name"
           />
         </div>
@@ -132,10 +139,11 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             id="lastName"
             type="text"
             value={formData.lastName}
+            disabled={isLocked}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
               setFormData(prev => ({ ...prev, lastName: e.target.value }))
             }
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
+            className={lockCls("w-full px-3 py-2 border rounded-md")}
             placeholder="Enter last name"
           />
         </div>
@@ -154,7 +162,8 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 type="text"
                 placeholder="DD/MM/YYYY"
                 value={formData.dateOfBirth}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm"
+                disabled={isLocked}
+                className={lockCls("w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm")}
                 onChange={(e) => {
                   const value = e.target.value;
                   setFormData(prev => ({ ...prev, dateOfBirth: value }));
@@ -163,19 +172,23 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  disabled={isLocked}
+                  aria-disabled={isLocked}
+                  className={`absolute right-3 top-1/2 -translate-y-1/2 ${isLocked ? "text-gray-300" : "text-muted-foreground hover:text-foreground"}`}
                 >
                   <CalendarIcon className="h-4 w-4" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent side="bottom" align="end" className="w-auto p-0 z-50">
-                <Calendar 
-                  mode="single" 
-                  selected={dateOfBirth ?? undefined} 
-                  onSelect={handleSelectDOB}
-                  initialFocus
-                />
-              </PopoverContent>
+              {!isLocked && (
+                <PopoverContent side="bottom" align="end" className="w-auto p-0 z-50">
+                  <Calendar 
+                    mode="single" 
+                    selected={dateOfBirth ?? undefined} 
+                    onSelect={handleSelectDOB}
+                    initialFocus
+                  />
+                </PopoverContent>
+              )}
             </div>
           </Popover>
         </div>
@@ -188,6 +201,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             id="sin"
             type="text"
             value={formData.sin}
+            disabled={isLocked}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               let value = e.target.value.replace(/\D/g, '');
               if (value.length <= 9) {
@@ -200,7 +214,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 setFormData(prev => ({ ...prev, sin: value }));
               }
             }}
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
+            className={lockCls("w-full px-3 py-2 border rounded-md")}
             placeholder="XXX-XXX-XXX"
             maxLength={11}
           />
@@ -219,10 +233,11 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             id="email"
             type="email"
             value={formData.email}
+            disabled={isLocked}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
               setFormData(prev => ({ ...prev, email: e.target.value }))
             }
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
+            className={lockCls("w-full px-3 py-2 border rounded-md")}
             placeholder="student@institution.edu"
           />
         </div>
@@ -235,6 +250,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             id="phone"
             type="tel"
             value={formData.phone}
+            disabled={isLocked}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               let value = e.target.value.replace(/\D/g, '');
               if (value.length <= 10) {
@@ -248,7 +264,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 setFormData(prev => ({ ...prev, phone: value }));
               }
             }}
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
+            className={lockCls("w-full px-3 py-2 border rounded-md")}
             placeholder="(XXX) XXX-XXXX"
             maxLength={14}
           />
@@ -260,21 +276,22 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
         <h3 className="text-lg font-semibold mb-3 text-brand-text-gray">Mailing Address</h3>
         
         <div className="space-y-4">
-        <div>
-          <label htmlFor="address" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            Street Address *
-          </label>
-          <input
-            id="address"
-            type="text"
-            value={formData.address || ''}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-              setFormData(prev => ({ ...prev, address: e.target.value }))
-            }
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
-            placeholder="123 Main Street"
-          />
-        </div>
+          <div>
+            <label htmlFor="address" className="block text-sm font-medium mb-1 text-brand-text-gray">
+              Street Address *
+            </label>
+            <input
+              id="address"
+              type="text"
+              value={formData.address || ''}
+              disabled={isLocked}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                setFormData(prev => ({ ...prev, address: e.target.value }))
+              }
+              className={lockCls("w-full px-3 py-2 border rounded-md")}
+              placeholder="123 Main Street"
+            />
+          </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
@@ -285,10 +302,11 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 id="city"
                 type="text"
                 value={formData.city || ''}
+                disabled={isLocked}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                   setFormData(prev => ({ ...prev, city: e.target.value }))
                 }
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
+                className={lockCls("w-full px-3 py-2 border rounded-md")}
                 placeholder="Toronto"
               />
             </div>
@@ -300,10 +318,11 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               <select
                 id="province"
                 value={formData.province || ''}
+                disabled={isLocked}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => 
                   setFormData(prev => ({ ...prev, province: e.target.value }))
                 }
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
+                className={lockCls("w-full px-3 py-2 border rounded-md")}
               >
                 <option value="">Select Province/Territory</option>
                 <option value="ON">Ontario</option>
@@ -329,6 +348,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 id="postalCode"
                 type="text"
                 value={formData.postalCode || ''}
+                disabled={isLocked}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
                   if (value.length <= 6) {
@@ -338,7 +358,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                     setFormData(prev => ({ ...prev, postalCode: formatted }));
                   }
                 }}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
+                className={lockCls("w-full px-3 py-2 border rounded-md")}
                 placeholder="A1A 1A1"
                 maxLength={7}
               />
@@ -352,10 +372,11 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 id="country"
                 type="text"
                 value={formData.country || 'Canada'}
+                disabled={isLocked}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                   setFormData(prev => ({ ...prev, country: e.target.value }))
                 }
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
+                className={lockCls("w-full px-3 py-2 border rounded-md")}
                 placeholder="Canada"
               />
             </div>
