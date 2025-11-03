@@ -32,7 +32,7 @@ const DEV_MODE = process.env.NODE_ENV === "development";
 // Initial values are set to empty strings, zeros, or false depending on field type
 export default function BSWDApplicationPage() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [maxStep, setMaxStep] = useState(7);
+  const [maxStep, setMaxStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
