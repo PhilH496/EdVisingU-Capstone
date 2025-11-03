@@ -42,7 +42,7 @@ export interface FormData {
 
   // Disability Information
   hasVerifiedDisability: boolean;
-  disabilityType: 'permanent' | 'persistent-prolonged' | 'not-verified';
+  disabilityType?: "permanent" | "persistent-prolonged" | "not-verified" | undefined;
   disabilityVerificationDate: string;
   functionalLimitations: string[];
   needsPsychoEdAssessment: boolean;
