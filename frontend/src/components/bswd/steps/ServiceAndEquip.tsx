@@ -22,7 +22,7 @@ export function ServiceAndEquip({
   setFormData,
 }: ServiceAndEquipProps) {
   const [tabFocus, setTabFocus] = useState("equipment");
-  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+  const [allItemsAddedWarning, setAllItemsAddedWarning] = useState(false);
 
   // Database mock up
   const availableEquip = [
@@ -89,10 +89,8 @@ export function ServiceAndEquip({
     );
     
     if (allItemsAlreadyAdded && existingItemsFromCategory.length > 0) {
-      // Show warning message
-      setShowDuplicateWarning(true);
-      // Hide warning after 3 seconds
-      setTimeout(() => setShowDuplicateWarning(false), 3000);
+      // Show warning message permanently
+      setAllItemsAddedWarning(true);
       return;
     }
     
@@ -108,16 +106,32 @@ export function ServiceAndEquip({
                        (item.bswdEligible ? 'bswd' : 'csg-dse') as 'bswd' | 'csg-dse' | 'both'
       }));
     
-    console.log('Adding items:', newItems);
-    
     setFormData(prev => {
       const updated = {
         ...prev,
         requestedItems: [...prev.requestedItems, ...newItems]
       };
-      console.log('Updated formData:', updated.requestedItems);
       return updated;
     });
+  };
+  
+  // Check if all items in current tab are added
+  const areAllItemsAdded = () => {
+    const currentItems = tabFocus === "equipment" ? availableEquip : availableServies;
+    const itemType = tabFocus === "equipment" ? "Equipment" : "Service";
+    const existingItemsFromCategory = formData.requestedItems.filter(
+      item => item.category === itemType
+    );
+    
+    return currentItems.every(currentItem =>
+      existingItemsFromCategory.some(existing => existing.item === currentItem.name)
+    );
+  };
+  
+  // Reset warning when switching tabs
+  const handleTabChange = (newTab: string) => {
+    setTabFocus(newTab);
+    setAllItemsAddedWarning(false);
   };
 
   return (
@@ -125,9 +139,9 @@ export function ServiceAndEquip({
       <h2 className="text-xl font-semibold mb-4">Section F: Services and Equipment</h2>
       
       {/* Display duplicate warning */}
-      {showDuplicateWarning && (
+      {allItemsAddedWarning && (
         <div className="bg-yellow-50 border border-yellow-400 rounded-md p-3 mb-4">
-          <p className="text-sm text-yellow-800">
+          <p className="text-base text-yellow-800">
             ⚠️ All {tabFocus === "equipment" ? "equipment" : "services"} have already been added. Cannot add duplicates.
           </p>
         </div>
@@ -136,7 +150,7 @@ export function ServiceAndEquip({
       {/* Display current requested items count */}
       {formData.requestedItems && formData.requestedItems.length > 0 && (
         <div className="bg-green-50 border border-green-200 rounded-md p-3 mb-4">
-          <p className="text-sm text-green-800">
+          <p className="text-base text-green-800">
             <strong>{formData.requestedItems.length}</strong> item(s) currently requested
           </p>
         </div>
@@ -146,7 +160,7 @@ export function ServiceAndEquip({
         Display TabBar component based on focus status
         < Focusing on Equipment or Services > 
       */}
-      {<TabBar tabFocus={tabFocus} setTabFocus={setTabFocus} />}
+      {<TabBar tabFocus={tabFocus} setTabFocus={handleTabChange} />}
       {tabFocus === "equipment" ? (
         <>
           <div className="flex justify-between items-center mb-4">
@@ -155,7 +169,12 @@ export function ServiceAndEquip({
             </h2>
             <button 
               onClick={handleAddAll}
-              className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-4 py-2 rounded-md transition-colors"
+              disabled={areAllItemsAdded()}
+              className={`font-semibold px-4 py-2 rounded-md transition-colors ${
+                areAllItemsAdded()
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-brand-dark-blue hover:bg-brand-dark-blue/90 text-white'
+              }`}
             >
               Add All Equipment
             </button>
@@ -172,7 +191,12 @@ export function ServiceAndEquip({
             </h2>
             <button 
               onClick={handleAddAll}
-              className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-4 py-2 rounded-md transition-colors"
+              disabled={areAllItemsAdded()}
+              className={`font-semibold px-4 py-2 rounded-md transition-colors ${
+                areAllItemsAdded()
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-brand-dark-blue hover:bg-brand-dark-blue/90 text-white'
+              }`}
             >
               Add All Services
             </button>
@@ -188,7 +212,7 @@ export function ServiceAndEquip({
 
 interface TabFocusProps {
   tabFocus: String;
-  setTabFocus: (data: string | ((prev: string) => string)) => void;
+  setTabFocus: (data: string) => void;
 }
 
 // TabBar compoennt
@@ -201,7 +225,7 @@ const TabBar = ({ tabFocus, setTabFocus }: TabFocusProps) => {
           (tabFocus === "equipment" ? "bg-white" : "bg-transparent")
         }
         onClick={() => {
-          setTabFocus(() => "equipment");
+          setTabFocus("equipment");
         }}
       >
         Equipment
@@ -212,7 +236,7 @@ const TabBar = ({ tabFocus, setTabFocus }: TabFocusProps) => {
           (tabFocus === "services" ? "bg-white" : "bg-transparent")
         }
         onClick={() => {
-          setTabFocus(() => "services");
+          setTabFocus("services");
         }}
       >
         Services
@@ -246,25 +270,30 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
   );
   
   const handleAddItem = () => {
-    // Check if item already exists
     if (isAdded) {
-      return;
+      // Remove item if already added
+      setFormData(prev => ({
+        ...prev,
+        requestedItems: prev.requestedItems.filter(
+          item => !(item.category === itemType && item.item === itemInfo.name)
+        )
+      }));
+    } else {
+      // Add new item
+      const newItem = {
+        category: itemType,
+        item: itemInfo.name,
+        cost: typeof itemInfo.cap === 'number' ? itemInfo.cap : 0,
+        justification: `${itemType} requested for disability support`,
+        fundingSource: (itemInfo.bswdEligible && itemInfo.csgdseEligible) ? 'both' : 
+                       (itemInfo.bswdEligible ? 'bswd' : 'csg-dse') as 'bswd' | 'csg-dse' | 'both'
+      };
+      
+      setFormData(prev => ({
+        ...prev,
+        requestedItems: [...prev.requestedItems, newItem]
+      }));
     }
-    
-    // Create new RequestedItem
-    const newItem = {
-      category: itemType,
-      item: itemInfo.name,
-      cost: typeof itemInfo.cap === 'number' ? itemInfo.cap : 0,
-      justification: `${itemType} requested for disability support`,
-      fundingSource: (itemInfo.bswdEligible && itemInfo.csgdseEligible) ? 'both' : 
-                     (itemInfo.bswdEligible ? 'bswd' : 'csg-dse') as 'bswd' | 'csg-dse' | 'both'
-    };
-    
-    setFormData(prev => ({
-      ...prev,
-      requestedItems: [...prev.requestedItems, newItem]
-    }));
   };
   
   return (
@@ -291,10 +320,9 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
       </div>
       <button 
         onClick={handleAddItem}
-        disabled={isAdded}
         className={`border rounded-md px-2 font-semibold text-sm h-10 transition-colors ${
           isAdded 
-            ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+            ? 'bg-green-100 text-green-700 border-green-400 hover:bg-red-100 hover:text-red-700 hover:border-red-400' 
             : 'bg-white hover:bg-teal-50 hover:border-teal-600 hover:text-teal-600'
         }`}
       >
