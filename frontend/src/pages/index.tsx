@@ -30,7 +30,7 @@ const DEV_MODE = process.env.NODE_ENV === "development";
 // Store all form data in a single state object
 // Initial values are set to empty strings, zeros, or false depending on field type
 export default function BSWDApplicationPage() {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(4);
   const [maxStep, setMaxStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -152,6 +152,14 @@ export default function BSWDApplicationPage() {
         const restrictionsOk = true; // Restrictions never block navigation
         return hasChosenOnFile && appTypeOk && needsOk && restrictionsOk;
       }
+
+      case 4: {
+        // Disability info step
+        // If Psycho-Ed referral is required, email must be non-empty
+        if (formData.needsPsychoEdAssessment && !formData.email?.trim()) return false;
+        return true;
+      }
+
       case 7: {
         // Step 7 (Review and Submit): Check if confirmation checkbox is checked
         return isConfirmed;
