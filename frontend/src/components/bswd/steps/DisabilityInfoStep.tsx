@@ -18,7 +18,9 @@ interface DisabilityInfoStepProps {
 
 export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStepProps) {
   // Local state for the psycho-educational assessment checkbox
-  const [requiresPsychoEducational, setRequiresPsychoEducational] = useState(false);
+  const [requiresPsychoEducational, setRequiresPsychoEducational] = useState(
+    Boolean((formData as any).needsPsychoEdAssessment)
+  );
 
   // Handler for the multi-select functional limitations checkboxes
   const handleLimitationsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -193,7 +195,10 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
             name="requiresPsychoEducational"
             type="checkbox"
             checked={requiresPsychoEducational}
-            onChange={e => setRequiresPsychoEducational(e.target.checked)}
+            onChange={e => {
+              setRequiresPsychoEducational(e.target.checked);
+              setFormData(prev => ({ ...prev, needsPsychoEdAssessment: e.target.checked }));
+            }}
             className="h-5 w-5 border-gray-300 rounded focus:ring-[#0071a9] mt-1"
           />
           <label
