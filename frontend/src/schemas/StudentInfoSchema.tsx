@@ -23,9 +23,4 @@ export const StudentInfoSchema = z.object({
     .min(new Date("1900-01-01"), { message: "Too old" })
     .max(new Date(), { message: "Born in the future???" }),
   sin: z.string().length(9, { message: "Sin must be 9 digits" }),
-  phone: z
-    .string()
-    .regex(/^\d+$/, { message: "Phone number must contain only number" })
-    .min(4, { message: "Too short" })
-    .max(17, { message: "Too long" }),
 });

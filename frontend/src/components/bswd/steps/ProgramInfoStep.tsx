@@ -157,18 +157,33 @@ export function ProgramInfoStep({
   const startRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLInputElement>(null);
 
-  const handleSelectStart = (selected: Date | undefined) => {
-    if (!selected) return;
-    setStartDate(selected);
-    if (startRef.current)
-      startRef.current.value = format(selected, "yyyy-MM-dd");
-  };
+const handleSelectStart = (selected: Date | undefined) => {
+  if (!selected) return;
+  setStartDate(selected);
+  const formattedDate = format(selected, "dd/MM/yyyy"); 
 
-  const handleSelectEnd = (selected: Date | undefined) => {
-    if (!selected) return;
-    setEndDate(selected);
-    if (endRef.current) endRef.current.value = format(selected, "yyyy-MM-dd");
-  };
+  if (startRef.current)
+    startRef.current.value = formattedDate;
+    // Save the formatted date to formData
+    setFormData((prev) => ({ 
+        ...prev, 
+        studyPeriodStart: formattedDate 
+    })); 
+};
+
+const handleSelectEnd = (selected: Date | undefined) => {
+  if (!selected) return;
+  setEndDate(selected);
+  const formattedDate = format(selected, "dd/MM/yyyy"); 
+
+  if (endRef.current) endRef.current.value = formattedDate;
+
+    // Save the formatted date to formData
+    setFormData((prev) => ({ 
+        ...prev, 
+        studyPeriodEnd: formattedDate 
+    }));
+};
 
   return (
     <div className="space-y-4">
@@ -367,28 +382,16 @@ export function ProgramInfoStep({
               <input
                 id="studyPeriodStart"
                 ref={startRef}
-                type="date"
-                defaultValue={
-                  formData.studyPeriodStart
-                    ? format(formData.studyPeriodStart, "yyyy-MM-dd")
-                    : ""
-                }
+                type="text" //Text disables native date picker
+                placeholder="DD/MM/YYYY"
+                value={formData.studyPeriodStart}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm"
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (value) {
-                    const parsed = new Date(value);
-                    if (!isNaN(parsed.getTime())) {
-                      setStartDate(parsed);
-                      setFormData((prev) => ({
-                        ...prev,
-                        studyPeriodStart: value,
-                      }));
-                    }
-                  } else {
-                    setStartDate(null);
-                    setFormData((prev) => ({ ...prev, studyPeriodStart: "" }));
-                  }
+                  setFormData((prev) => ({ 
+                    ...prev, 
+                    studyPeriodStart: value 
+                  }));
                 }}
               />
               <PopoverTrigger asChild>
@@ -427,27 +430,15 @@ export function ProgramInfoStep({
               <input
                 id="studyPeriodEnd"
                 ref={endRef}
-                type="date"
-                defaultValue={
-                  formData.studyPeriodEnd
-                    ? format(formData.studyPeriodEnd, "yyyy-MM-dd")
-                    : ""
-                }
+                type="text"
+                placeholder="DD/MM/YYYY"
+                value={formData.studyPeriodEnd}
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (value) {
-                    const parsed = new Date(value);
-                    if (!isNaN(parsed.getTime())) {
-                      setEndDate(parsed);
-                      setFormData((prev) => ({
-                        ...prev,
-                        studyPeriodEnd: value,
-                      }));
-                    }
-                  } else {
-                    setEndDate(null);
-                    setFormData((prev) => ({ ...prev, studyPeriodEnd: "" }));
-                  }
+                  setFormData((prev) => ({ 
+                    ...prev, 
+                    studyPeriodEnd: value 
+                  }));
                 }}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm"
               />
