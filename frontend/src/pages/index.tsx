@@ -359,9 +359,6 @@ export default function BSWDApplicationPage() {
       description="Complete application for Bursary for Students with Disabilities (BSWD) and Canada Student Grant for Services and Equipment"
     >
       <div className="mb-6">
-        <p className="text-sm text-gray-600">
-          Step {currentStep} of {TOTAL_STEPS}
-        </p>
       </div>
       <div className="mb-4 p-4 pb-2 py-6 border rounded-md">
         <StepBar />
