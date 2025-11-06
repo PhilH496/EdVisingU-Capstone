@@ -1,16 +1,18 @@
-import { supabase } from './supabase';
-import { FormData } from '@/types/bswd';
+import { supabase } from "./supabase";
+import { FormData } from "@/types/bswd";
 
 //StepOne
 export const saveStudentInfo = async (formData: FormData) => {
   const { data, error } = await supabase
-    .from('student')
+    .from("student")
     .insert({
+      student_id: +formData.studentId,
       oen: parseInt(formData.oen),
-      name: formData.fullName,
+      first_name: formData.firstName,
+      last_name: formData.lastName,
       dob: formData.dateOfBirth,
       sin: formData.sin || null,
-      phone_number: formData.phone || null
+      phone_number: formData.phone || null,
     })
     .select()
     .single();
@@ -19,19 +21,20 @@ export const saveStudentInfo = async (formData: FormData) => {
   return data.student_id;
 };
 
-//StepOne + part of StepTwo
-export const saveProgramInfo = async (studentId: number, formData: FormData) => {
-  const { error } = await supabase
-    .from('program_info')
-    .insert({
-      student_id: studentId,
-      institution_name: formData.institution,
-      institution_type: formData.institutionType,
-      program: formData.program,
-      study_type: formData.studyType,
-      study_start: formData.studyPeriodStart,
-      study_end: formData.studyPeriodEnd
-    });
+//StepTwo - (Not used in index.tsx for now, check if format is correct to save into database)
+export const saveProgramInfo = async (
+  studentId: number,
+  formData: FormData
+) => {
+  const { error } = await supabase.from("program_info").insert({
+    student_id: studentId,
+    institution_name: formData.institution,
+    institution_type: formData.institutionType,
+    program: formData.program,
+    study_type: formData.studyType,
+    study_start: formData.studyPeriodStart,
+    study_end: formData.studyPeriodEnd,
+  });
 
   if (error) throw error;
 };

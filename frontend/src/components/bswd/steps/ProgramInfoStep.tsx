@@ -1,6 +1,6 @@
 // Step 2: Institution and program information
 // ProgramInfoStep Component Goes Here
-// 
+//
 // HELPFUL INFO:
 // - formData: Object containing all form data (see @/types/bswd.ts for available fields)
 // - setFormData: Updates form data using: setFormData(prev => ({ ...prev, fieldName: value }))
@@ -15,9 +15,26 @@ import { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
@@ -122,44 +139,64 @@ const institutions = [
     value: "windsor",
     label: "University of Windsor",
   },
-]
+];
 
 interface ProgramInfoStepProps {
   formData: FormData;
   setFormData: (data: FormData | ((prev: FormData) => FormData)) => void;
 }
 
-export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps) {
-  const [value, setValue] = useState("")
-  const [open, setOpen] = useState(false)
-  const [startDate, setStartDate] = useState<Date | null>(null)
-  const [endDate, setEndDate] = useState<Date | null>(null)
-  const startRef = useRef<HTMLInputElement>(null)
-  const endRef = useRef<HTMLInputElement>(null)
+export function ProgramInfoStep({
+  formData,
+  setFormData,
+}: ProgramInfoStepProps) {
+  const [value, setValue] = useState("");
+  const [open, setOpen] = useState(false);
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const startRef = useRef<HTMLInputElement>(null);
+  const endRef = useRef<HTMLInputElement>(null);
 
-  const handleSelectStart = (selected: Date | undefined) => {
-    if (!selected) return
-    setStartDate(selected)
-    if (startRef.current)
-      startRef.current.value = format(selected, "yyyy-MM-dd")
-  }
+const handleSelectStart = (selected: Date | undefined) => {
+  if (!selected) return;
+  setStartDate(selected);
+  const formattedDate = format(selected, "dd/MM/yyyy"); 
 
-  const handleSelectEnd = (selected: Date | undefined) => {
-    if (!selected) return
-    setEndDate(selected)
-    if (endRef.current)
-      endRef.current.value = format(selected, "yyyy-MM-dd")
-  }
+  if (startRef.current)
+    startRef.current.value = formattedDate;
+    // Save the formatted date to formData
+    setFormData((prev) => ({ 
+        ...prev, 
+        studyPeriodStart: formattedDate 
+    })); 
+};
+
+const handleSelectEnd = (selected: Date | undefined) => {
+  if (!selected) return;
+  setEndDate(selected);
+  const formattedDate = format(selected, "dd/MM/yyyy"); 
+
+  if (endRef.current) endRef.current.value = formattedDate;
+
+    // Save the formatted date to formData
+    setFormData((prev) => ({ 
+        ...prev, 
+        studyPeriodEnd: formattedDate 
+    }));
+};
 
   return (
     <div className="space-y-4">
-
-      <h2 className="text-xl font-semibold mb-4">Section B: Information about your school and program</h2>
+      <h2 className="text-xl font-semibold mb-4">
+        Section B: Information about your school and program
+      </h2>
       <div className="grid md:grid-cols-2 gap-4 text-brand-text-gray">
-
         {/* Institution Name div */}
         <div>
-          <label htmlFor="institutionName" className="block text-base font-medium mb-1 text-brand-text-gray">
+          <label
+            htmlFor="institutionName"
+            className="block text-base font-medium mb-1 text-brand-text-gray"
+          >
             Institution Name *
           </label>
           <Popover open={open} onOpenChange={setOpen}>
@@ -170,15 +207,21 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
                 aria-expanded={open}
                 className="w-full justify-start text-left"
               >
-                {value
-                  ? institutions.find((institution) => institution.value === value)?.label
+                {formData.institution
+                  ? institutions.find(
+                      (institution) =>
+                        institution.value === formData.institution
+                    )?.label
                   : "Search for OSAP-approved institutions"}
                 <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="mx-auto p-0">
               <Command>
-                <CommandInput placeholder="Search institution..." className="h-9" />
+                <CommandInput
+                  placeholder="Search institution..."
+                  className="h-9"
+                />
                 <CommandList>
                   <CommandEmpty>No institution found.</CommandEmpty>
                   <CommandGroup>
@@ -187,17 +230,23 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
                         key={institution.value}
                         value={institution.value}
                         onSelect={(currentValue) => {
-                          const newValue = currentValue === value ? "" : currentValue;
-                          setValue(currentValue === value ? "" : currentValue)
-                          setFormData(prev => ({ ...prev, institution: newValue }));
-                          setOpen(false)
+                          const newValue =
+                            currentValue === value ? "" : currentValue;
+                          setValue(currentValue === value ? "" : currentValue);
+                          setFormData((prev) => ({
+                            ...prev,
+                            institution: newValue,
+                          }));
+                          setOpen(false);
                         }}
                       >
                         {institution.label}
                         <CheckIcon
                           className={cn(
                             "ml-auto",
-                            value === institution.value ? "opacity-100" : "opacity-0"
+                            value === institution.value
+                              ? "opacity-100"
+                              : "opacity-0"
                           )}
                         />
                       </CommandItem>
@@ -211,13 +260,19 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
 
         {/* Institution Type div */}
         <div className="flex flex-col justify-end">
-          <label htmlFor="institutionType" className="block text-base font-medium mb-1 text-brand-text-gray">
+          <label
+            htmlFor="institutionType"
+            className="block text-base font-medium mb-1 text-brand-text-gray"
+          >
             Institution Type *
           </label>
           <Select
             value={formData.institutionType}
             onValueChange={(value) =>
-              setFormData(prev => ({ ...prev, institutionType: value as "public-ontario" | "private-ontario" }))
+              setFormData((prev) => ({
+                ...prev,
+                institutionType: value as "public-ontario" | "private-ontario",
+              }))
             }
           >
             <SelectTrigger id="institutionType" className="w-full">
@@ -228,15 +283,16 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
               <SelectItem value="private-ontario">Private</SelectItem>
             </SelectContent>
           </Select>
-
         </div>
       </div>
 
       <div className="border-t pt-4 grid md:grid-cols-3 gap-4">
-
         {/* Program Cost Code div */}
         <div>
-          <label htmlFor="code" className="block text-base font-medium mb-1 text-brand-text-gray">
+          <label
+            htmlFor="code"
+            className="block text-base font-medium mb-1 text-brand-text-gray"
+          >
             Program Cost Code
           </label>
           <Input
@@ -247,8 +303,9 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
             value={formData.code}
             onChange={(e) => {
               const value = e.target.value;
-              if (/^[\d\s]*$/.test(value)) { // user input can be numbers, spaces
-                setFormData(prev => ({ ...prev, code: value }));
+              if (/^[\d\s]*$/.test(value)) {
+                // user input can be numbers, spaces
+                setFormData((prev) => ({ ...prev, code: value }));
               }
             }}
             className="w-full"
@@ -256,7 +313,10 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
         </div>
         {/* Program of Study div*/}
         <div>
-          <label htmlFor="program" className="block text-base font-medium mb-1 text-brand-text-gray">
+          <label
+            htmlFor="program"
+            className="block text-base font-medium mb-1 text-brand-text-gray"
+          >
             Program of Study
           </label>
           <Input
@@ -267,8 +327,9 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
             value={formData.program}
             onChange={(e) => {
               const value = e.target.value;
-              if (/^[A-Za-z\s]*$/.test(value)) { // user input can be alphabetic, spaces
-                setFormData(prev => ({ ...prev, program: value }));
+              if (/^[A-Za-z\s]*$/.test(value)) {
+                // user input can be alphabetic, spaces
+                setFormData((prev) => ({ ...prev, program: value }));
               }
             }}
             pattern="^[A-Za-z\s]+$"
@@ -278,31 +339,42 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
 
         {/* Study Type div*/}
         <div>
-          <label htmlFor="studyType" className="block text-base font-medium mb-1 text-brand-text-gray">
+          <label
+            htmlFor="studyType"
+            className="block text-base font-medium mb-1 text-brand-text-gray"
+          >
             Study Type *
           </label>
           <Select
             value={formData.studyType}
             onValueChange={(value) =>
-              setFormData(prev => ({ ...prev, studyType: value as "full-time" | "part-time" }))
-            }>
+              setFormData((prev) => ({
+                ...prev,
+                studyType: value as "full-time" | "part-time",
+              }))
+            }
+          >
             <SelectTrigger id="studyType" className="w-full">
               <SelectValue placeholder="Select..." />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="full-time">Full-Time</SelectItem>
               <SelectItem value="part-time">Part-Time</SelectItem>
-              <SelectItem value="part-time">Institution-funded Special Bursary</SelectItem>
+              <SelectItem value="part-time">
+                Institution-funded Special Bursary
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
       <div className="border-t pt-4 grid md:grid-cols-2 gap-4 ">
-
         {/* Study Start Date div */}
         <div>
-          <label htmlFor="studyPeriodStart" className="block text-base font-medium mb-1 text-brand-text-gray">
+          <label
+            htmlFor="studyPeriodStart"
+            className="block text-base font-medium mb-1 text-brand-text-gray"
+          >
             Study Start Date *
           </label>
           <Popover>
@@ -310,23 +382,17 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
               <input
                 id="studyPeriodStart"
                 ref={startRef}
-                type="date"
-                defaultValue={startDate ? format(startDate, "yyyy-MM-dd") : ""}
+                type="text" //Text disables native date picker
+                placeholder="DD/MM/YYYY"
+                value={formData.studyPeriodStart}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm"
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (value) {
-                    const parsed = new Date(value);
-                    if (!isNaN(parsed.getTime())) {
-                      setStartDate(parsed);
-                      setFormData(prev => ({ ...prev, studyPeriodStart: value }));
-                    }
-                  } else {
-                    setStartDate(null);
-                    setFormData(prev => ({ ...prev, studyPeriodStart: "" }));
-                  }
+                  setFormData((prev) => ({ 
+                    ...prev, 
+                    studyPeriodStart: value 
+                  }));
                 }}
-
               />
               <PopoverTrigger asChild>
                 <button
@@ -336,8 +402,16 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
                   <CalendarIcon className="h-4 w-4" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent side="bottom" align="end" className="w-auto p-0 z-50">
-                <Calendar mode="single" selected={startDate ?? undefined} onSelect={handleSelectStart} />
+              <PopoverContent
+                side="bottom"
+                align="end"
+                className="w-auto p-0 z-50"
+              >
+                <Calendar
+                  mode="single"
+                  selected={startDate ?? undefined}
+                  onSelect={handleSelectStart}
+                />
               </PopoverContent>
             </div>
           </Popover>
@@ -345,7 +419,10 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
 
         {/* Study End Date div */}
         <div>
-          <label htmlFor="studyPeriodEnd" className="block text-base font-medium mb-1 text-brand-text-gray">
+          <label
+            htmlFor="studyPeriodEnd"
+            className="block text-base font-medium mb-1 text-brand-text-gray"
+          >
             Study End Date *
           </label>
           <Popover>
@@ -353,20 +430,15 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
               <input
                 id="studyPeriodEnd"
                 ref={endRef}
-                type="date"
-                defaultValue={endDate ? format(endDate, "yyyy-MM-dd") : ""}
+                type="text"
+                placeholder="DD/MM/YYYY"
+                value={formData.studyPeriodEnd}
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (value) {
-                    const parsed = new Date(value);
-                    if (!isNaN(parsed.getTime())) {
-                      setEndDate(parsed);
-                      setFormData(prev => ({ ...prev, studyPeriodEnd: value }));
-                    }
-                  } else {
-                    setEndDate(null);
-                    setFormData(prev => ({ ...prev, studyPeriodEnd: "" }));
-                  }
+                  setFormData((prev) => ({ 
+                    ...prev, 
+                    studyPeriodEnd: value 
+                  }));
                 }}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm"
               />
@@ -378,8 +450,16 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
                   <CalendarIcon className="h-4 w-4" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent side="bottom" align="end" className="w-auto p-0 z-50">
-                <Calendar mode="single" selected={endDate ?? undefined} onSelect={handleSelectEnd} />
+              <PopoverContent
+                side="bottom"
+                align="end"
+                className="w-auto p-0 z-50"
+              >
+                <Calendar
+                  mode="single"
+                  selected={endDate ?? undefined}
+                  onSelect={handleSelectEnd}
+                />
               </PopoverContent>
             </div>
           </Popover>
@@ -389,24 +469,29 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
       <div className="mt-4">
         {/* Previous institution disability documentation div */}
         <label className="block text-base font-medium mb-2 text-left text-brand-text-gray">
-          Has the student submitted a completed OSAP Disability Verification Form 
-          or other disability documentation while attending another institution? *
+          Has the student submitted a completed OSAP Disability Verification
+          Form or other disability documentation while attending another
+          institution? *
         </label>
-          <RadioGroup
-            value={formData.submittedDisabilityElsewhere || "no"}
-            onValueChange={(value) => 
-              setFormData(prev => ({ ...prev, submittedDisabilityElsewhere: value as 'yes'}))}
-            className="flex items-center justify-left space-x-6 mb-3"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="yes" id="submitted-yes" />
-              <Label htmlFor="submitted-yes">Yes</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="no" id="submitted-no" />
-              <Label htmlFor="submitted-no">No</Label>
-            </div>
-          </RadioGroup>
+        <RadioGroup
+          value={formData.submittedDisabilityElsewhere || "no"}
+          onValueChange={(value) =>
+            setFormData((prev) => ({
+              ...prev,
+              submittedDisabilityElsewhere: value as "yes",
+            }))
+          }
+          className="flex items-center justify-left space-x-6 mb-3"
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="yes" id="submitted-yes" />
+            <Label htmlFor="submitted-yes">Yes</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="no" id="submitted-no" />
+            <Label htmlFor="submitted-no">No</Label>
+          </div>
+        </RadioGroup>
 
         {/* Previous institution combobox (used when "Yes") */}
         {formData.submittedDisabilityElsewhere === "yes" && (
@@ -424,7 +509,9 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
                   className="md:w-1/2 justify-start text-left"
                 >
                   {formData.previousInstitution
-                    ? institutions.find((inst) => inst.value === formData.previousInstitution)?.label
+                    ? institutions.find(
+                        (inst) => inst.value === formData.previousInstitution
+                      )?.label
                     : "Search previous institution..."}
                   <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -432,7 +519,10 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
 
               <PopoverContent className="mx-auto p-0">
                 <Command>
-                  <CommandInput placeholder="Search institution..." className="h-9" />
+                  <CommandInput
+                    placeholder="Search institution..."
+                    className="h-9"
+                  />
                   <CommandList>
                     <CommandEmpty>No institution found.</CommandEmpty>
                     <CommandGroup>
@@ -441,14 +531,19 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
                           key={inst.value}
                           value={inst.value}
                           onSelect={(currentValue) =>
-                            setFormData(prev => ({ ...prev, previousInstitution: currentValue }))
+                            setFormData((prev) => ({
+                              ...prev,
+                              previousInstitution: currentValue,
+                            }))
                           }
                         >
                           {inst.label}
                           <CheckIcon
                             className={cn(
                               "ml-auto",
-                              formData.previousInstitution === inst.value ? "opacity-100" : "opacity-0"
+                              formData.previousInstitution === inst.value
+                                ? "opacity-100"
+                                : "opacity-0"
                             )}
                           />
                         </CommandItem>
@@ -461,7 +556,6 @@ export function ProgramInfoStep({ formData, setFormData }: ProgramInfoStepProps)
           </div>
         )}
       </div>
-
     </div>
   );
 }
