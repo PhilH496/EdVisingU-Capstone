@@ -153,6 +153,14 @@ export default function BSWDApplicationPage() {
         const restrictionsOk = true; // Restrictions never block navigation
         return hasChosenOnFile && appTypeOk && needsOk && restrictionsOk;
       }
+
+      case 4: {
+        // Disability info step
+        // If Psycho-Ed referral is required, email must be non-empty
+        if (formData.needsPsychoEdAssessment && !formData.email?.trim()) return false;
+        return true;
+      }
+        
       case 6: {
         // Step 6 (Review and Submit): Check if confirmation checkbox is checked
         return isConfirmed;
