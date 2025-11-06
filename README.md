@@ -36,6 +36,9 @@ Windows PowerShell:
    python -m venv .venv  
    .venv\Scripts\Activate.ps1
 
+   (Make sure python 3.11.9 is installed - Link: https://www.python.org/downloads/release/python-3119/ )
+   pip install -r requirements.txt
+
 3. Install dependencies:
 
    pip install fastapi uvicorn[standard]

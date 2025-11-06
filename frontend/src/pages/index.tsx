@@ -107,7 +107,8 @@ export default function BSWDApplicationPage() {
     switch (currentStep) {
       case 1:
         return Boolean(
-          formData.studentId &&
+            formData.studentId &&
+            formData.studentId.length >= 7 &&
             formData.firstName &&
             formData.lastName &&
             formData.email &&
@@ -152,8 +153,8 @@ export default function BSWDApplicationPage() {
         const restrictionsOk = true; // Restrictions never block navigation
         return hasChosenOnFile && appTypeOk && needsOk && restrictionsOk;
       }
-      case 7: {
-        // Step 7 (Review and Submit): Check if confirmation checkbox is checked
+      case 6: {
+        // Step 6 (Review and Submit): Check if confirmation checkbox is checked
         return isConfirmed;
       }
       default:
@@ -235,7 +236,7 @@ export default function BSWDApplicationPage() {
     const phone = formData.phone.replace(/\D/g, "");
     console.log(phone);
     const studentInfoData = {
-      studentId: +formData.studentId,
+      studentId: formData.studentId,
       oen: formData.oen,
       firstName: formData.firstName,
       lastName: formData.lastName,

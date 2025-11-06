@@ -86,6 +86,9 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             placeholder="Enter student ID"
             maxLength={15}
           />
+          {formData.studentId && formData.studentId.length < 7 && (
+            <p className="text-sm text-red-600 mt-1">Student ID must be at least 7 digits</p>
+          )}
         </div>
 
         <div>
@@ -123,9 +126,12 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             type="text"
             value={formData.firstName}
             disabled={isLocked}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-              setFormData(prev => ({ ...prev, firstName: e.target.value }))
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value;
+            if (/^[A-Za-z\s'-]*$/.test(value)) {
+              setFormData(prev => ({ ...prev, firstName: value }));
             }
+          }}
             className={lockCls("w-full px-3 py-2 border rounded-md")}
             placeholder="Enter first name"
           />
@@ -140,9 +146,12 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             type="text"
             value={formData.lastName}
             disabled={isLocked}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-              setFormData(prev => ({ ...prev, lastName: e.target.value }))
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value;
+            if (/^[A-Za-z\s'-]*$/.test(value)) {
+              setFormData(prev => ({ ...prev, lastName: value }));
             }
+          }}
             className={lockCls("w-full px-3 py-2 border rounded-md")}
             placeholder="Enter last name"
           />
