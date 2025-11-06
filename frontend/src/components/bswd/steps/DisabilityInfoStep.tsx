@@ -187,14 +187,14 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
 
       {/* Psycho-educational Assessment Checkbox */}
       <div className="pt-2 border-t border-gray-200 mt-6">
-        <div className="flex items-start mt-4">
+        <div className="flex items-start my-4">
           <input
             id="requiresPsychoEducational"
             name="requiresPsychoEducational"
             type="checkbox"
             checked={requiresPsychoEducational}
             onChange={e => setRequiresPsychoEducational(e.target.checked)}
-            className="h-5 w-5 border-gray-300 rounded focus:ring-[#0071a9] mt-1"
+            className="h-5 w-5 border-gray-300 rounded focus:ring-[#0071a9]"
           />
           <label
             htmlFor="requiresPsychoEducational"
@@ -206,7 +206,7 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
 
         {/* Conditional Email Input - Only shows when checkbox is checked */}
         {requiresPsychoEducational && (
-          <div className="mt-6 ml-8 p-6 rounded-md border-l-4 border-[#0071a9] bg-[#e6fad2]">
+          <div className="mt-6 ml-8 p-6 rounded-md border-l-4 border-[#0071a9] bg-[#e6fad2] my-6">
             <div className="flex items-start mb-4">
               <div className="flex-shrink-0">
                 <svg
