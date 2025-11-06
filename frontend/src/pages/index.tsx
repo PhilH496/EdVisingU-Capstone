@@ -153,8 +153,8 @@ export default function BSWDApplicationPage() {
         const restrictionsOk = true; // Restrictions never block navigation
         return hasChosenOnFile && appTypeOk && needsOk && restrictionsOk;
       }
-      case 7: {
-        // Step 7 (Review and Submit): Check if confirmation checkbox is checked
+      case 6: {
+        // Step 6 (Review and Submit): Check if confirmation checkbox is checked
         return isConfirmed;
       }
       default:

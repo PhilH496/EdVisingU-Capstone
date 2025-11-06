@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
+from contextlib import asynccontextmanager
 import sys
 import os
 
@@ -15,10 +16,24 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from chain import get_or_create_chain, chat_with_memory
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Initialize the conversation chain on startup"""
+    try:
+        print("Initializing chatbot chain...")
+        chain, memory = get_or_create_chain()
+        print("Chatbot chain initialized successfully!")
+    except Exception as e:
+        print(f"Error initializing chain: {str(e)}")
+        raise
+    
+    yield  # Application runs here
+
 app = FastAPI(
     title="BSWD Chatbot API",
     description="Backend API for BSWD Manual Chatbot with RAG",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan 
 )
 
 # Configure CORS for Next.js frontend
@@ -49,19 +64,6 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     answer: str
     source_documents: Optional[List[dict]] = []
-
-
-# Initialize chain on startup
-@app.on_event("startup")
-async def startup_event():
-    """Initialize the conversation chain on startup"""
-    try:
-        print("Initializing chatbot chain...")
-        chain, memory = get_or_create_chain()
-        print("Chatbot chain initialized successfully!")
-    except Exception as e:
-        print(f"Error initializing chain: {str(e)}")
-        raise
 
 
 @app.get("/")
