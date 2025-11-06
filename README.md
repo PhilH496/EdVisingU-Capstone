@@ -4,7 +4,7 @@ This repository contains a Next.js frontend and a FastAPI backend. The instructi
 
 Prerequisites
 - Node.js and your package manager of choice (npm comes with Node)
-- Python 3.10+ 
+- Python 3.11 
 - Git
 
 Frontend (Next.js)
