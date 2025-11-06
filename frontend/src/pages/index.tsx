@@ -5,11 +5,10 @@
  * Manages the multi-step form flow and overall form state.
  *
  * Features:
- * - Multi-step form navigation (7 total steps)
+ * - Multi-step form navigation (6 total steps)
  * - Form data state management
  * - Step validation before allowing progression
- * - Saves data to Supabase ONLY on final submission (Step 7)
- * - Dev mode: Skip to any step (development only)
+ * - Saves data to Supabase ONLY on final submission (Step 6)
  */
 import { useState, useMemo, useEffect, useRef } from "react";
 import { FormData } from "@/types/bswd";
@@ -23,7 +22,6 @@ import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
 import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
 import { StudentInfoSchema } from "@/schemas/StudentInfoSchema";
 import { saveStudentInfo } from "@/lib/database";
-//import { saveStudentInfo, saveProgramInfo } from "@/lib/database"; // Database use later - create functions in database.ts, take a look and edit if needed SQL in supabase.
 
 const DEV_MODE = process.env.NODE_ENV === "development";
 
@@ -107,20 +105,20 @@ export default function BSWDApplicationPage() {
     switch (currentStep) {
       case 1:
         return Boolean(
-            formData.studentId &&
-            formData.studentId.length >= 7 &&
-            formData.firstName &&
-            formData.lastName &&
-            formData.email &&
-            formData.dateOfBirth &&
-            formData.oen.length === 9 &&
-            formData.sin.replace(/\D/g, "").length === 9 &&
-            formData.address &&
-            formData.city &&
-            formData.province &&
-            formData.postalCode &&
-            formData.country &&
-            formData.hasOsapApplication !== null
+          formData.studentId &&
+          formData.studentId.length >= 7 &&
+          formData.firstName &&
+          formData.lastName &&
+          formData.email &&
+          formData.dateOfBirth &&
+          formData.oen.length === 9 &&
+          formData.sin.replace(/\D/g, "").length === 9 &&
+          formData.address &&
+          formData.city &&
+          formData.province &&
+          formData.postalCode &&
+          formData.country &&
+          formData.hasOsapApplication !== null
         );
 
       case 2: {
@@ -128,19 +126,19 @@ export default function BSWDApplicationPage() {
           formData.previousInstitution;
           return Boolean(
             formData.institution &&
-              formData.institutionType &&
-              formData.studyType &&
-              formData.studyPeriodStart &&
-              formData.studyPeriodEnd &&
-              formData.previousInstitution
+            formData.institutionType &&
+            formData.studyType &&
+            formData.studyPeriodStart &&
+            formData.studyPeriodEnd &&
+            formData.previousInstitution
           );
         }
         return Boolean(
           formData.institution &&
-            formData.institutionType &&
-            formData.studyType &&
-            formData.studyPeriodStart &&
-            formData.studyPeriodEnd
+          formData.institutionType &&
+          formData.studyType &&
+          formData.studyPeriodStart &&
+          formData.studyPeriodEnd
         );
       }
 
@@ -343,15 +341,13 @@ export default function BSWDApplicationPage() {
               className="flex flex-col items-center"
             >
               <span
-                className={`flex rounded-full  justify-center items-center h-14 w-14 transition-colors font-medium ${
-                  currentStep === index + 1
+                className={`flex rounded-full  justify-center items-center h-14 w-14 transition-colors font-medium ${currentStep === index + 1
                     ? "bg-cyan-800 text-white"
                     : "bg-gray-100 text-black"
-                } ${
-                  index + 1 > maxStep
+                  } ${index + 1 > maxStep
                     ? "opacity-40 cursor-not-allowed"
                     : "hover:bg-cyan-700 hover:text-white"
-                }`}
+                  }`}
               >
                 <i className={`${stepInfo.stepIconFaClass} text-[150%]`}></i>
               </span>
@@ -371,9 +367,6 @@ export default function BSWDApplicationPage() {
       description="Complete application for Bursary for Students with Disabilities (BSWD) and Canada Student Grant for Services and Equipment"
     >
       <div className="mb-6">
-        <p className="text-sm text-gray-600">
-          Step {currentStep} of {TOTAL_STEPS}
-        </p>
       </div>
       <div className="mb-4 p-4 pb-2 py-6 border rounded-md">
         <StepBar />

@@ -8,7 +8,6 @@
  * @param setFormData - Function to update form data state
  */
 import { FormData } from "@/types/bswd";
-import * as React from "react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
@@ -17,6 +16,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { useRef, useState } from "react";
 
 interface StudentInfoStepProps {
   formData: FormData;
@@ -24,8 +25,8 @@ interface StudentInfoStepProps {
 }
 
 export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps) {
-  const [dateOfBirth, setDateOfBirth] = React.useState<Date | null>(null);
-  const dobRef = React.useRef<HTMLInputElement>(null);
+  const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
+  const dobRef = useRef<HTMLInputElement>(null);
 
   // Lock all fields on this page when OSAP application = "No"
   const isLocked = formData.hasOsapApplication === false;
@@ -71,7 +72,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
           <label htmlFor="studentId" className="block text-sm font-medium mb-1 text-brand-text-gray">
             Student ID *
           </label>
-          <input
+          <Input
             id="studentId"
             type="text"
             value={formData.studentId}
@@ -95,7 +96,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
           <label htmlFor="oen" className="block text-sm font-medium mb-1 text-brand-text-gray">
             Ontario Education Number (OEN) *
           </label>
-          <input
+          <Input
             id="oen"
             type="text"
             value={formData.oen}
@@ -121,7 +122,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
           <label htmlFor="firstName" className="block text-sm font-medium mb-1 text-brand-text-gray">
             First Name *
           </label>
-          <input
+          <Input
             id="firstName"
             type="text"
             value={formData.firstName}
@@ -141,7 +142,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
           <label htmlFor="lastName" className="block text-sm font-medium mb-1 text-brand-text-gray">
             Last Name *
           </label>
-          <input
+          <Input
             id="lastName"
             type="text"
             value={formData.lastName}
@@ -165,7 +166,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
           </label>
           <Popover>
             <div className="relative w-full">
-              <input
+              <Input
                 id="dateOfBirth"
                 ref={dobRef}
                 type="text"
@@ -206,7 +207,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
           <label htmlFor="sin" className="block text-sm font-medium mb-1 text-brand-text-gray">
             Social Insurance Number *
           </label>
-          <input
+          <Input
             id="sin"
             type="text"
             value={formData.sin}
@@ -238,7 +239,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
           <label htmlFor="email" className="block text-sm font-medium mb-1 text-brand-text-gray">
             Email Address *
           </label>
-          <input
+          <Input
             id="email"
             type="email"
             value={formData.email}
@@ -255,7 +256,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
           <label htmlFor="phone" className="block text-sm font-medium mb-1 text-brand-text-gray">
             Phone Number
           </label>
-          <input
+          <Input
             id="phone"
             type="tel"
             value={formData.phone}
@@ -289,7 +290,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             <label htmlFor="address" className="block text-sm font-medium mb-1 text-brand-text-gray">
               Street Address *
             </label>
-            <input
+            <Input
               id="address"
               type="text"
               value={formData.address || ''}
@@ -307,7 +308,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               <label htmlFor="city" className="block text-sm font-medium mb-1 text-brand-text-gray">
                 City *
               </label>
-              <input
+              <Input
                 id="city"
                 type="text"
                 value={formData.city || ''}
@@ -353,7 +354,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               <label htmlFor="postalCode" className="block text-sm font-medium mb-1 text-brand-text-gray">
                 Postal Code *
               </label>
-              <input
+              <Input
                 id="postalCode"
                 type="text"
                 value={formData.postalCode || ''}
@@ -377,7 +378,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               <label htmlFor="country" className="block text-sm font-medium mb-1 text-brand-text-gray">
                 Country *
               </label>
-              <input
+              <Input
                 id="country"
                 type="text"
                 value={formData.country || 'Canada'}

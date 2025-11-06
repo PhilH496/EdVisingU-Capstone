@@ -17,7 +17,6 @@
 // - Use brand colors located in tailwind.config.js; reference StudentInfoStep.tsx
 
 import { FormData } from "@/types/bswd";
-import * as React from "react";
 import { notifyNoOsap } from "@/lib/notify";
 
 const OSAP_MANUAL_URL = "https://osap.gov.on.ca/dc/TCONT003225";
