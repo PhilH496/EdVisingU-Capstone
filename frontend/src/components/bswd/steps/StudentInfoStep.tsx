@@ -8,7 +8,6 @@
  * @param setFormData - Function to update form data state
  */
 import { FormData } from "@/types/bswd";
-import * as React from "react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
@@ -18,6 +17,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+import { useRef, useState } from "react";
 
 interface StudentInfoStepProps {
   formData: FormData;
@@ -25,8 +25,8 @@ interface StudentInfoStepProps {
 }
 
 export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps) {
-  const [dateOfBirth, setDateOfBirth] = React.useState<Date | null>(null);
-  const dobRef = React.useRef<HTMLInputElement>(null);
+  const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
+  const dobRef = useRef<HTMLInputElement>(null);
 
   // Lock all fields on this page when OSAP application = "No"
   const isLocked = formData.hasOsapApplication === false;
