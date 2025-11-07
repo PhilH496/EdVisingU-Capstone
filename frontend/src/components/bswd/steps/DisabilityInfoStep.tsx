@@ -84,77 +84,80 @@ export function DisabilityInfoStep({
       </div>
 
       {/* Disability Verification Date */}
-      <div>
-        <label
-          htmlFor="disabilityVerificationDate"
-          className="block text-base font-medium mb-1 text-[#4e4e4e]"
-        >
-          Disability Verification Date
-        </label>
-        <div className="relative">
-          <input
-            type="date"
-            id="disabilityVerificationDate"
-            name="disabilityVerificationDate"
-            value={formData.disabilityVerificationDate || ""}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                disabilityVerificationDate: e.target.value,
-              }))
-            }
-            disabled={isVerificationDisabled}
-            className={`w-full max-w-xs px-3 py-2 border rounded-md text-sm text-[#4e4e4e] focus:outline-none focus:ring-2 ${
-              isVerificationDisabled
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200"
-                : "focus:ring-[#0071a9]"
-            }`}
-          />
+      {formData.disabilityType !== "not-verified" && (
+        <div>
+          <label
+            htmlFor="disabilityVerificationDate"
+            className="block text-base font-medium mb-1 text-[#4e4e4e]"
+          >
+            Disability Verification Date
+          </label>
+          <div className="relative">
+            <input
+              type="date"
+              id="disabilityVerificationDate"
+              name="disabilityVerificationDate"
+              value={formData.disabilityVerificationDate || ""}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  disabilityVerificationDate: e.target.value,
+                }))
+              }
+              disabled={isVerificationDisabled}
+              className={`w-full max-w-xs px-3 py-2 border rounded-md text-sm text-[#4e4e4e] focus:outline-none focus:ring-2 ${
+                isVerificationDisabled
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200"
+                  : "focus:ring-[#0071a9]"
+              }`}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Disability Type Radio Group */}
-      <div>
-        <fieldset>
-          <legend className="text-base font-medium mb-2 text-[#4e4e4e]">
-            Disability Type
-          </legend>
-          <div className="space-y-2">
-            {[
-              { value: "permanent" as const, label: "Permanent Disability" },
-              {
-                value: "persistent-prolonged" as const,
-                label: "Persistent or Prolonged Disability",
-              },
-              { value: "not-verified" as const, label: "Not Yet Verified" },
-            ].map((type) => (
-              <div key={type.value} className="flex items-center">
-                <input
-                  id={type.value}
-                  name="disabilityType"
-                  type="radio"
-                  value={type.value}
-                  checked={formData.disabilityType === type.value}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      disabilityType: e.target
-                        .value as typeof prev.disabilityType,
-                    }))
-                  }
-                  className="h-4 w-4 border-gray-300 focus:ring-[#0071a9]"
-                />
-                <label
-                  htmlFor={type.value}
-                  className="ml-3 text-sm text-[#4e4e4e]"
-                >
-                  {type.label}
-                </label>
-              </div>
-            ))}
-          </div>
-        </fieldset>
-      </div>
+      {formData.disabilityType !== "not-verified" && (
+        <div>
+          <fieldset>
+            <legend className="text-base font-medium mb-2 text-[#4e4e4e]">
+              Disability Type
+            </legend>
+            <div className="space-y-2">
+              {[
+                { value: "permanent" as const, label: "Permanent Disability" },
+                {
+                  value: "persistent-prolonged" as const,
+                  label: "Persistent or Prolonged Disability",
+                },
+              ].map((type) => (
+                <div key={type.value} className="flex items-center">
+                  <input
+                    id={type.value}
+                    name="disabilityType"
+                    type="radio"
+                    value={type.value}
+                    checked={formData.disabilityType === type.value}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        disabilityType: e.target
+                          .value as typeof prev.disabilityType,
+                      }))
+                    }
+                    className="h-4 w-4 border-gray-300 focus:ring-[#0071a9]"
+                  />
+                  <label
+                    htmlFor={type.value}
+                    className="ml-3 text-sm text-[#4e4e4e]"
+                  >
+                    {type.label}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </fieldset>
+        </div>
+      )}
 
       {/* Functional Limitations Checkbox Group */}
       <div>
