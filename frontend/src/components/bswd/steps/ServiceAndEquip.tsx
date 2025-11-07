@@ -237,7 +237,7 @@ export function ServiceAndEquip({
 
 interface TabFocusProps {
   tabFocus: string;
-  setTabFocus: (data: string | ((prev: string) => string)) => void;
+  setTabFocus: (data: string) => void;
 }
 
 // TabBar compoennt
