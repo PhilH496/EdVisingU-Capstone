@@ -313,7 +313,10 @@ export default function BSWDApplicationPage() {
     "use client";
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const stepRefs = useRef<(HTMLButtonElement | null)[]>([]);
+    const prevStepRef = useRef(currentStep);
     useEffect(() => {
+    // Scrolls to top if step is changed
+    if (prevStepRef.current !== currentStep) {
       const el = scrollRef.current;
       const target = stepRefs.current[currentStep - 1];
       if (el && target) {
@@ -323,7 +326,9 @@ export default function BSWDApplicationPage() {
           block: "nearest",
         });
       }
-    }, [currentStep]);
+      prevStepRef.current = currentStep;
+    }
+  }, [currentStep]);
     return (
       <div
         className="overflow-x-scroll pb-4"
