@@ -119,7 +119,8 @@ export default function BSWDApplicationPage() {
           formData.province &&
           formData.postalCode &&
           formData.country &&
-          formData.hasOsapApplication !== null
+          formData.hasOsapApplication !== null &&
+          formData.osapApplicationStartDate 
         );
 
       case 2: {

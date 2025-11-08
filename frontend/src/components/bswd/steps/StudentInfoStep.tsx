@@ -81,7 +81,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       {formData.hasOsapApplication === true && (
         <div>
           <label htmlFor="osapApplicationStartDate" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            OSAP Application Start Date (DD/MM/YYYY)
+            OSAP Application Start Date (DD/MM/YYYY) <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Popover>
             <div className="relative w-full">

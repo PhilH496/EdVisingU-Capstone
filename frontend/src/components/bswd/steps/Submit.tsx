@@ -113,8 +113,10 @@ export function ReviewAndSubmit({ formData, setFormData, isConfirmed, setIsConfi
           </div>
           {formData.hasOsapApplication === true && (
             <div>
-              <p className="text-gray-500">OSAP Application Start Date</p>
-              <p className="font-medium text-gray-900">{formData.osapApplicationStartDate || 'Not provided'}</p>
+              <p className="text-gray-500">
+                OSAP Application Start Date <span className="text-brand-light-red">*</span>
+              </p>
+              <p className="font-medium text-gray-900">{formData.osapApplicationStartDate || 'Not provided'} </p>
             </div>
           )}
         </div>
