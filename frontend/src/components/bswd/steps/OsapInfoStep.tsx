@@ -65,7 +65,7 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
 
       {/* OSAP Application On-File Confirmation */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-brand-text-gray">Do you have an active & approved OSAP application on file? <span className="text-red-500">*</span></label>
+        <label className="block text-sm font-medium text-brand-text-gray">Do you have an active & approved OSAP application on file? <span className="text-brand-light-red">*</span></label>
         <div className="flex gap-4">
           <label className="inline-flex items-center gap-2 text-brand-text-gray"><input type="radio" name="osapOnFileStatus" checked={onFileStatus === "APPROVED"} onChange={() => handleOnFileChange("APPROVED")} />Yes — Active & Approved</label>
           <label className="inline-flex items-center gap-2 text-brand-text-gray"><input type="radio" name="osapOnFileStatus" checked={onFileStatus === "NONE"} onChange={() => handleOnFileChange("NONE")} />No application on file</label>
@@ -75,7 +75,7 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
 
       {/* OSAP Application Type */}
       <div className="space-y-1">
-        <label className="block text-sm font-medium text-brand-text-gray">OSAP Application Type <span className="text-red-500">*</span></label>
+        <label className="block text-sm font-medium text-brand-text-gray">OSAP Application Type <span className="text-brand-light-red">*</span></label>
         <select className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-dark-blue" value={applicationType} onChange={e => setField("osapApplication", e.currentTarget.value as any)} disabled={false}>
           <option value="none">Select type</option>
           <option value="full-time">Full-Time OSAP</option>
@@ -87,11 +87,11 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
       {/* Assessed Needs (kept, but not gating display caps) */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-1">
-          <label className="block text-sm font-medium text-brand-text-gray">Federal Financial Need ($) <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-medium text-brand-text-gray">Federal Financial Need ($) <span className="text-brand-light-red">*</span></label>
           <input type="number" min={0} className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-dark-blue" value={Number.isNaN(federalNeed) ? "" : federalNeed} onChange={e => setField("federalNeed", Number(e.currentTarget.value) as any)} disabled={onFileStatus !== "APPROVED"} />
         </div>
         <div className="space-y-1">
-          <label className="block text-sm font-medium text-brand-text-gray">Provincial Financial Need ($) <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-medium text-brand-text-gray">Provincial Financial Need ($) <span className="text-brand-light-red">*</span></label>
           <input type="number" min={0} className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-dark-blue" value={Number.isNaN(provincialNeed) ? "" : provincialNeed} onChange={e => setField("provincialNeed", Number(e.currentTarget.value) as any)} disabled={onFileStatus !== "APPROVED"} />
         </div>
       </div>

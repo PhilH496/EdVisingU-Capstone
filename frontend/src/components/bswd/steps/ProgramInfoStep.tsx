@@ -197,7 +197,7 @@ const handleSelectEnd = (selected: Date | undefined) => {
             htmlFor="institutionName"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Institution Name *
+            Institution Name <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -264,7 +264,7 @@ const handleSelectEnd = (selected: Date | undefined) => {
             htmlFor="institutionType"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Institution Type *
+            Institution Type <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Select
             value={formData.institutionType}
@@ -343,7 +343,7 @@ const handleSelectEnd = (selected: Date | undefined) => {
             htmlFor="studyType"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Study Type *
+            Study Type <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Select
             value={formData.studyType}
@@ -375,7 +375,7 @@ const handleSelectEnd = (selected: Date | undefined) => {
             htmlFor="studyPeriodStart"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Study Start Date *
+            Study Start Date <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Popover>
             <div className="w-full relative">
@@ -423,7 +423,7 @@ const handleSelectEnd = (selected: Date | undefined) => {
             htmlFor="studyPeriodEnd"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Study End Date *
+            Study End Date <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Popover>
             <div className="w-full relative">

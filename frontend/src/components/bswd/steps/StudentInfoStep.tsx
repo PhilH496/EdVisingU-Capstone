@@ -58,7 +58,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
     <div className="space-y-4">
       <div>
         <label htmlFor="hasOsapApplication" className="block text-sm font-medium mb-1 text-brand-text-gray">
-          Do you have an OSAP application? *
+          Do you have an OSAP application? <span className="text-sm text-brand-light-red mt-1">*</span>
         </label>
         <select
           id="hasOsapApplication"
@@ -122,7 +122,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="studentId" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            Student ID *
+            Student ID <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
             id="studentId"
@@ -140,13 +140,13 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             maxLength={15}
           />
           {formData.studentId && formData.studentId.length < 7 && (
-            <p className="text-sm text-red-600 mt-1">Student ID must be at least 7 digits</p>
+            <p className="text-sm text-brand-light-red mt-1">Student ID must be at least 7 digits</p>
           )}
         </div>
 
         <div>
           <label htmlFor="oen" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            Ontario Education Number (OEN) *
+            Ontario Education Number (OEN) <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
             id="oen"
@@ -164,7 +164,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             maxLength={9}
           />
           {formData.oen && formData.oen.length !== 9 && (
-            <p className="text-sm text-red-600 mt-1">OEN must be exactly 9 digits</p>
+            <p className="text-sm text-brand-light-red mt-1">OEN must be exactly 9 digits</p>
           )}
         </div>
       </div>
@@ -172,7 +172,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="firstName" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            First Name *
+            First Name <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
             id="firstName"
@@ -192,7 +192,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
 
         <div>
           <label htmlFor="lastName" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            Last Name *
+            Last Name <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
             id="lastName"
@@ -214,7 +214,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="dateOfBirth" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            Date of Birth (DD/MM/YYYY) *
+            Date of Birth (DD/MM/YYYY) <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Popover>
             <div className="relative w-full">
@@ -256,7 +256,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
 
         <div>
           <label htmlFor="sin" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            Social Insurance Number *
+            Social Insurance Number <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
             id="sin"
@@ -280,7 +280,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             maxLength={11}
           />
           {formData.sin && formData.sin.replace(/\D/g, '').length !== 9 && (
-            <p className="text-sm text-red-600 mt-1">SIN must be exactly 9 digits</p>
+            <p className="text-sm text-brand-light-red mt-1">SIN must be exactly 9 digits</p>
           )}
         </div>
       </div>
@@ -288,7 +288,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="email" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            Email Address *
+            Email Address <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
             id="email"
@@ -339,7 +339,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
         <div className="space-y-4">
           <div>
             <label htmlFor="address" className="block text-sm font-medium mb-1 text-brand-text-gray">
-              Street Address *
+              Street Address <span className="text-sm text-brand-light-red mt-1">*</span>
             </label>
             <Input
               id="address"
@@ -357,7 +357,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="city" className="block text-sm font-medium mb-1 text-brand-text-gray">
-                City *
+                City <span className="text-sm text-brand-light-red mt-1">*</span>
               </label>
               <Input
                 id="city"
@@ -374,7 +374,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
 
             <div>
               <label htmlFor="province" className="block text-sm font-medium mb-1 text-brand-text-gray">
-                Province/Territory *
+                Province/Territory <span className="text-sm text-brand-light-red mt-1">*</span>
               </label>
               <select
                 id="province"
@@ -403,7 +403,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="postalCode" className="block text-sm font-medium mb-1 text-brand-text-gray">
-                Postal Code *
+                Postal Code <span className="text-sm text-brand-light-red mt-1">*</span>
               </label>
               <Input
                 id="postalCode"
@@ -427,7 +427,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
 
             <div>
               <label htmlFor="country" className="block text-sm font-medium mb-1 text-brand-text-gray">
-                Country *
+                Country <span className="text-sm text-brand-light-red mt-1">*</span>
               </label>
               <Input
                 id="country"
