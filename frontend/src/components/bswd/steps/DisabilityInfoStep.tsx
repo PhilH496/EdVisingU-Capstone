@@ -10,6 +10,7 @@
 
 import { FormData } from "@/types/bswd";
 import React, { useState } from "react";
+import { sendPsychoEdReferral } from "@/lib/notify";
 
 interface DisabilityInfoStepProps {
   formData: FormData;
@@ -21,6 +22,61 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
   const [requiresPsychoEducational, setRequiresPsychoEducational] = useState(
     Boolean((formData as any).needsPsychoEdAssessment)
   );
+  
+  // State for email sending status
+  const [emailStatus, setEmailStatus] = useState<{
+    sending: boolean;
+    sent: boolean;
+    error: string | null;
+  }>({
+    sending: false,
+    sent: false,
+    error: null,
+  });
+
+  // Handler for psycho-educational assessment checkbox
+  const handlePsychoEdChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isChecked = e.target.checked;
+    setRequiresPsychoEducational(isChecked);
+    
+    // Update form data
+    setFormData(prev => ({
+      ...prev,
+      needsPsychoEdAssessment: isChecked,
+    }));
+
+    // Send referral email when checkbox is checked
+    if (isChecked && formData.email) {
+      setEmailStatus({ sending: true, sent: false, error: null });
+      
+      try {
+        const result = await sendPsychoEdReferral(
+          formData.email,
+          `${formData.firstName} ${formData.lastName}`,
+          formData.studentId
+        );
+        
+        if (result.success) {
+          setEmailStatus({ sending: false, sent: true, error: null });
+          // Auto-hide success message after 5 seconds
+          setTimeout(() => {
+            setEmailStatus(prev => ({ ...prev, sent: false }));
+          }, 5000);
+        } else {
+          setEmailStatus({ sending: false, sent: false, error: result.message });
+        }
+      } catch (error) {
+        setEmailStatus({
+          sending: false,
+          sent: false,
+          error: "Failed to send referral email. Please contact support.",
+        });
+      }
+    } else if (!isChecked) {
+      // Reset email status when unchecked
+      setEmailStatus({ sending: false, sent: false, error: null });
+    }
+  };
 
   // Handler for the multi-select functional limitations checkboxes
   const handleLimitationsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -195,8 +251,9 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
             name="requiresPsychoEducational"
             type="checkbox"
             checked={requiresPsychoEducational}
-            onChange={e => setRequiresPsychoEducational(e.target.checked)}
-            className="h-5 w-5 border-gray-300 rounded focus:ring-[#0071a9]"
+            onChange={handlePsychoEdChange}
+            disabled={!formData.email || emailStatus.sending}
+            className="h-5 w-5 border-gray-300 rounded focus:ring-[#0071a9] disabled:opacity-50 disabled:cursor-not-allowed"
           />
           <label
             htmlFor="requiresPsychoEducational"
@@ -205,6 +262,36 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
             Requires Psycho-Educational Assessment for Learning Disability Verification
           </label>
         </div>
+
+        {/* Email validation warning */}
+        {!formData.email && (
+          <div className="ml-8 mb-4 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md p-3">
+            ⚠️ Please enter your email address in Section A (Student Info) before requesting an assessment.
+          </div>
+        )}
+
+        {/* Email sending status */}
+        {emailStatus.sending && (
+          <div className="ml-8 mb-4 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded-md p-3 flex items-center">
+            <svg className="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Sending referral email...
+          </div>
+        )}
+
+        {emailStatus.sent && (
+          <div className="ml-8 mb-4 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md p-3">
+            ✓ Referral email sent successfully to {formData.email}
+          </div>
+        )}
+
+        {emailStatus.error && (
+          <div className="ml-8 mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md p-3">
+            ✗ {emailStatus.error}
+          </div>
+        )}
 
         {/* Conditional Email Input - Only shows when checkbox is checked */}
         {requiresPsychoEducational && (
