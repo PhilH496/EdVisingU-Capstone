@@ -26,29 +26,97 @@ export function ReviewAndSubmit({ formData, setFormData, isConfirmed, setIsConfi
         </div>
         <div className="grid md:grid-cols-2 gap-4 text-sm">
           <div>
-            <p className="text-gray-500">Full Name</p>
-            <p className="font-medium text-gray-900">{(formData.firstName + " " + formData.lastName).trim() || 'Not provided'}</p>
-          </div>
-          <div>
-            <p className="text-gray-500">Student ID</p>
+            <p className="text-gray-500">
+              Student ID <span className="text-brand-light-red">*</span>
+            </p>
             <p className="font-medium text-gray-900">{formData.studentId || 'Not provided'}</p>
           </div>
           <div>
-            <p className="text-gray-500">OEN</p>
+            <p className="text-gray-500">
+              Ontario Education Number (OEN) <span className="text-brand-light-red">*</span>
+            </p>
             <p className="font-medium text-gray-900">{formData.oen || 'Not provided'}</p>
           </div>
           <div>
-            <p className="text-gray-500">Date of Birth</p>
+            <p className="text-gray-500">
+              First Name <span className="text-brand-light-red">*</span>
+            </p>
+            <p className="font-medium text-gray-900">{formData.firstName || 'Not provided'}</p>
+          </div>
+          <div>
+            <p className="text-gray-500">
+              Last Name <span className="text-brand-light-red">*</span>
+            </p>
+            <p className="font-medium text-gray-900">{formData.lastName || 'Not provided'}</p>
+          </div>
+          <div>
+            <p className="text-gray-500">
+              Date of Birth <span className="text-brand-light-red">*</span>
+            </p>
             <p className="font-medium text-gray-900">{formData.dateOfBirth || 'Not provided'}</p>
           </div>
           <div>
-            <p className="text-gray-500">Email</p>
+            <p className="text-gray-500">
+              Social Insurance Number <span className="text-brand-light-red">*</span>
+            </p>
+            <p className="font-medium text-gray-900">{formData.sin || 'Not provided'}</p>
+          </div>
+          <div>
+            <p className="text-gray-500">
+              Email Address <span className="text-brand-light-red">*</span>
+            </p>
             <p className="font-medium text-gray-900">{formData.email || 'Not provided'}</p>
           </div>
           <div>
-            <p className="text-gray-500">Phone</p>
+            <p className="text-gray-500">Phone Number</p>
             <p className="font-medium text-gray-900">{formData.phone || 'Not provided'}</p>
           </div>
+          <div>
+            <p className="text-gray-500">
+              Street Address <span className="text-brand-light-red">*</span>
+            </p>
+            <p className="font-medium text-gray-900">{formData.address || 'Not provided'}</p>
+          </div>
+          <div>
+            <p className="text-gray-500">
+              City <span className="text-brand-light-red">*</span>
+            </p>
+            <p className="font-medium text-gray-900">{formData.city || 'Not provided'}</p>
+          </div>
+          <div>
+            <p className="text-gray-500">
+              Province/Territory <span className="text-brand-light-red">*</span>
+            </p>
+            <p className="font-medium text-gray-900">{formData.province || 'Not provided'}</p>
+          </div>
+          <div>
+            <p className="text-gray-500">
+              Postal Code <span className="text-brand-light-red">*</span>
+            </p>
+            <p className="font-medium text-gray-900">{formData.postalCode || 'Not provided'}</p>
+          </div>
+          <div>
+            <p className="text-gray-500">
+              Country <span className="text-brand-light-red">*</span>
+            </p>
+            <p className="font-medium text-gray-900">{formData.country || 'Not provided'}</p>
+          </div>
+          <div>
+            <p className="text-gray-500">
+              Has OSAP Application <span className="text-brand-light-red">*</span>
+            </p>
+            <p className="font-medium text-gray-900">
+              {formData.hasOsapApplication === true ? 'Yes' : 
+               formData.hasOsapApplication === false ? 'No' : 
+               'Not provided'}
+            </p>
+          </div>
+          {formData.hasOsapApplication === true && (
+            <div>
+              <p className="text-gray-500">OSAP Application Start Date</p>
+              <p className="font-medium text-gray-900">{formData.osapApplicationStartDate || 'Not provided'}</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -184,7 +252,7 @@ export function ReviewAndSubmit({ formData, setFormData, isConfirmed, setIsConfi
       </div>
 
       {!isConfirmed && (
-        <p className="text-center text-sm text-red-600 font-medium">
+        <p className="text-center text-sm text-brand-light-red font-medium">
           Please confirm the above statement before submitting your application.
         </p>
       )}
