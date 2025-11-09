@@ -17,7 +17,6 @@
 // - Use brand colors located in tailwind.config.js; reference StudentInfoStep.tsx
 
 import { FormData } from "@/types/bswd";
-import * as React from "react";
 import { notifyNoOsap } from "@/lib/notify";
 
 const OSAP_MANUAL_URL = "https://osap.gov.on.ca/dc/TCONT003225";
@@ -61,7 +60,7 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold mb-2">OSAP Information</h2>
+      <h2 className="text-xl font-semibold mb-2">Section C: OSAP Information</h2>
       <p className="text-sm text-brand-text-gray">Confirm your OSAP status, enter assessed needs, and note any restrictions.</p>
 
       {/* OSAP Application On-File Confirmation */}

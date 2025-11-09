@@ -5,11 +5,10 @@
  * Manages the multi-step form flow and overall form state.
  *
  * Features:
- * - Multi-step form navigation (7 total steps)
+ * - Multi-step form navigation (6 total steps)
  * - Form data state management
  * - Step validation before allowing progression
- * - Saves data to Supabase ONLY on final submission (Step 7)
- * - Dev mode: Skip to any step (development only)
+ * - Saves data to Supabase ONLY on final submission (Step 6)
  */
 import { useState, useMemo, useEffect, useRef } from "react";
 import { FormData } from "@/types/bswd";
@@ -19,12 +18,10 @@ import { FormNavigation } from "@/components/bswd/navigation/FormNavigation";
 import { ProgramInfoStep } from "@/components/bswd/steps/ProgramInfoStep";
 import { OsapInfoStep } from "@/components/bswd/steps/OsapInfoStep";
 import { DisabilityInfoStep } from "@/components/bswd/steps/DisabilityInfoStep";
-import { DocumentsStep } from "@/components/bswd/steps/DocumentsStep";
 import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
 import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
 import { StudentInfoSchema } from "@/schemas/StudentInfoSchema";
 import { saveStudentInfo } from "@/lib/database";
-//import { saveStudentInfo, saveProgramInfo } from "@/lib/database"; // Database use later - create functions in database.ts, take a look and edit if needed SQL in supabase.
 
 const DEV_MODE = process.env.NODE_ENV === "development";
 
@@ -32,7 +29,7 @@ const DEV_MODE = process.env.NODE_ENV === "development";
 // Initial values are set to empty strings, zeros, or false depending on field type
 export default function BSWDApplicationPage() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [maxStep, setMaxStep] = useState(1);
+  const [maxStep, setMaxStep] = useState(7);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
@@ -73,17 +70,6 @@ export default function BSWDApplicationPage() {
     functionalLimitations: [],
     needsPsychoEdAssessment: false,
     requestedItems: [],
-    osapApplicationFiles: [],
-    disabilityVerificationFiles: [],
-    serviceRecommendationsFiles: [],
-    psychoEdAssessmentSent: null,
-    psychoEdAssessmentDate: "",
-    restrictionSatisfied: null,
-    restrictionSatisfiedDate: "",
-    osapVerificationReceived: null,
-    osapVerificationReceivedDate: "",
-    osapApplicationActive: null,
-    osapApplicationActiveDate: "",
   });
 
   const stepsInfo = [
@@ -104,10 +90,6 @@ export default function BSWDApplicationPage() {
       stepIconFaClass: "fa-solid fa-wheelchair",
     },
     {
-      stepName: "Documents",
-      stepIconFaClass: "fa-solid fa-file",
-    },
-    {
       stepName: "Service & Equipment",
       stepIconFaClass: "fa-solid fa-wrench",
     },
@@ -124,18 +106,19 @@ export default function BSWDApplicationPage() {
       case 1:
         return Boolean(
           formData.studentId &&
-            formData.firstName &&
-            formData.lastName &&
-            formData.email &&
-            formData.dateOfBirth &&
-            formData.oen.length === 9 &&
-            formData.sin.replace(/\D/g, "").length === 9 &&
-            formData.address &&
-            formData.city &&
-            formData.province &&
-            formData.postalCode &&
-            formData.country &&
-            formData.hasOsapApplication !== null
+          formData.studentId.length >= 7 &&
+          formData.firstName &&
+          formData.lastName &&
+          formData.email &&
+          formData.dateOfBirth &&
+          formData.oen.length === 9 &&
+          formData.sin.replace(/\D/g, "").length === 9 &&
+          formData.address &&
+          formData.city &&
+          formData.province &&
+          formData.postalCode &&
+          formData.country &&
+          formData.hasOsapApplication !== null
         );
 
       case 2: {
@@ -143,19 +126,19 @@ export default function BSWDApplicationPage() {
           formData.previousInstitution;
           return Boolean(
             formData.institution &&
-              formData.institutionType &&
-              formData.studyType &&
-              formData.studyPeriodStart &&
-              formData.studyPeriodEnd &&
-              formData.previousInstitution
+            formData.institutionType &&
+            formData.studyType &&
+            formData.studyPeriodStart &&
+            formData.studyPeriodEnd &&
+            formData.previousInstitution
           );
         }
         return Boolean(
           formData.institution &&
-            formData.institutionType &&
-            formData.studyType &&
-            formData.studyPeriodStart &&
-            formData.studyPeriodEnd
+          formData.institutionType &&
+          formData.studyType &&
+          formData.studyPeriodStart &&
+          formData.studyPeriodEnd
         );
       }
 
@@ -168,8 +151,16 @@ export default function BSWDApplicationPage() {
         const restrictionsOk = true; // Restrictions never block navigation
         return hasChosenOnFile && appTypeOk && needsOk && restrictionsOk;
       }
-      case 7: {
-        // Step 7 (Review and Submit): Check if confirmation checkbox is checked
+
+      case 4: {
+        // Disability info step
+        // If Psycho-Ed referral is required, email must be non-empty
+        if (formData.needsPsychoEdAssessment && !formData.email?.trim()) return false;
+        return true;
+      }
+        
+      case 6: {
+        // Step 6 (Review and Submit): Check if confirmation checkbox is checked
         return isConfirmed;
       }
       default:
@@ -251,7 +242,7 @@ export default function BSWDApplicationPage() {
     const phone = formData.phone.replace(/\D/g, "");
     console.log(phone);
     const studentInfoData = {
-      studentId: +formData.studentId,
+      studentId: formData.studentId,
       oen: formData.oen,
       firstName: formData.firstName,
       lastName: formData.lastName,
@@ -299,12 +290,10 @@ export default function BSWDApplicationPage() {
           <DisabilityInfoStep formData={formData} setFormData={setFormData} />
         );
       case 5:
-        return <DocumentsStep formData={formData} setFormData={setFormData} />;
-      case 6:
         return (
           <ServiceAndEquip formData={formData} setFormData={setFormData} />
         );
-      case 7:
+      case 6:
         return (
           <ReviewAndSubmit
             formData={formData}
@@ -352,15 +341,13 @@ export default function BSWDApplicationPage() {
               className="flex flex-col items-center"
             >
               <span
-                className={`flex rounded-full  justify-center items-center h-14 w-14 transition-colors font-medium ${
-                  currentStep === index + 1
+                className={`flex rounded-full  justify-center items-center h-14 w-14 transition-colors font-medium ${currentStep === index + 1
                     ? "bg-cyan-800 text-white"
                     : "bg-gray-100 text-black"
-                } ${
-                  index + 1 > maxStep
+                  } ${index + 1 > maxStep
                     ? "opacity-40 cursor-not-allowed"
                     : "hover:bg-cyan-700 hover:text-white"
-                }`}
+                  }`}
               >
                 <i className={`${stepInfo.stepIconFaClass} text-[150%]`}></i>
               </span>
@@ -380,9 +367,6 @@ export default function BSWDApplicationPage() {
       description="Complete application for Bursary for Students with Disabilities (BSWD) and Canada Student Grant for Services and Equipment"
     >
       <div className="mb-6">
-        <p className="text-sm text-gray-600">
-          Step {currentStep} of {TOTAL_STEPS}
-        </p>
       </div>
       <div className="mb-4 p-4 pb-2 py-6 border rounded-md">
         <StepBar />
