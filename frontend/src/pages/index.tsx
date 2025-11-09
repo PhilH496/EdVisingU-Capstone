@@ -23,8 +23,6 @@ import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
 import { StudentInfoSchema } from "@/schemas/StudentInfoSchema";
 import { saveStudentInfo } from "@/lib/database";
 
-const DEV_MODE = process.env.NODE_ENV === "development";
-
 // Store all form data in a single state object
 // Initial values are set to empty strings, zeros, or false depending on field type
 export default function BSWDApplicationPage() {
