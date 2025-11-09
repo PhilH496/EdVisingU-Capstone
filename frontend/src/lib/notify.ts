@@ -1,3 +1,5 @@
+import { supabase } from './supabase';
+
 /**
  * notifyNoOsap
  * 
@@ -23,8 +25,8 @@ export async function notifyNoOsap(email: string | undefined | null) {
 /**
  * sendPsychoEdReferral
  * 
- * Sends a psycho-educational assessment referral email to the student.
- * Includes information about connecting with qualified assessment providers.
+ * Sends a psycho-educational assessment referral email to the student immediately.
+ * Calls Edge Function directly via Supabase client.
  * 
  * @param email - Student's email address
  * @param studentName - Student's full name
@@ -37,26 +39,30 @@ export async function sendPsychoEdReferral(
   studentId?: string
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const response = await fetch("/api/notify/psycho-ed-referral", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    // Call Edge Function via Supabase client to send email immediately
+    const { data, error } = await supabase.functions.invoke('send-psycho-ed-email', {
+      body: {
         email: email ?? "",
         studentName: studentName ?? "Student",
         studentId: studentId ?? "",
-        template: "psycho-ed-referral",
-      }),
+      },
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Failed to send referral email");
+    if (error) {
+      console.error('Edge Function error:', error);
+      return {
+        success: false,
+        message: error.message || 'Failed to send referral email',
+      };
     }
 
-    const data = await response.json();
-    return { success: true, message: data.message || "Referral email sent successfully" };
+    console.log('Email sent via Edge Function:', data);
+    return {
+      success: true,
+      message: 'Referral email sent successfully!',
+    };
   } catch (e) {
-    console.warn("sendPsychoEdReferral failed", e);
+    console.error("sendPsychoEdReferral failed", e);
     return { success: false, message: "Failed to send referral email. Please try again." };
   }
 }

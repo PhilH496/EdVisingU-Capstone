@@ -1,146 +1,122 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
-// Supabase automatically provides these environment variables in Edge Functions
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-interface EmailQueueItem {
-  id: string
-  to_email: string
-  subject: string
-  body: string
-  email_type: string
-  student_name?: string
-  student_id?: string
+// CORS headers for browser requests
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const handler = async (_request: Request): Promise<Response> => {
+const handler = async (request: Request): Promise<Response> => {
+  // Handle CORS preflight
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders })
+  }
+
   try {
-    // Create Supabase client with service role
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
-
-    // Get pending emails from queue
-    const { data: emails, error: fetchError } = await supabase
-      .from('email_queue')
-      .select('*')
-      .eq('status', 'pending')
-      .limit(10)
-
-    if (fetchError) {
-      console.error('Error fetching emails:', fetchError)
+    // Get request body
+    let body;
+    try {
+      body = await request.json()
+    } catch (parseError) {
+      console.error('Failed to parse JSON body:', parseError)
       return new Response(
-        JSON.stringify({ error: 'Failed to fetch emails', details: fetchError }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          error: 'Invalid JSON in request body',
+          details: String(parseError) 
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    if (!emails || emails.length === 0) {
+    const { email, studentName, studentId } = body
+
+    if (!email) {
       return new Response(
-        JSON.stringify({ message: 'No pending emails to send', processed: 0 }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Email address is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    const results = []
+    console.log(`Sending email to: ${email}`)
 
-    // Process each email
-    for (const email of emails as EmailQueueItem[]) {
-      try {
-        // Mark as processing
-        await supabase
-          .from('email_queue')
-          .update({ status: 'processing' })
-          .eq('id', email.id)
+    // Build email content
+    const emailSubject = 'Psycho-Educational Assessment Referral'
+    const emailBody = `
+Dear ${studentName || 'Student'},
 
-        // Send email via Resend
-        const res = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${RESEND_API_KEY}`,
-          },
-          body: JSON.stringify({
-            from: 'BSWD Services <noreply@yourdomain.com>', // TODO: Change to your domain
-            to: email.to_email,
-            subject: email.subject,
-            text: email.body,
-          }),
-        })
+You have been referred for a psycho-educational assessment.
 
-        const resendData = await res.json()
+Student Information:
+- Name: ${studentName || 'N/A'}
+- Student ID: ${studentId || 'N/A'}
 
-        if (res.ok) {
-          // Mark as sent
-          await supabase
-            .from('email_queue')
-            .update({ 
-              status: 'sent', 
-              sent_at: new Date().toISOString() 
-            })
-            .eq('id', email.id)
+Please contact BSWD Services for more information about your referral.
 
-          results.push({
-            id: email.id,
-            to: email.to_email,
-            status: 'sent',
-            resend_id: resendData.id,
-          })
+Best regards,
+BSWD Services Team
+    `.trim()
 
-          console.log(`✓ Email sent to ${email.to_email} (ID: ${email.id})`)
-        } else {
-          // Mark as failed
-          await supabase
-            .from('email_queue')
-            .update({ 
-              status: 'failed', 
-              error_message: JSON.stringify(resendData) 
-            })
-            .eq('id', email.id)
-
-          results.push({
-            id: email.id,
-            to: email.to_email,
-            status: 'failed',
-            error: resendData,
-          })
-
-          console.error(`✗ Failed to send email to ${email.to_email}:`, resendData)
-        }
-      } catch (emailError) {
-        // Mark as failed with error
-        await supabase
-          .from('email_queue')
-          .update({ 
-            status: 'failed', 
-            error_message: String(emailError) 
-          })
-          .eq('id', email.id)
-
-        results.push({
-          id: email.id,
-          to: email.to_email,
-          status: 'failed',
-          error: String(emailError),
-        })
-
-        console.error(`✗ Error processing email ${email.id}:`, emailError)
-      }
-    }
-
-    return new Response(
-      JSON.stringify({
-        message: 'Email processing complete',
-        processed: results.length,
-        results,
+    // Send email via Resend
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: 'Acme <onboarding@resend.dev>',
+        to: [email],
+        subject: emailSubject,
+        html: `<div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2>${emailSubject}</h2>
+          <p>Dear ${studentName || 'Student'},</p>
+          <p>You have been referred for a psycho-educational assessment.</p>
+          
+          <h3>Student Information:</h3>
+          <ul>
+            <li><strong>Name:</strong> ${studentName || 'N/A'}</li>
+            <li><strong>Student ID:</strong> ${studentId || 'N/A'}</li>
+          </ul>
+          
+          <p>Please contact BSWD Services for more information about your referral.</p>
+          
+          <hr style="margin: 20px 0;">
+          <p style="color: #666; font-size: 12px;">
+            Best regards,<br>
+            BSWD Services Team
+          </p>
+        </div>`,
       }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    )
+    })
+
+    const resendData = await res.json()
+
+    if (res.ok) {
+      console.log(`✓ Email sent successfully to ${email}`, resendData)
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: 'Email sent successfully',
+          resendId: resendData.id,
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    } else {
+      console.error(`✗ Failed to send email to ${email}:`, resendData)
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Failed to send email',
+          details: resendData,
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
   } catch (error) {
     console.error('Handler error:', error)
     return new Response(
       JSON.stringify({ error: 'Internal server error', details: String(error) }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 }
