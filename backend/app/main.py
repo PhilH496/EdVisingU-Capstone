@@ -22,10 +22,10 @@ async def lifespan(app: FastAPI):
     try:
         print("Initializing chatbot chain...")
         chain, memory = get_or_create_chain()
-        print("✓ Chatbot chain initialized successfully")
+        print("Chatbot chain initialized successfully!")
     except Exception as e:
-        print(f"⚠️  Warning: Could not initialize chatbot chain: {str(e)}")
-        print("    Chatbot features will be unavailable.")
+        print(f"Error initializing chain: {str(e)}")
+        raise
     
     yield  # Application runs here
 
@@ -83,21 +83,31 @@ async def health_check():
         chain, memory = get_or_create_chain()
         return {
             "status": "healthy",
-            "chatbot": "enabled"
+            "chain_loaded": chain is not None,
+            "memory_loaded": memory is not None
         }
     except Exception as e:
         return {
-            "status": "degraded",
-            "chatbot": f"disabled ({str(e)})"
+            "status": "unhealthy",
+            "error": str(e)
         }
 
 
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
-    """Main chat endpoint - Processes user messages and returns AI responses using RAG"""
+    """
+    Main chat endpoint
+    
+    Processes user messages and returns AI responses using RAG
+    """
     try:
+        # Get the conversation chain and memory
         chain, memory = get_or_create_chain()
+        
+        # Get response from chatbot
         response = chat_with_memory(chain, memory, request.message)
+        
+        # Format source documents - implement sources most likely on admin side later
         source_docs = []
         if response.get("source_documents"):
             source_docs = [
@@ -107,10 +117,12 @@ async def chat(request: ChatRequest):
                 }
                 for doc in response["source_documents"]
             ]
+        
         return ChatResponse(
             answer=response["answer"],
             source_documents=source_docs
         )
+        
     except Exception as e:
         print(f"Error processing chat: {str(e)}")
         raise HTTPException(
