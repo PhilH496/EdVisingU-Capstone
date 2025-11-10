@@ -20,8 +20,7 @@ import { OsapInfoStep } from "@/components/bswd/steps/OsapInfoStep";
 import { DisabilityInfoStep } from "@/components/bswd/steps/DisabilityInfoStep";
 import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
 import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
-import { StudentInfoSchema } from "@/schemas/StudentInfoSchema";
-import { saveStudentInfo } from "@/lib/database";
+import { saveSubmission } from "@/lib/database";
 
 // Store all form data in a single state object
 // Initial values are set to empty strings, zeros, or false depending on field type
@@ -54,7 +53,7 @@ export default function BSWDApplicationPage() {
     studyPeriodStart: "",
     studyPeriodEnd: "",
     studyType: "",
-    submittedDisabilityElsewhere: "no",
+    submittedDisabilityElsewhere: false,
     previousInstitution: "",
     osapApplication: "full-time",
 
@@ -120,7 +119,7 @@ export default function BSWDApplicationPage() {
         );
 
       case 2: {
-        if (formData.submittedDisabilityElsewhere === "yes") {
+        if (formData.submittedDisabilityElsewhere === true) {
           formData.previousInstitution;
           return Boolean(
             formData.institution &&
@@ -156,7 +155,7 @@ export default function BSWDApplicationPage() {
         if (formData.needsPsychoEdAssessment && !formData.email?.trim()) return false;
         return true;
       }
-        
+
       case 6: {
         // Step 6 (Review and Submit): Check if confirmation checkbox is checked
         return isConfirmed;
@@ -185,44 +184,7 @@ export default function BSWDApplicationPage() {
         setMaxStep((m) => m + 1);
       }
     } else {
-      // On the last step, handle submission
-      setSaving(true);
-
-      // Simulate API call to submit application
-      setTimeout(() => {
-        // Capture the exact submission time
-        const currentDateTime = new Date();
-
-        // Save form data to localStorage for the status page
-        const applicationData = {
-          id: `APP-${currentDateTime.getFullYear()}-${Math.floor(
-            Math.random() * 1000000
-          )
-            .toString()
-            .padStart(6, "0")}`,
-          studentName: `${formData.firstName} ${formData.lastName}`,
-          studentId: formData.studentId,
-          submittedDate: currentDateTime.toISOString(),
-          status: "submitted" as const,
-          program: formData.program,
-          institution: formData.institution,
-          studyPeriod:
-            formData.studyPeriodStart && formData.studyPeriodEnd
-              ? `${formData.studyPeriodStart} - ${formData.studyPeriodEnd}`
-              : "Not specified",
-          statusUpdatedDate: currentDateTime.toISOString(),
-        };
-
-        localStorage.setItem(
-          "currentApplication",
-          JSON.stringify(applicationData)
-        );
-
-        setSaving(false);
-
-        // Redirect to status page
-        window.location.href = "/application-status";
-      }, 2000);
+      await handleSubmit();
     }
   };
 
@@ -232,38 +194,50 @@ export default function BSWDApplicationPage() {
     }
   };
 
-  const handleStudentSubmit = async () => {
-    console.log(formData.sin);
-    const [day, month, year] = formData.dateOfBirth.split("/").map(Number);
-    const birthDate = new Date(year, month - 1, day);
-    const sin = formData.sin.replace(/-/g, "");
-    const phone = formData.phone.replace(/\D/g, "");
-    console.log(phone);
-    const studentInfoData = {
-      studentId: formData.studentId,
-      oen: formData.oen,
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      dateOfBirth: birthDate,
-      sin,
-      phone,
-    };
-    const parsedStudentInfo = StudentInfoSchema.safeParse(studentInfoData);
-    if (!parsedStudentInfo.success) {
-      console.error("Validation Error:", parsedStudentInfo.error);
-      return;
-    }
-    saveStudentInfo(formData);
-    console.log("Submitted");
-  };
-
   const handleSubmit = async () => {
     setSaving(true);
-    // Mimic delaying when user submits [REMOVE LATER]
-    await new Promise((r) => setTimeout(r, 2000));
-    const results = await Promise.all([handleStudentSubmit()]);
-    console.log(results);
-    setSaving(false);
+    setError(null);
+
+    try {
+      const result = await saveSubmission(formData);
+
+      // Capture the exact submission time
+      const currentDateTime = new Date();
+
+      // Save form data to localStorage for the status page
+      const applicationData = {
+        id: `APP-${currentDateTime.getFullYear()}-${Math.floor(
+          Math.random() * 1000000
+        )
+          .toString()
+          .padStart(6, "0")}`,
+        studentName: `${formData.firstName} ${formData.lastName}`,
+        studentId: formData.studentId,
+        submittedDate: currentDateTime.toISOString(),
+        status: "submitted" as const,
+        program: formData.program,
+        institution: formData.institution,
+        studyPeriod:
+          formData.studyPeriodStart && formData.studyPeriodEnd
+            ? `${formData.studyPeriodStart} - ${formData.studyPeriodEnd}`
+            : "Not specified",
+        statusUpdatedDate: currentDateTime.toISOString(),
+      };
+
+      localStorage.setItem(
+        "currentApplication",
+        JSON.stringify(applicationData)
+      );
+
+      // Redirect to status page
+      window.location.href = "/application-status";
+    } catch (err) {
+      // Handle submission errors
+      const errorMessage = err instanceof Error ? err.message : "Failed to submit application. Please try again.";
+      setError(errorMessage);
+      setSaving(false);
+      console.error("Submission error:", err);
+    }
   };
 
   const handleStepClick = (step: number) => {
@@ -340,8 +314,8 @@ export default function BSWDApplicationPage() {
             >
               <span
                 className={`flex rounded-full  justify-center items-center h-14 w-14 transition-colors font-medium ${currentStep === index + 1
-                    ? "bg-cyan-800 text-white"
-                    : "bg-gray-100 text-black"
+                  ? "bg-cyan-800 text-white"
+                  : "bg-gray-100 text-black"
                   } ${index + 1 > maxStep
                     ? "opacity-40 cursor-not-allowed"
                     : "hover:bg-cyan-700 hover:text-white"
