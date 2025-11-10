@@ -26,3 +26,6 @@ backend/app/__pycache__
 **/.env
 **/.env.local
 **/.env*.local
+
+# Supabase temporary files
+supabase/.temp/
