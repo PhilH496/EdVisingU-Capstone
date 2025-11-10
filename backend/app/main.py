@@ -14,18 +14,15 @@ import os
 # Add the app directory to the path so we can import chain
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# Commented out temporarily due to Pinecone version issue
-# from chain import get_or_create_chain, chat_with_memory
+from chain import get_or_create_chain, chat_with_memory
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize the conversation chain on startup"""
-    # Try to initialize chatbot, but don't fail if it doesn't work
     try:
         print("Initializing chatbot chain...")
-        # Temporarily disabled due to Pinecone version issue
-        # chain, memory = get_or_create_chain()
-        print("⚠️  Chatbot chain initialization skipped (Pinecone version issue)")
+        chain, memory = get_or_create_chain()
+        print("✓ Chatbot chain initialized successfully")
     except Exception as e:
         print(f"⚠️  Warning: Could not initialize chatbot chain: {str(e)}")
         print("    Chatbot features will be unavailable.")
@@ -82,52 +79,58 @@ async def root():
 @app.get("/health")
 async def health_check():
     """Detailed health check"""
-    return {
-        "status": "healthy",
-        "chatbot": "disabled (Pinecone version issue)"
-    }
+    try:
+        chain, memory = get_or_create_chain()
+        return {
+            "status": "healthy",
+            "chatbot": "enabled"
+        }
+    except Exception as e:
+        return {
+            "status": "degraded",
+            "chatbot": f"disabled ({str(e)})"
+        }
 
 
-# Temporarily disabled due to Pinecone version issue
-# @app.post("/api/chat", response_model=ChatResponse)
-# async def chat(request: ChatRequest):
-#     """Main chat endpoint - Processes user messages and returns AI responses using RAG"""
-#     try:
-#         chain, memory = get_or_create_chain()
-#         response = chat_with_memory(chain, memory, request.message)
-#         source_docs = []
-#         if response.get("source_documents"):
-#             source_docs = [
-#                 {
-#                     "content": doc.page_content if hasattr(doc, "page_content") else str(doc),
-#                     "metadata": doc.metadata if hasattr(doc, "metadata") else {}
-#                 }
-#                 for doc in response["source_documents"]
-#             ]
-#         return ChatResponse(
-#             answer=response["answer"],
-#             source_documents=source_docs
-#         )
-#     except Exception as e:
-#         print(f"Error processing chat: {str(e)}")
-#         raise HTTPException(
-#             status_code=500,
-#             detail=f"Error processing your message: {str(e)}"
-#         )
+@app.post("/api/chat", response_model=ChatResponse)
+async def chat(request: ChatRequest):
+    """Main chat endpoint - Processes user messages and returns AI responses using RAG"""
+    try:
+        chain, memory = get_or_create_chain()
+        response = chat_with_memory(chain, memory, request.message)
+        source_docs = []
+        if response.get("source_documents"):
+            source_docs = [
+                {
+                    "content": doc.page_content if hasattr(doc, "page_content") else str(doc),
+                    "metadata": doc.metadata if hasattr(doc, "metadata") else {}
+                }
+                for doc in response["source_documents"]
+            ]
+        return ChatResponse(
+            answer=response["answer"],
+            source_documents=source_docs
+        )
+    except Exception as e:
+        print(f"Error processing chat: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error processing your message: {str(e)}"
+        )
 
 
-# @app.post("/api/chat/reset")
-# async def reset_conversation():
-#     """Reset the conversation memory"""
-#     try:
-#         chain, memory = get_or_create_chain()
-#         memory.clear()
-#         return {"status": "success", "message": "Conversation history cleared"}
-#     except Exception as e:
-#         raise HTTPException(
-#             status_code=500,
-#             detail=f"Error resetting conversation: {str(e)}"
-#         )
+@app.post("/api/chat/reset")
+async def reset_conversation():
+    """Reset the conversation memory"""
+    try:
+        chain, memory = get_or_create_chain()
+        memory.clear()
+        return {"status": "success", "message": "Conversation history cleared"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error resetting conversation: {str(e)}"
+        )
 
 
 if __name__ == "__main__":
