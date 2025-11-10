@@ -60,12 +60,6 @@ export interface RequestedItem {
   fundingSource: 'bswd' | 'csg-dse' | 'both';
 }
 
-export interface RiskAssessment {
-  score: number;
-  level: 'Low' | 'Medium' | 'High';
-  factors: string[];
-}
-
 export interface Application {
   id: string;
   studentName: string;
