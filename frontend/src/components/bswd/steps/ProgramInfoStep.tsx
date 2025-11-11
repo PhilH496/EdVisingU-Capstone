@@ -420,11 +420,11 @@ export function ProgramInfoStep({
           institution? <span className="text-sm text-brand-light-red mt-1">*</span>
         </label>
         <RadioGroup
-          value={formData.submittedDisabilityElsewhere || "no"}
+          value={formData.submittedDisabilityElsewhere ? "yes" : "no"}
           onValueChange={(value) =>
             setFormData((prev) => ({
               ...prev,
-              submittedDisabilityElsewhere: value as "yes",
+              submittedDisabilityElsewhere: value === "yes",
             }))
           }
           className="flex items-center justify-left space-x-6 mb-3"
@@ -440,7 +440,7 @@ export function ProgramInfoStep({
         </RadioGroup>
 
         {/* Previous institution combobox (used when "Yes") */}
-        {formData.submittedDisabilityElsewhere === "yes" && (
+        {formData.submittedDisabilityElsewhere === true && (
           <div className="mb-3 text-left">
             <label className="block text-sm font-medium mb-1 text-brand-text-gray">
               Previous institution <span className="text-sm text-brand-light-red mt-1">*</span>
