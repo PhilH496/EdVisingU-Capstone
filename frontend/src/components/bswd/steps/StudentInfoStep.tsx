@@ -26,7 +26,9 @@ interface StudentInfoStepProps {
 
 export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps) {
   const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
+  const [osapStartDate, setOsapStartDate] = useState<Date | null>(null);
   const dobRef = useRef<HTMLInputElement>(null);
+  const osapDateRef = useRef<HTMLInputElement>(null);
 
   // Lock all fields on this page when OSAP application = "No"
   const isLocked = formData.hasOsapApplication === false;
@@ -42,11 +44,21 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
     setFormData(prev => ({ ...prev, dateOfBirth: formattedDate }));
   };
 
+  const handleSelectOsapDate = (selected: Date | undefined) => {
+    if (!selected) return;
+    setOsapStartDate(selected);
+    const formattedDate = format(selected, "dd/MM/yyyy");
+    if (osapDateRef.current) {
+      osapDateRef.current.value = formattedDate;
+    }
+    setFormData(prev => ({ ...prev, osapApplicationStartDate: formattedDate }));
+  };
+
   return (
     <div className="space-y-4">
       <div>
         <label htmlFor="hasOsapApplication" className="block text-sm font-medium mb-1 text-brand-text-gray">
-          Do you have an OSAP application? *
+          Do you have an OSAP application? <span className="text-sm text-brand-light-red mt-1">*</span>
         </label>
         <select
           id="hasOsapApplication"
@@ -64,13 +76,53 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
           <option value="yes">Yes</option>
           <option value="no">No</option>
         </select>
-      </div>    
+      </div>
+
+      {formData.hasOsapApplication === true && (
+        <div>
+          <label htmlFor="osapApplicationStartDate" className="block text-sm font-medium mb-1 text-brand-text-gray">
+            OSAP Application Start Date (DD/MM/YYYY) <span className="text-sm text-brand-light-red mt-1">*</span>
+          </label>
+          <Popover>
+            <div className="relative w-full">
+              <Input
+                id="osapApplicationStartDate"
+                ref={osapDateRef}
+                type="text"
+                placeholder="DD/MM/YYYY"
+                value={formData.osapApplicationStartDate || ''}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFormData(prev => ({ ...prev, osapApplicationStartDate: value }));
+                }}
+              />
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <CalendarIcon className="h-4 w-4" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent side="bottom" align="end" className="w-auto p-0 z-50">
+                <Calendar 
+                  mode="single" 
+                  selected={osapStartDate ?? undefined} 
+                  onSelect={handleSelectOsapDate}
+                />
+              </PopoverContent>
+            </div>
+          </Popover>
+        </div>
+      )}
+    
       <h2 className="text-xl font-semibold mb-4">Section A: Student Information</h2>
       
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="studentId" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            Student ID *
+            Student ID <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
             id="studentId"
@@ -88,13 +140,13 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             maxLength={15}
           />
           {formData.studentId && formData.studentId.length < 7 && (
-            <p className="text-sm text-red-600 mt-1">Student ID must be at least 7 digits</p>
+            <p className="text-sm text-brand-light-red mt-1">Student ID must be at least 7 digits</p>
           )}
         </div>
 
         <div>
           <label htmlFor="oen" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            Ontario Education Number (OEN) *
+            Ontario Education Number (OEN) <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
             id="oen"
@@ -112,7 +164,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             maxLength={9}
           />
           {formData.oen && formData.oen.length !== 9 && (
-            <p className="text-sm text-red-600 mt-1">OEN must be exactly 9 digits</p>
+            <p className="text-sm text-brand-light-red mt-1">OEN must be exactly 9 digits</p>
           )}
         </div>
       </div>
@@ -120,7 +172,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="firstName" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            First Name *
+            First Name <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
             id="firstName"
@@ -140,7 +192,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
 
         <div>
           <label htmlFor="lastName" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            Last Name *
+            Last Name <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
             id="lastName"
@@ -162,7 +214,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="dateOfBirth" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            Date of Birth (DD/MM/YYYY) *
+            Date of Birth (DD/MM/YYYY) <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Popover>
             <div className="relative w-full">
@@ -195,7 +247,6 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                     mode="single" 
                     selected={dateOfBirth ?? undefined} 
                     onSelect={handleSelectDOB}
-                    initialFocus
                   />
                 </PopoverContent>
               )}
@@ -205,7 +256,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
 
         <div>
           <label htmlFor="sin" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            Social Insurance Number *
+            Social Insurance Number <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
             id="sin"
@@ -229,7 +280,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             maxLength={11}
           />
           {formData.sin && formData.sin.replace(/\D/g, '').length !== 9 && (
-            <p className="text-sm text-red-600 mt-1">SIN must be exactly 9 digits</p>
+            <p className="text-sm text-brand-light-red mt-1">SIN must be exactly 9 digits</p>
           )}
         </div>
       </div>
@@ -237,7 +288,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="email" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            Email Address *
+            Email Address <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
             id="email"
@@ -248,7 +299,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               setFormData(prev => ({ ...prev, email: e.target.value }))
             }
             className={lockCls("w-full px-3 py-2 border rounded-md")}
-            placeholder="student@institution.edu"
+            placeholder="YourEmail@example.com"
           />
         </div>
 
@@ -288,7 +339,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
         <div className="space-y-4">
           <div>
             <label htmlFor="address" className="block text-sm font-medium mb-1 text-brand-text-gray">
-              Street Address *
+              Street Address <span className="text-sm text-brand-light-red mt-1">*</span>
             </label>
             <Input
               id="address"
@@ -306,7 +357,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="city" className="block text-sm font-medium mb-1 text-brand-text-gray">
-                City *
+                City <span className="text-sm text-brand-light-red mt-1">*</span>
               </label>
               <Input
                 id="city"
@@ -323,7 +374,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
 
             <div>
               <label htmlFor="province" className="block text-sm font-medium mb-1 text-brand-text-gray">
-                Province/Territory *
+                Province/Territory <span className="text-sm text-brand-light-red mt-1">*</span>
               </label>
               <select
                 id="province"
@@ -352,7 +403,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="postalCode" className="block text-sm font-medium mb-1 text-brand-text-gray">
-                Postal Code *
+                Postal Code <span className="text-sm text-brand-light-red mt-1">*</span>
               </label>
               <Input
                 id="postalCode"
@@ -376,7 +427,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
 
             <div>
               <label htmlFor="country" className="block text-sm font-medium mb-1 text-brand-text-gray">
-                Country *
+                Country <span className="text-sm text-brand-light-red mt-1">*</span>
               </label>
               <Input
                 id="country"

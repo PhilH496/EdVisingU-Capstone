@@ -59,6 +59,7 @@ export default function BSWDApplicationPage() {
     submittedDisabilityElsewhere: "no",
     previousInstitution: "",
     osapApplication: "full-time",
+    osapApplicationStartDate: "",
     restrictionType: "DEFAULT",
     queuedForManualReview: false,
     federalNeed: 0,
@@ -118,19 +119,20 @@ export default function BSWDApplicationPage() {
       case 1:
         return Boolean(
           formData.studentId &&
-            formData.studentId.length >= 7 &&
-            formData.firstName &&
-            formData.lastName &&
-            formData.email &&
-            formData.dateOfBirth &&
-            formData.oen.length === 9 &&
-            formData.sin.replace(/\D/g, "").length === 9 &&
-            formData.address &&
-            formData.city &&
-            formData.province &&
-            formData.postalCode &&
-            formData.country &&
-            formData.hasOsapApplication !== null
+          formData.studentId.length >= 7 &&
+          formData.firstName &&
+          formData.lastName &&
+          formData.email &&
+          formData.dateOfBirth &&
+          formData.oen.length === 9 &&
+          formData.sin.replace(/\D/g, "").length === 9 &&
+          formData.address &&
+          formData.city &&
+          formData.province &&
+          formData.postalCode &&
+          formData.country &&
+          formData.hasOsapApplication !== null &&
+          formData.osapApplicationStartDate 
         );
 
       case 2: {
@@ -339,7 +341,10 @@ export default function BSWDApplicationPage() {
   function StepBar() {
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const stepRefs = useRef<(HTMLButtonElement | null)[]>([]);
+    const prevStepRef = useRef(currentStep);
     useEffect(() => {
+    // Scrolls to top if step is changed
+    if (prevStepRef.current !== currentStep) {
       const el = scrollRef.current;
       const target = stepRefs.current[currentStep - 1];
       if (el && target) {
@@ -349,7 +354,9 @@ export default function BSWDApplicationPage() {
           block: "nearest",
         });
       }
-    }, [currentStep]);
+      prevStepRef.current = currentStep;
+    }
+  }, [currentStep]);
     return (
       <div
         className="overflow-x-scroll pb-4"

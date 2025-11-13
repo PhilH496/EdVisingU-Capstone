@@ -24,7 +24,8 @@ export interface FormData {
   postalCode: string;
   country: string;
   hasOsapApplication: boolean | null;
-
+  osapApplicationStartDate: string;
+  
   // Program Information
   institution: string;
   institutionType: "" | "public-ontario" | "private-ontario";

@@ -81,10 +81,7 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
       </p>
       {/* OSAP Application On-File Confirmation */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-brand-text-gray">
-          Do you have an active & approved OSAP application on file?{" "}
-          <span className="text-red-500">*</span>
-        </label>
+        <label className="block text-sm font-medium text-brand-text-gray">Do you have an active & approved OSAP application on file? <span className="text-brand-light-red">*</span></label>
         <div className="flex gap-4">
           <label className="inline-flex items-center gap-2 text-brand-text-gray">
             <input
@@ -122,7 +119,7 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
       {/* OSAP Application Type */}
       <div className="space-y-1">
         <label className="block text-sm font-medium text-brand-text-gray">
-          OSAP Application Type <span className="text-red-500">*</span>
+          OSAP Application Type <span className="text-brand-light-red">*</span>
         </label>
         <select
           className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
@@ -150,7 +147,7 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-1">
           <label className="block text-sm font-medium text-brand-text-gray">
-            Federal Financial Need ($) <span className="text-red-500">*</span>
+            Federal Financial Need ($) <span className="text-brand-light-red">*</span>
           </label>
           <input
             type="number"
@@ -166,7 +163,7 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
         <div className="space-y-1">
           <label className="block text-sm font-medium text-brand-text-gray">
             Provincial Financial Need ($){" "}
-            <span className="text-red-500">*</span>
+            <span className="text-brand-light-red">*</span>
           </label>
           <input
             type="number"
