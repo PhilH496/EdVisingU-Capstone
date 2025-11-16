@@ -20,10 +20,8 @@ export function DisabilityInfoStep({
   formData,
   setFormData,
 }: DisabilityInfoStepProps) {
-  // Local state for the psycho-educational assessment checkbox
-  const [requiresPsychoEducational, setRequiresPsychoEducational] = useState(
-    formData.needsPsychoEdAssessment ?? false
-  );
+  const [requiresPsychoEducational, setRequiresPsychoEducational] =
+    useState(formData.needsPsychoEdAssessment ?? false);
 
   const defaultFunctionalLimitations: FunctionalLimitationOption[] = [
     { name: "mobility", label: "Mobility", checked: false },
@@ -42,14 +40,12 @@ export function DisabilityInfoStep({
     },
   ];
 
-  // Normalize functionalLimitations so .map() is always safe
   const functionalLimitations: FunctionalLimitationOption[] = Array.isArray(
     formData.functionalLimitations
   )
     ? (formData.functionalLimitations as FunctionalLimitationOption[])
     : defaultFunctionalLimitations;
 
-  // Handler for the multi-select functional limitations checkboxes
   const handleLimitationsChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -73,7 +69,6 @@ export function DisabilityInfoStep({
     });
   };
 
-  // Disable verification date if not verified or not selected
   const isVerificationDisabled =
     !formData.disabilityType || formData.disabilityType === "not-verified";
 
@@ -194,7 +189,7 @@ export function DisabilityInfoStep({
         </div>
       )}
 
-      {/* Functional Limitations Checkbox Group */}
+      {/* Functional Limitations */}
       <div>
         <fieldset>
           <legend className="text-base font-medium mb-2 text-[#4e4e4e]">
@@ -223,7 +218,7 @@ export function DisabilityInfoStep({
         </fieldset>
       </div>
 
-      {/* Psycho-educational Assessment Checkbox */}
+      {/* Psycho-ed Assessment */}
       <div className="pt-2 border-t border-gray-200 mt-6">
         <div className="flex items-start my-4">
           <input
@@ -250,7 +245,6 @@ export function DisabilityInfoStep({
           </label>
         </div>
 
-        {/* Conditional Email Input - Only shows when checkbox is checked */}
         {requiresPsychoEducational && (
           <div className="mt-6 ml-8 p-6 rounded-md border-l-4 border-[#0071a9] bg-[#e6fad2] my-6">
             <div className="flex items-start mb-4">
