@@ -3,10 +3,8 @@
  *
  * First step of the BSWD application form that collects basic student information.
  * Includes validation for OEN (Ontario Education Number) format.
- *
- * @param formData - Current state of all form data
- * @param setFormData - Function to update form data state
  */
+
 import { FormData } from "@/types/bswd";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
@@ -24,7 +22,10 @@ interface StudentInfoStepProps {
   setFormData: (data: FormData | ((prev: FormData) => FormData)) => void;
 }
 
-export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps) {
+export function StudentInfoStep({
+  formData,
+  setFormData,
+}: StudentInfoStepProps) {
   const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
   const [osapStartDate, setOsapStartDate] = useState<Date | null>(null);
   const dobRef = useRef<HTMLInputElement>(null);
@@ -55,12 +56,15 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
     if (osapDateRef.current) {
       osapDateRef.current.value = formattedDate;
     }
-    setFormData((prev) => ({ ...prev, osapApplicationStartDate: formattedDate }));
+    setFormData((prev) => ({
+      ...prev,
+      osapApplicationStartDate: formattedDate,
+    }));
   };
 
   return (
     <div className="space-y-4">
-      {/* OSAP Application Question */}
+      {/* OSAP application question + start date */}
       <div>
         <label
           htmlFor="hasOsapApplication"
@@ -94,7 +98,6 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
         </select>
       </div>
 
-      {/* OSAP Start Date (only when Yes) */}
       {formData.hasOsapApplication === true && (
         <div>
           <label
@@ -149,14 +152,14 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
         Section A: Student Information
       </h2>
 
-      {/* Student ID & OEN */}
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label
             htmlFor="studentId"
             className="block text-sm font-medium mb-1 text-brand-text-gray"
           >
-            Student ID <span className="text-sm text-brand-light-red mt-1">*</span>
+            Student ID{" "}
+            <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
             id="studentId"
@@ -211,7 +214,6 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
         </div>
       </div>
 
-      {/* Name */}
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label
@@ -262,7 +264,6 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
         </div>
       </div>
 
-      {/* DOB & SIN */}
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label
@@ -352,7 +353,6 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             maxLength={11}
           />
           {formData.sin &&
-            formData.sin.replace(/\D/g, "").length > 0 &&
             formData.sin.replace(/\D/g, "").length !== 9 && (
               <p className="text-sm text-brand-light-red mt-1">
                 SIN must be exactly 9 digits
@@ -361,7 +361,6 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
         </div>
       </div>
 
-      {/* Email & Phone */}
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label
