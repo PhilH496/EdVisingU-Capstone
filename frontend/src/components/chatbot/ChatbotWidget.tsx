@@ -1,6 +1,6 @@
 /**
- * ChatbotWidget Component 
- * 
+ * ChatbotWidget Component
+ *
  * Features:
  * - Collapsible chat window
  * - Floating action button
@@ -13,14 +13,14 @@ import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 interface Message {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   timestamp: Date;
 }
 
 export function ChatbotWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +28,7 @@ export function ChatbotWidget() {
 
   // Auto-scroll to bottom when new msgs arrive
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -49,29 +49,29 @@ export function ChatbotWidget() {
     if (!message.trim() || isLoading) return;
 
     const userMessage = message.trim();
-    setMessage('');
+    setMessage("");
     setError(null);
 
     // Adds user message to chat
     const newUserMessage: Message = {
-      role: 'user',
+      role: "user",
       content: userMessage,
       timestamp: new Date(),
     };
-    setMessages(prev => [...prev, newUserMessage]);
+    setMessages((prev) => [...prev, newUserMessage]);
 
     // Set loading state when message in progress
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/chat', {
-        method: 'POST',
+      const response = await fetch("http://localhost:8000/api/chat", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           message: userMessage,
-          history: messages.map(msg => ({
+          history: messages.map((msg) => ({
             role: msg.role,
             content: msg.content,
           })),
@@ -86,23 +86,28 @@ export function ChatbotWidget() {
 
       // Add assistant response to chat
       const assistantMessage: Message = {
-        role: 'assistant',
-        content: data.answer || data.response || 'Sorry, I couldn\'t generate a response.',
+        role: "assistant",
+        content:
+          data.answer ||
+          data.response ||
+          "Sorry, I couldn't generate a response.",
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, assistantMessage]);
-
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (err) {
-      console.error('Chat error:', err);
-      setError('Failed to connect to chatbot. Please make sure the backend is running.');
-      
+      console.error("Chat error:", err);
+      setError(
+        "Failed to connect to chatbot. Please make sure the backend is running."
+      );
+
       // Add error message to chat
       const errorMessage: Message = {
-        role: 'assistant',
-        content: 'Sorry, I\'m having trouble connecting right now. Please try again later.',
+        role: "assistant",
+        content:
+          "Sorry, I'm having trouble connecting right now. Please try again later.",
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -117,9 +122,9 @@ export function ChatbotWidget() {
           <div className="bg-[#0066A1] text-white px-5 py-4 flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div>
-            <h3 className="font-semibold text-base">BSWD Assistant</h3>
-            <p className="text-sm text-blue-100">Online</p>
-            </div>
+                <h3 className="font-semibold text-base">BSWD Assistant</h3>
+                <p className="text-sm text-blue-100">Online</p>
+              </div>
             </div>
             <button
               onClick={handleToggle}
@@ -134,14 +139,14 @@ export function ChatbotWidget() {
           <div className="h-96 overflow-y-auto p-4 bg-gray-100">
             {/* Welcome Message */}
             <div className="flex items-start space-x-3 mb-4">
-              <img 
-                src="/custom-ontario-logo.png" 
-                alt="Ontario Logo" 
+              <img
+                src="/custom-ontario-logo.png"
+                alt="Ontario Logo"
                 className="w-10 h-10 object-contain flex-shrink-0"
               />
               <div className="bg-white rounded-lg rounded-tl-none px-4 py-3 shadow-sm max-w-[85%]">
                 <p className="text-base text-gray-800">
-                  Hi! I'm your BSWD Assistant. How can I help you today?
+                  Hi! I&apos;m your BSWD Assistant. How can I help you today?
                 </p>
               </div>
             </div>
@@ -151,21 +156,21 @@ export function ChatbotWidget() {
               <div
                 key={index}
                 className={`flex items-start space-x-3 mb-4 ${
-                  msg.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''
+                  msg.role === "user" ? "flex-row-reverse space-x-reverse" : ""
                 }`}
               >
-                {msg.role === 'assistant' && (
-                  <img 
-                    src="/custom-ontario-logo.png" 
-                    alt="Ontario Logo" 
+                {msg.role === "assistant" && (
+                  <img
+                    src="/custom-ontario-logo.png"
+                    alt="Ontario Logo"
                     className="w-10 h-10 object-contain flex-shrink-0"
                   />
                 )}
                 <div
                   className={`rounded-lg px-4 py-3 shadow-sm max-w-[85%] ${
-                    msg.role === 'user'
-                      ? 'bg-[#0066A1] text-white rounded-tr-none'
-                      : 'bg-white text-gray-800 rounded-tl-none'
+                    msg.role === "user"
+                      ? "bg-[#0066A1] text-white rounded-tr-none"
+                      : "bg-white text-gray-800 rounded-tl-none"
                   }`}
                 >
                 {msg.role === 'assistant' ? (
@@ -195,9 +200,9 @@ export function ChatbotWidget() {
             {/* Loading Indicator */}
             {isLoading && (
               <div className="flex items-start space-x-3 mb-4">
-                <img 
-                  src="/custom-ontario-logo.png" 
-                  alt="Ontario Logo" 
+                <img
+                  src="/custom-ontario-logo.png"
+                  alt="Ontario Logo"
                   className="w-10 h-10 object-contain flex-shrink-0"
                 />
                 <div className="bg-white rounded-lg rounded-tl-none px-4 py-3 shadow-sm">
@@ -219,7 +224,10 @@ export function ChatbotWidget() {
 
           {/* Input Area */}
           <div className="border-t border-gray-200 p-5 bg-white">
-            <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
+            <form
+              onSubmit={handleSendMessage}
+              className="flex items-center space-x-2"
+            >
               <input
                 type="text"
                 value={message}
@@ -233,8 +241,8 @@ export function ChatbotWidget() {
                 disabled={!message.trim() || isLoading}
                 className={`p-3 rounded-lg transition-colors ${
                   message.trim() && !isLoading
-                    ? 'bg-[#0066A1] text-white hover:bg-[#004f7d]'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    ? "bg-[#0066A1] text-white hover:bg-[#004f7d]"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
                 }`}
                 aria-label="Send message"
               >
