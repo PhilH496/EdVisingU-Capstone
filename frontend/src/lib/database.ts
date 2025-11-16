@@ -1,86 +1,69 @@
 import { supabase } from "./supabase";
 
-export const saveStudentInfo = async (formData: {
+type SaveStudentInfoPayload = {
   studentId: string;
   oen: string;
   firstName: string;
   lastName: string;
-  dateOfBirth: string | Date;
-  sin?: string | null;
-  phone?: string | null;
+  dateOfBirth: Date;
+  sin: string;
   email: string;
+  phone?: string;
   address: string;
   city: string;
   province: string;
   postalCode: string;
   country: string;
-}) => {
-  let dobIso: string;
+  hasOsapApplication: boolean | null;
+};
 
-  if (formData.dateOfBirth instanceof Date) {
-    dobIso = formData.dateOfBirth.toISOString().slice(0, 10);
-  } else {
-    const raw = String(formData.dateOfBirth || "").trim();
-
-    if (!raw) {
-      throw new Error("Invalid date of birth format. Expected DD/MM/YYYY.");
-    }
-
-    if (raw.includes("/")) {
-      const [dayStr, monthStr, yearStr] = raw.split("/");
-      const day = Number(dayStr);
-      const month = Number(monthStr);
-      const year = Number(yearStr);
-
-      if (!day || !month || !year) {
-        throw new Error("Invalid date of birth format. Expected DD/MM/YYYY.");
-      }
-
-      dobIso = new Date(year, month - 1, day).toISOString().slice(0, 10);
-    } else {
-      dobIso = raw;
-    }
-  }
-
-  if (!formData.email?.trim()) throw new Error("Email is required.");
-  if (!formData.address?.trim()) throw new Error("Address is required.");
-  if (!formData.city?.trim()) throw new Error("City is required.");
-  if (!formData.province?.trim()) throw new Error("Province is required.");
-  if (!formData.postalCode?.trim()) throw new Error("Postal code is required.");
-  if (!formData.country?.trim()) throw new Error("Country is required.");
-
-  const studentIdNum = Number(formData.studentId);
-  const oenNum = Number(formData.oen);
-
-  if (Number.isNaN(studentIdNum)) {
-    throw new Error("Student ID must be numeric.");
-  }
-  if (Number.isNaN(oenNum)) {
-    throw new Error("OEN must be numeric.");
-  }
-
-  const payload = {
-    student_id: studentIdNum,
-    oen: oenNum,
-    first_name: formData.firstName.trim(),
-    last_name: formData.lastName.trim(),
-    dob: dobIso,
-    sin: formData.sin ?? null,
-    phone_number: formData.phone ?? null,
-    email: formData.email.trim(),
-    address: formData.address.trim(),
-    city: formData.city.trim(),
-    province: formData.province.trim(),
-    postal_code: formData.postalCode.trim(),
-    country: formData.country.trim(),
-  };
+export const saveStudentInfo = async (formData: SaveStudentInfoPayload) => {
+  const dobIso = formData.dateOfBirth.toISOString().slice(0, 10);
+  const sinDigits = formData.sin.replace(/\D/g, "");
+  const phoneDigits = formData.phone ? formData.phone.replace(/\D/g, "") : null;
 
   const { data, error } = await supabase
     .from("student")
-    .upsert(payload, { onConflict: "student_id" })
+    .upsert(
+      {
+        student_id: Number(formData.studentId),
+        oen: formData.oen,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        dob: dobIso,
+        sin: sinDigits,
+        email: formData.email.trim(),
+        phone: phoneDigits,
+        address: formData.address,
+        city: formData.city,
+        province: formData.province,
+        postal_code: formData.postalCode,
+        country: formData.country,
+        has_osap_application: formData.hasOsapApplication ?? false,
+      },
+      { onConflict: "student_id" }
+    )
     .select()
     .single();
 
   if (error) throw error;
-  return data.student_id;
+  return data.student_id as number;
+};
+
+export const saveProgramInfo = async (studentId: number, formData: any) => {
+  const { error } = await supabase.from("program_info").insert({
+    student_id: studentId,
+    institution_name: formData.institution,
+    institution_type: formData.institutionType,
+    program: formData.program,
+    study_type: formData.studyType,
+    study_start: formData.studyPeriodStart,
+    study_end: formData.studyPeriodEnd,
+    code: formData.code ? Number(formData.code) : null,
+    previous_institution: formData.previousInstitution || null,
+    submitted_disability_elsewhere:
+      formData.submittedDisabilityElsewhere === "yes",
+  });
+
+  if (error) throw error;
 };
