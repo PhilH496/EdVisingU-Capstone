@@ -1,58 +1,86 @@
 import { supabase } from "./supabase";
-import { FormData } from "@/types/bswd";
 
-// StepOne
-// Accepts either the full FormData or a normalized payload.
-// We upsert on student_id so resubmits don't crash with duplicates.
-export const saveStudentInfo = async (formData: Partial<FormData> & {
+export const saveStudentInfo = async (formData: {
   studentId: string;
   oen: string;
   firstName: string;
   lastName: string;
-  // Expect normalized date string YYYY-MM-DD (safer for DB) or Date
   dateOfBirth: string | Date;
   sin?: string | null;
   phone?: string | null;
+  email: string;
+  address: string;
+  city: string;
+  province: string;
+  postalCode: string;
+  country: string;
 }) => {
-  const dob =
-    (formData.dateOfBirth as any) instanceof Date
-      ? (formData.dateOfBirth as Date).toISOString().slice(0, 10)
-      : String(formData.dateOfBirth);
+  let dobIso: string;
+
+  if (formData.dateOfBirth instanceof Date) {
+    dobIso = formData.dateOfBirth.toISOString().slice(0, 10);
+  } else {
+    const raw = String(formData.dateOfBirth || "").trim();
+
+    if (!raw) {
+      throw new Error("Invalid date of birth format. Expected DD/MM/YYYY.");
+    }
+
+    if (raw.includes("/")) {
+      const [dayStr, monthStr, yearStr] = raw.split("/");
+      const day = Number(dayStr);
+      const month = Number(monthStr);
+      const year = Number(yearStr);
+
+      if (!day || !month || !year) {
+        throw new Error("Invalid date of birth format. Expected DD/MM/YYYY.");
+      }
+
+      dobIso = new Date(year, month - 1, day).toISOString().slice(0, 10);
+    } else {
+      dobIso = raw;
+    }
+  }
+
+  if (!formData.email?.trim()) throw new Error("Email is required.");
+  if (!formData.address?.trim()) throw new Error("Address is required.");
+  if (!formData.city?.trim()) throw new Error("City is required.");
+  if (!formData.province?.trim()) throw new Error("Province is required.");
+  if (!formData.postalCode?.trim()) throw new Error("Postal code is required.");
+  if (!formData.country?.trim()) throw new Error("Country is required.");
+
+  const studentIdNum = Number(formData.studentId);
+  const oenNum = Number(formData.oen);
+
+  if (Number.isNaN(studentIdNum)) {
+    throw new Error("Student ID must be numeric.");
+  }
+  if (Number.isNaN(oenNum)) {
+    throw new Error("OEN must be numeric.");
+  }
+
+  const payload = {
+    student_id: studentIdNum,
+    oen: oenNum,
+    first_name: formData.firstName.trim(),
+    last_name: formData.lastName.trim(),
+    dob: dobIso,
+    sin: formData.sin ?? null,
+    phone_number: formData.phone ?? null,
+    email: formData.email.trim(),
+    address: formData.address.trim(),
+    city: formData.city.trim(),
+    province: formData.province.trim(),
+    postal_code: formData.postalCode.trim(),
+    country: formData.country.trim(),
+  };
 
   const { data, error } = await supabase
     .from("student")
-    .upsert(
-      {
-        student_id: Number(formData.studentId),
-        oen: Number(formData.oen),
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        dob,
-        sin: formData.sin ?? null,
-        phone_number: formData.phone ?? null,
-      },
-      { onConflict: "student_id" } // ← key fix: prevent duplicate errors
-    )
+    .upsert(payload, { onConflict: "student_id" })
     .select()
     .single();
 
   if (error) throw error;
   return data.student_id;
-};
-
-// StepTwo - (Not used in index.tsx for now, check if format is correct to save into database)
-export const saveProgramInfo = async (studentId: number, formData: FormData) => {
-  const { error } = await supabase
-    .from("program_info")
-    .insert({
-      student_id: studentId,
-      institution_name: formData.institution,
-      institution_type: formData.institutionType,
-      program: formData.program,
-      study_type: formData.studyType,
-      study_start: formData.studyPeriodStart,
-      study_end: formData.studyPeriodEnd,
-    });
-
-  if (error) throw error;
 };
