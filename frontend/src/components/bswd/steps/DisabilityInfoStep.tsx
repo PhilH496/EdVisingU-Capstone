@@ -20,8 +20,9 @@ export function DisabilityInfoStep({
   formData,
   setFormData,
 }: DisabilityInfoStepProps) {
-  const [requiresPsychoEducational, setRequiresPsychoEducational] =
-    useState(formData.needsPsychoEdAssessment ?? false);
+  const [requiresPsychoEducational, setRequiresPsychoEducational] = useState(
+    formData.needsPsychoEdAssessment ?? false
+  );
 
   const defaultFunctionalLimitations: FunctionalLimitationOption[] = [
     { name: "mobility", label: "Mobility", checked: false },
@@ -189,7 +190,7 @@ export function DisabilityInfoStep({
         </div>
       )}
 
-      {/* Functional Limitations */}
+      {/* Functional Limitations Checkbox Group */}
       <div>
         <fieldset>
           <legend className="text-base font-medium mb-2 text-[#4e4e4e]">
@@ -218,7 +219,7 @@ export function DisabilityInfoStep({
         </fieldset>
       </div>
 
-      {/* Psycho-ed Assessment */}
+      {/* Psycho-educational Assessment Checkbox */}
       <div className="pt-2 border-t border-gray-200 mt-6">
         <div className="flex items-start my-4">
           <input
