@@ -5,11 +5,10 @@
  * Manages the multi-step form flow and overall form state.
  *
  * Features:
- * - Multi-step form navigation (7 total steps)
+ * - Multi-step form navigation (6 total steps)
  * - Form data state management
  * - Step validation before allowing progression
- * - Saves data to Supabase ONLY on final submission (Step 7)
- * - Dev mode: Skip to any step (development only)
+ * - Saves data to Supabase ONLY on final submission (Step 6)
  */
 import { useState, useMemo, useEffect, useRef } from "react";
 import { FormData } from "@/types/bswd";
@@ -23,7 +22,6 @@ import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
 import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
 import { StudentInfoSchema } from "@/schemas/StudentInfoSchema";
 import { saveStudentInfo } from "@/lib/database";
-//import { saveStudentInfo, saveProgramInfo } from "@/lib/database"; // Database use later - create functions in database.ts, take a look and edit if needed SQL in supabase.
 
 const DEV_MODE = process.env.NODE_ENV === "development";
 
@@ -61,7 +59,9 @@ export default function BSWDApplicationPage() {
     submittedDisabilityElsewhere: "no",
     previousInstitution: "",
     osapApplication: "full-time",
-
+    osapApplicationStartDate: "",
+    restrictionType: "DEFAULT",
+    queuedForManualReview: false,
     federalNeed: 0,
     provincialNeed: 0,
     hasOSAPRestrictions: false,
@@ -69,7 +69,18 @@ export default function BSWDApplicationPage() {
     hasVerifiedDisability: false,
     disabilityType: "not-verified",
     disabilityVerificationDate: "",
-    functionalLimitations: [],
+    functionalLimitations: [
+      { name: "mobility", label: "Mobility", checked: false },
+      { name: "vision", label: "Vision", checked: false },
+      { name: "hearing", label: "Hearing", checked: false },
+      { name: "learning", label: "Learning", checked: false },
+      { name: "cognitive", label: "Cognitive", checked: false },
+      { name: "mentalHealth", label: "Mental Health", checked: false },
+      { name: "communication", label: "Communication", checked: false },
+      { name: "dexterity", label: "Dexterity", checked: false },
+      { name: "chronicPain", label: "Chronic Pain", checked: false },
+      { name: "attention", label: "Attention/Concentration", checked: false },
+    ],
     needsPsychoEdAssessment: false,
     requestedItems: [],
   });
@@ -103,24 +114,25 @@ export default function BSWDApplicationPage() {
   ];
   const TOTAL_STEPS = stepsInfo.length;
 
-  const isStepComplete = (): boolean => {
-    switch (currentStep) {
+  const isStepComplete = (stepCheck: number): boolean => {
+    switch (stepCheck) {
       case 1:
         return Boolean(
-            formData.studentId &&
-            formData.studentId.length >= 7 &&
-            formData.firstName &&
-            formData.lastName &&
-            formData.email &&
-            formData.dateOfBirth &&
-            formData.oen.length === 9 &&
-            formData.sin.replace(/\D/g, "").length === 9 &&
-            formData.address &&
-            formData.city &&
-            formData.province &&
-            formData.postalCode &&
-            formData.country &&
-            formData.hasOsapApplication !== null
+          formData.studentId &&
+          formData.studentId.length >= 7 &&
+          formData.firstName &&
+          formData.lastName &&
+          formData.email &&
+          formData.dateOfBirth &&
+          formData.oen.length === 9 &&
+          formData.sin.replace(/\D/g, "").length === 9 &&
+          formData.address &&
+          formData.city &&
+          formData.province &&
+          formData.postalCode &&
+          formData.country &&
+          formData.hasOsapApplication !== null &&
+          formData.osapApplicationStartDate 
         );
 
       case 2: {
@@ -147,37 +159,56 @@ export default function BSWDApplicationPage() {
       case 3: {
         // Step 3 (OSAP): require application type; if not 'none', needs must be >= 0
         // If restrictions are checked, details must be provided
-        const hasChosenOnFile = formData.osapOnFileStatus === "APPROVED" || formData.osapOnFileStatus === "NONE";
-        const appTypeOk = formData.osapOnFileStatus === "APPROVED" ? formData.osapApplication !== "none" : true;
-        const needsOk = formData.osapOnFileStatus === "APPROVED" ? (!Number.isNaN(Number(formData.federalNeed)) && !Number.isNaN(Number(formData.provincialNeed)) && Number(formData.federalNeed) >= 0 && Number(formData.provincialNeed) >= 0) : true;
+        const hasChosenOnFile =
+          formData.osapOnFileStatus === "APPROVED" ||
+          formData.osapOnFileStatus === "NONE";
+        const appTypeOk =
+          formData.osapOnFileStatus === "APPROVED"
+            ? formData.osapApplication !== "none"
+            : true;
+        const needsOk =
+          formData.osapOnFileStatus === "APPROVED"
+            ? !Number.isNaN(Number(formData.federalNeed)) &&
+              !Number.isNaN(Number(formData.provincialNeed)) &&
+              Number(formData.federalNeed) >= 0 &&
+              Number(formData.provincialNeed) >= 0
+            : true;
         const restrictionsOk = true; // Restrictions never block navigation
         return hasChosenOnFile && appTypeOk && needsOk && restrictionsOk;
       }
-
       case 4: {
         // Disability info step
         // If Psycho-Ed referral is required, email must be non-empty
-        if (formData.needsPsychoEdAssessment && !formData.email?.trim()) return false;
+        if (formData.needsPsychoEdAssessment && !formData.email?.trim())
+          return false;
         return true;
       }
-        
+      case 5: {
+        // Assume this step is optional
+        return true;
+      }
       case 6: {
         // Step 6 (Review and Submit): Check if confirmation checkbox is checked
+        // Assume this step is optional
+        return true;
+      }
+      case 7: {
+        // Step 7 (Review and Submit): Check if confirmation checkbox is checked
         return isConfirmed;
       }
       default:
-        return true;
+        return false;
     }
   };
 
   // Memoize canProceed to ensure it updates when isConfirmed changes
   const canProceed = useMemo(() => {
-    return isStepComplete() && !saving;
+    return isStepComplete(currentStep) && !saving;
   }, [currentStep, formData, isConfirmed, saving]);
 
   const handleNext = async () => {
     // Check if current step is complete before proceeding
-    if (!isStepComplete()) {
+    if (!isStepComplete(currentStep)) {
       return;
     }
 
@@ -237,12 +268,10 @@ export default function BSWDApplicationPage() {
   };
 
   const handleStudentSubmit = async () => {
-    console.log(formData.sin);
     const [day, month, year] = formData.dateOfBirth.split("/").map(Number);
     const birthDate = new Date(year, month - 1, day);
     const sin = formData.sin.replace(/-/g, "");
     const phone = formData.phone.replace(/\D/g, "");
-    console.log(phone);
     const studentInfoData = {
       studentId: formData.studentId,
       oen: formData.oen,
@@ -266,7 +295,6 @@ export default function BSWDApplicationPage() {
     // Mimic delaying when user submits [REMOVE LATER]
     await new Promise((r) => setTimeout(r, 2000));
     const results = await Promise.all([handleStudentSubmit()]);
-    console.log(results);
     setSaving(false);
   };
 
@@ -311,10 +339,12 @@ export default function BSWDApplicationPage() {
 
   // Client component for step bar
   function StepBar() {
-    "use client";
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const stepRefs = useRef<(HTMLButtonElement | null)[]>([]);
+    const prevStepRef = useRef(currentStep);
     useEffect(() => {
+    // Scrolls to top if step is changed
+    if (prevStepRef.current !== currentStep) {
       const el = scrollRef.current;
       const target = stepRefs.current[currentStep - 1];
       if (el && target) {
@@ -324,7 +354,9 @@ export default function BSWDApplicationPage() {
           block: "nearest",
         });
       }
-    }, [currentStep]);
+      prevStepRef.current = currentStep;
+    }
+  }, [currentStep]);
     return (
       <div
         className="overflow-x-scroll pb-4"
@@ -365,16 +397,27 @@ export default function BSWDApplicationPage() {
     );
   }
 
+  // Make sure the current step is complete before moving forward
+  useEffect(() => {
+    // If the form is uncomplete when user has not filled up or user edit the forn
+    if (!isStepComplete(currentStep)) {
+      setMaxStep(currentStep);
+    } else {
+      // Unlock new step (optional: unlock steps that already filled in before)
+      setMaxStep(currentStep + 1);
+      let stepCheck = currentStep + 1;
+      while (isStepComplete(stepCheck)) {
+        setMaxStep(stepCheck + 1);
+        stepCheck++;
+      }
+    }
+  }, [currentStep, formData]);
   return (
     <FormLayout
       title="BSWD/CSG-DSE Application Form"
       description="Complete application for Bursary for Students with Disabilities (BSWD) and Canada Student Grant for Services and Equipment"
     >
-      <div className="mb-6">
-        <p className="text-sm text-gray-600">
-          Step {currentStep} of {TOTAL_STEPS}
-        </p>
-      </div>
+      <div className="mb-6"></div>
       <div className="mb-4 p-4 pb-2 py-6 border rounded-md">
         <StepBar />
       </div>

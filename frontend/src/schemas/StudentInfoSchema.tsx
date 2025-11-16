@@ -1,4 +1,4 @@
-import * as z from "zod";
+import { z } from "zod";
 
 export const StudentInfoSchema = z.object({
   studentId: z
@@ -8,19 +8,19 @@ export const StudentInfoSchema = z.object({
     .regex(/^\d+$/, "Student ID must contain only numbers"),
   oen: z
     .string()
-    .regex(/^\d+$/, { message: "Must contain only numbers" })
+    .regex(/^\d+$/, "Must contain only numbers")
     .length(9, "Student ID must be exactly 9 digits long"),
   firstName: z
     .string()
-    .min(2, { message: "First name is too short" })
-    .max(50, { message: "First name is too long" }),
+    .min(2, "First name is too short")
+    .max(50, "First name is too long"),
   lastName: z
     .string()
-    .min(2, { message: "Last name is too short" })
-    .max(30, { message: "Last name is too long" }),
+    .min(2, "Last name is too short")
+    .max(30, "Last name is too long"),
   dateOfBirth: z
     .date()
-    .min(new Date("1900-01-01"), { message: "Too old" })
-    .max(new Date(), { message: "Born in the future???" }),
-  sin: z.string().length(9, { message: "Sin must be 9 digits" }),
+    .min(new Date("1900-01-01"), "Too old")
+    .max(new Date(), "Born in the future???"),
+  sin: z.string().length(9, "Sin must be 9 digits"),
 });
