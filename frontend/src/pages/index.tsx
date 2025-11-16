@@ -25,10 +25,8 @@ import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
 import { StudentInfoSchema } from "@/schemas/StudentInfoSchema";
 import { saveStudentInfo } from "@/lib/database";
 
-const DEV_MODE = process.env.NODE_ENV === "development";
-
 export default function BSWDApplicationPage() {
-  const [currentStep, setCurrentStep] = useState(DEV_MODE ? 1 : 1);
+  const [currentStep, setCurrentStep] = useState(1);
   const [maxStep, setMaxStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,23 +88,34 @@ export default function BSWDApplicationPage() {
       },
     ],
     needsPsychoEdAssessment: false,
-
     requestedItems: [],
   });
 
   const stepsInfo = [
-    { stepName: "Student Info", stepIconFaClass: "fa-solid fa-user" },
-    { stepName: "Program Info", stepIconFaClass: "fa-solid fa-user-graduate" },
+    {
+      stepName: "Student Info",
+      stepIconFaClass: "fa-solid fa-user",
+    },
+    {
+      stepName: "Program Info",
+      stepIconFaClass: "fa-solid fa-user-graduate",
+    },
     {
       stepName: "OSAP Info",
       stepIconFaClass: "fa-solid fa-money-check-dollar",
     },
-    { stepName: "Disability Info", stepIconFaClass: "fa-solid fa-wheelchair" },
+    {
+      stepName: "Disability Info",
+      stepIconFaClass: "fa-solid fa-wheelchair",
+    },
     {
       stepName: "Service & Equipment",
       stepIconFaClass: "fa-solid fa-wrench",
     },
-    { stepName: "Review & Submit", stepIconFaClass: "fa-solid fa-receipt" },
+    {
+      stepName: "Review & Submit",
+      stepIconFaClass: "fa-solid fa-receipt",
+    },
   ];
 
   const TOTAL_STEPS = stepsInfo.length;
@@ -129,9 +138,7 @@ export default function BSWDApplicationPage() {
             formData.postalCode &&
             formData.country &&
             formData.hasOsapApplication !== null &&
-            (!formData.hasOsapApplication ||
-              (!!formData.osapApplicationStartDate &&
-                formData.osapApplicationStartDate.trim() !== ""))
+            formData.osapApplicationStartDate
         );
 
       case 2: {
@@ -197,10 +204,9 @@ export default function BSWDApplicationPage() {
     }
   };
 
-  const canProceed = useMemo(
-    () => isStepComplete(currentStep) && !saving,
-    [currentStep, formData, isConfirmed, saving]
-  );
+  const canProceed = useMemo(() => {
+    return isStepComplete(currentStep) && !saving;
+  }, [currentStep, formData, isConfirmed, saving]);
 
   const handleNext = async () => {
     if (!isStepComplete(currentStep)) return;
@@ -214,7 +220,9 @@ export default function BSWDApplicationPage() {
   };
 
   const handlePrevious = () => {
-    if (currentStep > 1) setCurrentStep((prev) => prev - 1);
+    if (currentStep > 1) {
+      setCurrentStep((prev) => prev - 1);
+    }
   };
 
   const handleStudentSubmit = async (): Promise<boolean> => {
@@ -222,9 +230,9 @@ export default function BSWDApplicationPage() {
       const [dayStr, monthStr, yearStr] = (formData.dateOfBirth || "").split(
         "/"
       );
-      const day = Number(dayStr),
-        month = Number(monthStr),
-        year = Number(yearStr);
+      const day = Number(dayStr);
+      const month = Number(monthStr);
+      const year = Number(yearStr);
 
       if (!day || !month || !year) {
         setError("Invalid date of birth format. Use DD/MM/YYYY.");
@@ -232,8 +240,8 @@ export default function BSWDApplicationPage() {
       }
 
       const birthDate = new Date(year, month - 1, day);
-      const sin = formData.sin.replace(/\D/g, "");
-      const phone = formData.phone.replace(/\D/g, "");
+      const sinDigits = formData.sin.replace(/\D/g, "");
+      const phoneDigits = formData.phone.replace(/\D/g, "");
 
       const studentInfoData = {
         studentId: formData.studentId.trim(),
@@ -241,8 +249,7 @@ export default function BSWDApplicationPage() {
         firstName: formData.firstName,
         lastName: formData.lastName,
         dateOfBirth: birthDate,
-        sin,
-        phone,
+        sin: sinDigits,
       };
 
       const parsed = StudentInfoSchema.safeParse(studentInfoData);
@@ -252,25 +259,18 @@ export default function BSWDApplicationPage() {
         return false;
       }
 
-      const dbPayload = {
-        studentId: parsed.data.studentId,
-        oen: parsed.data.oen,
-        firstName: parsed.data.firstName,
-        lastName: parsed.data.lastName,
-        dateOfBirth: parsed.data.dateOfBirth.toISOString().slice(0, 10),
-        sin: parsed.data.sin,
-        phone, // ← use local `phone` instead of parsed.data.phone (avoids TS error)
+      await saveStudentInfo({
+        ...parsed.data,
         email: formData.email,
+        phone: phoneDigits,
         address: formData.address,
         city: formData.city,
         province: formData.province,
         postalCode: formData.postalCode,
         country: formData.country,
-        hasOsapApplication: !!formData.hasOsapApplication,
-        osapApplicationStartDate: formData.osapApplicationStartDate || "",
-      };
+        hasOsapApplication: formData.hasOsapApplication,
+      });
 
-      await saveStudentInfo(dbPayload as any);
       return true;
     } catch (e: any) {
       console.error("Save error:", e);
@@ -285,6 +285,7 @@ export default function BSWDApplicationPage() {
 
   const handleSubmit = async () => {
     if (saving) return;
+
     setSaving(true);
     setError(null);
 
@@ -314,6 +315,7 @@ export default function BSWDApplicationPage() {
         `applicationDetail:${applicationData.id}`,
         JSON.stringify({ summary: applicationData, formData })
       );
+
       localStorage.setItem(
         "currentApplication",
         JSON.stringify(applicationData)
@@ -337,7 +339,7 @@ export default function BSWDApplicationPage() {
   };
 
   const handleStepClick = (step: number) => {
-    if (!DEV_MODE && step > maxStep) return;
+    if (step > maxStep) return;
     setCurrentStep(step);
   };
 
@@ -406,30 +408,26 @@ export default function BSWDApplicationPage() {
             <button
               key={stepInfo.stepName}
               onClick={() => handleStepClick(index + 1)}
-              disabled={!DEV_MODE && index + 1 > maxStep}
+              disabled={index + 1 > maxStep}
               ref={(el) => {
                 stepRefs.current[index] = el;
               }}
               className="flex flex-col items-center"
             >
               <span
-                className={`flex rounded-full justify-center items-center h-14 w-14 transition-colors font-medium ${
+                className={`flex rounded-full  justify-center items-center h-14 w-14 transition-colors font-medium ${
                   currentStep === index + 1
                     ? "bg-cyan-800 text-white"
                     : "bg-gray-100 text-black"
                 } ${
-                  !DEV_MODE && index + 1 > maxStep
+                  index + 1 > maxStep
                     ? "opacity-40 cursor-not-allowed"
                     : "hover:bg-cyan-700 hover:text-white"
                 }`}
               >
                 <i className={`${stepInfo.stepIconFaClass} text-[150%]`}></i>
               </span>
-              <span
-                className={
-                  !DEV_MODE && index + 1 > maxStep ? "opacity-40" : ""
-                }
-              >
+              <span className={index + 1 > maxStep ? "opacity-40" : ""}>
                 {stepInfo.stepName}
               </span>
             </button>
@@ -457,6 +455,7 @@ export default function BSWDApplicationPage() {
       title="BSWD/CSG-DSE Application Form"
       description="Complete application for Bursary for Students with Disabilities (BSWD) and Canada Student Grant for Services and Equipment"
     >
+      {/* admin button */}
       <div className="mb-3 flex items-center justify-end">
         <Link
           href="/admin"
