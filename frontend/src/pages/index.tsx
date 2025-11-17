@@ -56,7 +56,9 @@ export default function BSWDApplicationPage() {
     submittedDisabilityElsewhere: false,
     previousInstitution: "",
     osapApplication: "full-time",
-
+    osapApplicationStartDate: "",
+    restrictionType: "DEFAULT",
+    queuedForManualReview: false,
     federalNeed: 0,
     provincialNeed: 0,
     hasOSAPRestrictions: false,
@@ -64,7 +66,18 @@ export default function BSWDApplicationPage() {
     hasVerifiedDisability: false,
     disabilityType: "not-verified",
     disabilityVerificationDate: "",
-    functionalLimitations: [],
+    functionalLimitations: [
+      { name: "mobility", label: "Mobility", checked: false },
+      { name: "vision", label: "Vision", checked: false },
+      { name: "hearing", label: "Hearing", checked: false },
+      { name: "learning", label: "Learning", checked: false },
+      { name: "cognitive", label: "Cognitive", checked: false },
+      { name: "mentalHealth", label: "Mental Health", checked: false },
+      { name: "communication", label: "Communication", checked: false },
+      { name: "dexterity", label: "Dexterity", checked: false },
+      { name: "chronicPain", label: "Chronic Pain", checked: false },
+      { name: "attention", label: "Attention/Concentration", checked: false },
+    ],
     needsPsychoEdAssessment: false,
     requestedItems: [],
   });
@@ -98,8 +111,8 @@ export default function BSWDApplicationPage() {
   ];
   const TOTAL_STEPS = stepsInfo.length;
 
-  const isStepComplete = (): boolean => {
-    switch (currentStep) {
+  const isStepComplete = (stepCheck: number): boolean => {
+    switch (stepCheck) {
       case 1:
         return Boolean(
           formData.studentId &&
@@ -115,7 +128,8 @@ export default function BSWDApplicationPage() {
           formData.province &&
           formData.postalCode &&
           formData.country &&
-          formData.hasOsapApplication !== null
+          formData.hasOsapApplication !== null &&
+          formData.osapApplicationStartDate 
         );
 
       case 2: {
@@ -123,56 +137,76 @@ export default function BSWDApplicationPage() {
           formData.previousInstitution;
           return Boolean(
             formData.institution &&
-            formData.institutionType &&
-            formData.studyType &&
-            formData.studyPeriodStart &&
-            formData.studyPeriodEnd &&
-            formData.previousInstitution
+              formData.institutionType &&
+              formData.studyType &&
+              formData.studyPeriodStart &&
+              formData.studyPeriodEnd &&
+              formData.previousInstitution
           );
         }
         return Boolean(
           formData.institution &&
-          formData.institutionType &&
-          formData.studyType &&
-          formData.studyPeriodStart &&
-          formData.studyPeriodEnd
+            formData.institutionType &&
+            formData.studyType &&
+            formData.studyPeriodStart &&
+            formData.studyPeriodEnd
         );
       }
 
       case 3: {
         // Step 3 (OSAP): require application type; if not 'none', needs must be >= 0
         // If restrictions are checked, details must be provided
-        const hasChosenOnFile = formData.osapOnFileStatus === "APPROVED" || formData.osapOnFileStatus === "NONE";
-        const appTypeOk = formData.osapOnFileStatus === "APPROVED" ? formData.osapApplication !== "none" : true;
-        const needsOk = formData.osapOnFileStatus === "APPROVED" ? (!Number.isNaN(Number(formData.federalNeed)) && !Number.isNaN(Number(formData.provincialNeed)) && Number(formData.federalNeed) >= 0 && Number(formData.provincialNeed) >= 0) : true;
+        const hasChosenOnFile =
+          formData.osapOnFileStatus === "APPROVED" ||
+          formData.osapOnFileStatus === "NONE";
+        const appTypeOk =
+          formData.osapOnFileStatus === "APPROVED"
+            ? formData.osapApplication !== "none"
+            : true;
+        const needsOk =
+          formData.osapOnFileStatus === "APPROVED"
+            ? !Number.isNaN(Number(formData.federalNeed)) &&
+              !Number.isNaN(Number(formData.provincialNeed)) &&
+              Number(formData.federalNeed) >= 0 &&
+              Number(formData.provincialNeed) >= 0
+            : true;
         const restrictionsOk = true; // Restrictions never block navigation
         return hasChosenOnFile && appTypeOk && needsOk && restrictionsOk;
       }
-
       case 4: {
         // Disability info step
         // If Psycho-Ed referral is required, email must be non-empty
-        if (formData.needsPsychoEdAssessment && !formData.email?.trim()) return false;
+        if (formData.needsPsychoEdAssessment && !formData.email?.trim())
+          return false;
+        return true;
+      }
+      case 5: {
+        // Assume this step is optional
         return true;
       }
 
       case 6: {
         // Step 6 (Review and Submit): Check if confirmation checkbox is checked
+        // Assume this step is optional
+        return true;
+      }
+      case 7: {
+        // Step 7 (Review and Submit): Check if confirmation checkbox is checked
         return isConfirmed;
       }
       default:
-        return true;
+        return false;
     }
   };
 
   // Memoize canProceed to ensure it updates when isConfirmed changes
   const canProceed = useMemo(() => {
-    return isStepComplete() && !saving;
+    return isStepComplete(currentStep) && !saving;
   }, [currentStep, formData, isConfirmed, saving]);
 
   const handleNext = async () => {
     // Check if current step is complete before proceeding
-    if (!isStepComplete()) {
+    if (!isStepComplete(currentStep)) {
       return;
     }
 
@@ -281,10 +315,12 @@ export default function BSWDApplicationPage() {
 
   // Client component for step bar
   function StepBar() {
-    "use client";
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const stepRefs = useRef<(HTMLButtonElement | null)[]>([]);
+    const prevStepRef = useRef(currentStep);
     useEffect(() => {
+    // Scrolls to top if step is changed
+    if (prevStepRef.current !== currentStep) {
       const el = scrollRef.current;
       const target = stepRefs.current[currentStep - 1];
       if (el && target) {
@@ -294,7 +330,9 @@ export default function BSWDApplicationPage() {
           block: "nearest",
         });
       }
-    }, [currentStep]);
+      prevStepRef.current = currentStep;
+    }
+  }, [currentStep]);
     return (
       <div
         className="overflow-x-scroll pb-4"
@@ -319,7 +357,7 @@ export default function BSWDApplicationPage() {
                   } ${index + 1 > maxStep
                     ? "opacity-40 cursor-not-allowed"
                     : "hover:bg-cyan-700 hover:text-white"
-                  }`}
+                }`}
               >
                 <i className={`${stepInfo.stepIconFaClass} text-[150%]`}></i>
               </span>
@@ -333,13 +371,27 @@ export default function BSWDApplicationPage() {
     );
   }
 
+  // Make sure the current step is complete before moving forward
+  useEffect(() => {
+    // If the form is uncomplete when user has not filled up or user edit the forn
+    if (!isStepComplete(currentStep)) {
+      setMaxStep(currentStep);
+    } else {
+      // Unlock new step (optional: unlock steps that already filled in before)
+      setMaxStep(currentStep + 1);
+      let stepCheck = currentStep + 1;
+      while (isStepComplete(stepCheck)) {
+        setMaxStep(stepCheck + 1);
+        stepCheck++;
+      }
+    }
+  }, [currentStep, formData]);
   return (
     <FormLayout
       title="BSWD/CSG-DSE Application Form"
       description="Complete application for Bursary for Students with Disabilities (BSWD) and Canada Student Grant for Services and Equipment"
     >
-      <div className="mb-6">
-      </div>
+      <div className="mb-6"></div>
       <div className="mb-4 p-4 pb-2 py-6 border rounded-md">
         <StepBar />
       </div>

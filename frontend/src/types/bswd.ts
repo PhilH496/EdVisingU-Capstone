@@ -1,7 +1,12 @@
 // types/bswd.ts
 // Type definitions for BSWD/CSG-DSE application form
 
-export type ApplicationStatus = 'submitted' | 'in-review' | 'in-progress' | 'accepted' | 'denied';
+export type ApplicationStatus =
+  | "submitted"
+  | "in-review"
+  | "in-progress"
+  | "accepted"
+  | "denied";
 
 export interface FormData {
   // Student Information
@@ -19,10 +24,11 @@ export interface FormData {
   postalCode: string;
   country: string;
   hasOsapApplication: boolean | null;
+  osapApplicationStartDate: string;
   
   // Program Information
   institution: string;
-  institutionType: '' | 'public-ontario' | 'private-ontario';
+  institutionType: "" | "public-ontario" | "private-ontario";
   program: string;
   code: string;
   studyPeriodStart: string;
@@ -32,20 +38,26 @@ export interface FormData {
   previousInstitution: string;
 
   // OSAP Information
-  osapApplication: 'full-time' | 'part-time' | 'none';
+  osapApplication: "full-time" | "part-time" | "none";
   federalNeed: number;
   provincialNeed: number;
   hasOSAPRestrictions: boolean;
   restrictionDetails: string;
-  osapOnFileStatus?: 'APPROVED' | 'NONE' | '';
-  queuedForManualReview?: boolean;
-  restrictionType?: 'DEFAULT' | 'OVERPAYMENT' | 'BANKRUPTCY' | 'FALSE_INFO' | 'LOAN_FORGIVENESS_REVIEW' | 'OTHER';
+  osapOnFileStatus?: "APPROVED" | "NONE" | "";
+  queuedForManualReview: boolean;
+  restrictionType:
+    | "DEFAULT"
+    | "OVERPAYMENT"
+    | "BANKRUPTCY"
+    | "FALSE_INFO"
+    | "LOAN_FORGIVENESS_REVIEW"
+    | "OTHER";
 
   // Disability Information
   hasVerifiedDisability: boolean;
-  disabilityType: 'permanent' | 'persistent-prolonged' | 'not-verified';
+  disabilityType: "permanent" | "persistent-prolonged" | "not-verified";
   disabilityVerificationDate: string;
-  functionalLimitations: string[];
+  functionalLimitations: { name: string; label: string; checked: boolean }[];
   needsPsychoEdAssessment: boolean;
 
   // Requested Services & Equipment
