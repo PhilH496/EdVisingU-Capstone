@@ -64,7 +64,7 @@ export default function AdminDashboardPage() {
   const [toolbarMsg, setToolbarMsg] = useState<string>("");
   const [editMode, setEditMode] = useState<boolean>(false);
 
-  // ---------- storage I/O ----------
+  // storage I/O 
   useEffect(() => {
     (async () => {
       const summaries = await storeLoadSummaries();
@@ -125,7 +125,7 @@ export default function AdminDashboardPage() {
     );
   };
 
-  // ---------- per-row save ----------
+  // per-row save
   const saveRow = async (r: Row) => {
     const now = new Date().toISOString();
 
@@ -154,7 +154,7 @@ export default function AdminDashboardPage() {
     setTimeout(() => updateRow(r.id, { _saveMsg: "" }), 1200);
   };
 
-  // ---------- bulk selection ----------
+  // bulk selection 
   const selectedCount = rows.filter((r: Row) => r._selected).length;
 
   const toggleSelectAll = (checked: boolean) => {
@@ -176,7 +176,7 @@ export default function AdminDashboardPage() {
     );
     setRows(updated);
 
-    // persist each selected snapshot change (keeps attachments/assignee/etc.)
+    // persist each selected snapshot change
     await Promise.all(
       updated.map(async (r: Row) => {
         if (r._selected) await storeSaveSnapshotMerge(r);
@@ -202,7 +202,7 @@ export default function AdminDashboardPage() {
     setTimeout(() => setToolbarMsg(""), 1400);
   };
 
-  // ---------- render ----------
+  // render 
   return (
     <AdminLayout
       title="BSWD Admin Dashboard"
