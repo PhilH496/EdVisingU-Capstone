@@ -39,10 +39,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 // Icons
 import { CheckIcon, ChevronsUpDownIcon, ChevronDownIcon } from "lucide-react";
 // Utilities, types and hooks
-import { format, set } from "date-fns";
+import { endOfMonth, format, set } from "date-fns";
 import { cn } from "@/lib/utils";
 import { FormData } from "@/types/bswd";
 import { useDateRange } from "@/hooks/UseDateRange";
+import { date } from "zod";
 
 const institutions = [
   {
@@ -357,9 +358,19 @@ export function ProgramInfoStep({
             </PopoverTrigger>
             <PopoverContent className="w-auto overflow-hidden p-0" align="start">
               <Calendar
+                defaultMonth={start.date || new Date(2025, 0)}
+                startMonth={new Date(2025, 0)}
+                endMonth={new Date(2026, 11)}
                 mode="single"
                 selected={start.date}
                 captionLayout="dropdown"
+                disabled={(date) => {
+                  // Disable dates after the end date if end date is selected
+                  if (end.date) {
+                    return date > end.date
+                  }
+                  return false
+                }}
                 onSelect={(date) => {
                   start.setDate(date)
                   start.setOpen(false)
@@ -393,9 +404,18 @@ export function ProgramInfoStep({
             </PopoverTrigger>
             <PopoverContent className="w-auto overflow-hidden p-0" align="start">
               <Calendar
+                defaultMonth={end.date || new Date(2026, 11)}
+                startMonth={new Date(2025, 0)}
+                endMonth={new Date(2026, 11)}
                 mode="single"
                 selected={end.date}
                 captionLayout="dropdown"
+                disabled={(date) => {
+                  if (start.date) {
+                    return date < start.date
+                  }
+                  return false
+                }}
                 onSelect={(date) => {
                   end.setDate(date)
                   end.setOpen(false)
