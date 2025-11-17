@@ -87,42 +87,40 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
       </div>
 
       {/* Disability Verification Date */}
-      <div>
-        <div className="flex flex-col gap-3">
-          <Label htmlFor="endDate" className="block text-base font-medium mb-1 text-brand-text-gray">
-            Disability Verification Date <span className="text-sm text-brand-light-red mt-1">*</span>
-          </Label>
-          <Popover open={verificationDate.open} onOpenChange={verificationDate.setOpen}>
-            <PopoverTrigger asChild disabled={isVerificationDisabled}>
-              <Button
-                variant="outline"
-                id="endDate"
-                className="w-full max-w-xs justify-between font-normal"
-              >
-                {verificationDate.date ? verificationDate.date.toLocaleDateString() : "Select date"}
-                <ChevronDownIcon />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={verificationDate.date}
-                captionLayout="dropdown"
-                onSelect={(date) => {
-                  verificationDate.setDate(date)
-                  verificationDate.setOpen(false)
-                  if (date) {
-                    setFormData((prev) => ({
-                      ...prev,
-                      disabilityVerificationDate: format(date, "dd/MM/yyyy")
-                    }))
-                  }
-                }}
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-      )}
+      <div className="flex flex-col gap-3">
+        <Label htmlFor="endDate" className="block text-base font-medium mb-1 text-brand-text-gray">
+          Disability Verification Date <span className="text-sm text-brand-light-red mt-1">*</span>
+        </Label>
+        <Popover open={verificationDate.open} onOpenChange={verificationDate.setOpen}>
+          <PopoverTrigger asChild disabled={isVerificationDisabled}>
+            <Button
+              variant="outline"
+              id="endDate"
+              className="w-full max-w-xs justify-between font-normal"
+            >
+              {verificationDate.date ? verificationDate.date.toLocaleDateString() : "Select date"}
+              <ChevronDownIcon />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={verificationDate.date}
+              captionLayout="dropdown"
+              onSelect={(date) => {
+                verificationDate.setDate(date)
+                verificationDate.setOpen(false)
+                if (date) {
+                  setFormData((prev) => ({
+                    ...prev,
+                    disabilityVerificationDate: format(date, "dd/MM/yyyy")
+                  }))
+                }
+              }}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
 
       {/* Disability Type Radio Group */}
       {formData.disabilityType !== "not-verified" && (
