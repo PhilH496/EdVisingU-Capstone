@@ -1,5 +1,5 @@
 /**
- * Application Detail (Read-Only + Inline Edit Mode)
+ * Application Detail 
  *
  * Focused, readable view of the submitted student application.
  * Renders:
@@ -10,7 +10,7 @@
  *  - Disability Info (chips for functional limitations)
  *  - Services & Equipment (table for requested items)
  *
- * Edit Mode uses the same step components (via shims) then persists via adminStore.
+ * Edit Mode uses the same step components then persists via adminStore.
  */
 
 import { useRouter } from "next/router";
@@ -18,7 +18,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { AdminLayout } from "@/components/bswd/AdminLayout";
 
-// === using app’s existing types/steps ===
+// using app’s existing types/steps
 import { FormData } from "@/types/bswd";
 import { StudentInfoStep } from "@/components/bswd/steps/StudentInfoStep";
 import { ProgramInfoStep } from "@/components/bswd/steps/ProgramInfoStep";
@@ -28,7 +28,7 @@ import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
 import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
 import { StudentInfoSchema } from "@/schemas/StudentInfoSchema";
 
-// === central store I/O (Supabase + local) ===
+// central store I/O (Supabase + local) 
 import {
   AppSummary as StoreSummary,
   Snapshot as StoreSnapshot,
@@ -37,7 +37,7 @@ import {
   saveApplicationsList as storeSaveApplicationsList,
 } from "@/lib/adminStore";
 
-// --- shims to pass through readOnly while keeping step prop types unchanged ---
+// pass through readOnly while keeping step prop types unchanged 
 const StudentInfoStepShim = ({
   formData,
   setFormData,
@@ -188,7 +188,7 @@ export default function AdminApplicationDetailPage() {
     !!editForm &&
     JSON.stringify(initialSnapshot.current) !== JSON.stringify(editForm);
 
-  // Persist snapshot + refresh list (centralized store)
+  // Persist snapshot and  refresh list (centralized store)
   const persistEverywhere = async (fd: FormData) => {
     if (!summary) return;
 
@@ -230,7 +230,7 @@ export default function AdminApplicationDetailPage() {
     initialSnapshot.current = fd;
   };
 
-  // Validate a minimal set from Student block and (optionally) persist via your service
+  // Validate a minimal set from Student block 
   const validateAndSaveStudentBlock = async (fd: FormData) => {
     try {
       const [dayStr, monthStr, yearStr] = (fd.dateOfBirth || "").split("/");
@@ -261,7 +261,7 @@ export default function AdminApplicationDetailPage() {
         return false;
       }
 
-      // You may also persist to a dedicated table/service here if desired.
+      // it may also persist to a dedicated table/service here
       return true;
     } catch (e) {
       console.error(e);
