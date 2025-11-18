@@ -45,7 +45,7 @@ export default function BSWDApplicationPage() {
     province: "",
     postalCode: "",
     country: "Canada",
-    hasOsapApplication: null,
+    hasOsapApplication: false,
     institution: "",
     institutionType: "",
     program: "",
