@@ -8,59 +8,27 @@
 import { FormData } from "@/types/bswd";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
+import { ChevronDownIcon } from "lucide-react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { useRef, useState } from "react";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { useDateRange } from "@/hooks/UseDateRange";
 
 interface StudentInfoStepProps {
   formData: FormData;
   setFormData: (data: FormData | ((prev: FormData) => FormData)) => void;
 }
 
-export function StudentInfoStep({
-  formData,
-  setFormData,
-}: StudentInfoStepProps) {
-  const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
-  const [osapStartDate, setOsapStartDate] = useState<Date | null>(null);
-  const dobRef = useRef<HTMLInputElement>(null);
-  const osapDateRef = useRef<HTMLInputElement>(null);
-
+export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps) {
+  // Lock all fields on this page when OSAP application = "No"
   const isLocked = formData.hasOsapApplication === false;
-  const lockCls = (base: string) =>
-    base +
-    " " +
-    (isLocked
-      ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200"
-      : "focus:outline-none focus:ring-2 focus:ring-brand-dark-blue");
-
-  const handleSelectDOB = (selected: Date | undefined) => {
-    if (!selected) return;
-    setDateOfBirth(selected);
-    const formattedDate = format(selected, "dd/MM/yyyy");
-    if (dobRef.current) {
-      dobRef.current.value = formattedDate;
-    }
-    setFormData((prev) => ({ ...prev, dateOfBirth: formattedDate }));
-  };
-
-  const handleSelectOsapDate = (selected: Date | undefined) => {
-    if (!selected) return;
-    setOsapStartDate(selected);
-    const formattedDate = format(selected, "dd/MM/yyyy");
-    if (osapDateRef.current) {
-      osapDateRef.current.value = formattedDate;
-    }
-    setFormData((prev) => ({
-      ...prev,
-      osapApplicationStartDate: formattedDate,
-    }));
-  };
+  const lockCls = (base: string) => base + " " + (isLocked ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200" : "focus:outline-none focus:ring-2 focus:ring-brand-dark-blue");
+  const dob = useDateRange();
 
   return (
     <div className="space-y-4">
@@ -75,19 +43,12 @@ export function StudentInfoStep({
         </label>
         <select
           id="hasOsapApplication"
-          value={
-            formData.hasOsapApplication === null
-              ? ""
-              : formData.hasOsapApplication
-              ? "yes"
-              : "no"
-          }
+          value={formData.hasOsapApplication === null ? '' : (formData.hasOsapApplication ? 'yes' : 'no')}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-            setFormData((prev) => ({
+            setFormData(prev => ({
               ...prev,
-              hasOsapApplication: e.target.value === "yes",
-              osapApplication:
-                e.target.value === "yes" ? prev.osapApplication : "none",
+              hasOsapApplication: e.target.value === 'yes',
+              osapApplication: e.target.value === 'yes' ? prev.osapApplication : 'none'
             }))
           }
           className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
@@ -97,60 +58,8 @@ export function StudentInfoStep({
           <option value="no">No</option>
         </select>
       </div>
+      <h2 className="text-xl font-semibold mb-4">Section A: Student Information</h2>
 
-      {formData.hasOsapApplication === true && (
-        <div>
-          <label
-            htmlFor="osapApplicationStartDate"
-            className="block text-sm font-medium mb-1 text-brand-text-gray"
-          >
-            OSAP Application Start Date (DD/MM/YYYY){" "}
-            <span className="text-sm text-brand-light-red mt-1">*</span>
-          </label>
-          <Popover>
-            <div className="relative w-full">
-              <Input
-                id="osapApplicationStartDate"
-                ref={osapDateRef}
-                type="text"
-                placeholder="DD/MM/YYYY"
-                value={formData.osapApplicationStartDate || ""}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({
-                    ...prev,
-                    osapApplicationStartDate: value,
-                  }));
-                }}
-              />
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  <CalendarIcon className="h-4 w-4" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent
-                side="bottom"
-                align="end"
-                className="w-auto p-0 z-50"
-              >
-                <Calendar
-                  mode="single"
-                  selected={osapStartDate ?? undefined}
-                  onSelect={handleSelectOsapDate}
-                />
-              </PopoverContent>
-            </div>
-          </Popover>
-        </div>
-      )}
-
-      <h2 className="text-xl font-semibold mb-4">
-        Section A: Student Information
-      </h2>
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
@@ -266,58 +175,38 @@ export function StudentInfoStep({
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <label
-            htmlFor="dateOfBirth"
-            className="block text-sm font-medium mb-1 text-brand-text-gray"
-          >
-            Date of Birth (DD/MM/YYYY){" "}
-            <span className="text-sm text-brand-light-red mt-1">*</span>
-          </label>
-          <Popover>
-            <div className="relative w-full">
-              <Input
-                id="dateOfBirth"
-                ref={dobRef}
-                type="text"
-                placeholder="DD/MM/YYYY"
-                value={formData.dateOfBirth}
+          <Label htmlFor="dob" className="block text-base font-medium mb-1 text-brand-text-gray">
+            Date of Birth <span className="text-sm text-brand-light-red mt-1">*</span>
+          </Label>
+          <Popover open={dob.open} onOpenChange={dob.setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                id="dob"
                 disabled={isLocked}
-                className={lockCls(
-                  "w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm"
-                )}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({ ...prev, dateOfBirth: value }));
+                className="w-full justify-between font-normal"
+              >
+                {dob.date ? dob.date.toLocaleDateString() : "Select date"}
+                <ChevronDownIcon />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={dob.date}
+                captionLayout="dropdown"
+                onSelect={(date) => {
+                  dob.setDate(date)
+                  dob.setOpen(false)
+                  if (date) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      dateOfBirth: format(date, "dd/MM/yyyy")
+                    }))
+                  }
                 }}
               />
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  disabled={isLocked}
-                  aria-disabled={isLocked}
-                  className={`absolute right-3 top-1/2 -translate-y-1/2 ${
-                    isLocked
-                      ? "text-gray-300"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <CalendarIcon className="h-4 w-4" />
-                </button>
-              </PopoverTrigger>
-              {!isLocked && (
-                <PopoverContent
-                  side="bottom"
-                  align="end"
-                  className="w-auto p-0 z-50"
-                >
-                  <Calendar
-                    mode="single"
-                    selected={dateOfBirth ?? undefined}
-                    onSelect={handleSelectDOB}
-                  />
-                </PopoverContent>
-              )}
-            </div>
+            </PopoverContent>
           </Popover>
         </div>
 

@@ -30,5 +30,6 @@ backend/app/__pycache__
 **/.env.local
 **/.env*.local
 
+.DS_Store
 # Supabase temporary files
 supabase/.temp/

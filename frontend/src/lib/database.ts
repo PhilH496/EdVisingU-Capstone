@@ -1,69 +1,189 @@
 import { supabase } from "./supabase";
-
-type SaveStudentInfoPayload = {
-  studentId: string;
-  oen: string;
-  firstName: string;
-  lastName: string;
-  dateOfBirth: Date;
-  sin: string;
-  email: string;
-  phone?: string;
-  address: string;
-  city: string;
-  province: string;
-  postalCode: string;
-  country: string;
-  hasOsapApplication: boolean | null;
+import { FormData } from "@/types/bswd";
+import { DeterministicChecksResult } from "./deterministicChecks";
+import { Database } from "@/types/supabase";
+type StudentInsert = Database["public"]["Tables"]["student"]["Insert"];
+type OsapInfoInsert = Database["public"]["Tables"]["osap_info"]["Insert"];
+type DisabilityInfoInsert = Database["public"]["Tables"]["disability_info"]["Insert"];
+type ProgramInfoInsert = Database["public"]["Tables"]["program_info"]["Insert"];
+type RequestedItemsInsert = Database["public"]["Tables"]["requested_items"]["Insert"]
+type ManualReviewPayload = StudentInsert & ProgramInfoInsert & OsapInfoInsert & DisabilityInfoInsert & {
+  requested_items?: RequestedItemsInsert[]
 };
 
-export const saveStudentInfo = async (formData: SaveStudentInfoPayload) => {
-  const dobIso = formData.dateOfBirth.toISOString().slice(0, 10);
-  const sinDigits = formData.sin.replace(/\D/g, "");
-  const phoneDigits = formData.phone ? formData.phone.replace(/\D/g, "") : null;
+interface AnalysisPayload {
+  manualReviewData: Partial<ManualReviewPayload>;
+  deterministicChecksData: DeterministicChecksResult;
+}
 
-  const { data, error } = await supabase
+// Helper to conditionally add optional fields
+const addIfPresent = (obj: Record<string, any>, key: string, value: any): void => {
+  if (value != null && value !== "" && value !== false) {
+    obj[key] = value;
+  }
+};
+
+/**
+ * Saves complete form submission to multiple Supabase tables
+ * @param formData - Complete form data object
+ * @returns Object containing inserted student_id
+ * @throws Error if any insert operation fails
+ */
+export const saveSubmission = async (formData: FormData) => {
+  // 1. Insert into student table
+  const studentPayload: StudentInsert = {
+    has_osap_application: formData.hasOsapApplication,
+    student_id: +formData.studentId,
+    oen: parseInt(formData.oen),
+    first_name: formData.firstName,
+    last_name: formData.lastName,
+    dob: formData.dateOfBirth,
+    sin: parseInt(formData.sin),
+    email: formData.email,
+    address: formData.address,
+    city: formData.city,
+    province: formData.province,
+    postal_code: parseInt(formData.postalCode),
+    country: formData.country,
+  };
+
+  const { data: studentData, error: studentError } = await supabase
     .from("student")
-    .upsert(
-      {
-        student_id: Number(formData.studentId),
-        oen: formData.oen,
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        dob: dobIso,
-        sin: sinDigits,
-        email: formData.email.trim(),
-        phone: phoneDigits,
-        address: formData.address,
-        city: formData.city,
-        province: formData.province,
-        postal_code: formData.postalCode,
-        country: formData.country,
-        has_osap_application: formData.hasOsapApplication ?? false,
-      },
-      { onConflict: "student_id" }
-    )
+    .insert(studentPayload)
     .select()
     .single();
 
-  if (error) throw error;
-  return data.student_id as number;
-};
+  if (studentError) throw studentError;
+  const studentId = studentData.student_id;
 
-export const saveProgramInfo = async (studentId: number, formData: any) => {
-  const { error } = await supabase.from("program_info").insert({
+  // 2. Insert into program_info table
+  const programPayload: ProgramInfoInsert = {
     student_id: studentId,
     institution_name: formData.institution,
     institution_type: formData.institutionType,
-    program: formData.program,
     study_type: formData.studyType,
     study_start: formData.studyPeriodStart,
     study_end: formData.studyPeriodEnd,
-    code: formData.code ? Number(formData.code) : null,
-    previous_institution: formData.previousInstitution || null,
-    submitted_disability_elsewhere:
-      formData.submittedDisabilityElsewhere === "yes",
-  });
+    submitted_disability_elsewhere: formData.submittedDisabilityElsewhere,
+  };
+  addIfPresent(programPayload, "program", formData.program);
+  addIfPresent(programPayload, "code", formData.code);
+  addIfPresent(programPayload, "previous_institution", formData.previousInstitution);
 
-  if (error) throw error;
+  const { error: programError } = await supabase
+    .from("program_info")
+    .insert(programPayload);
+
+  if (programError) throw programError;
+
+  // 3. Insert into osap_info table
+  const osapPayload: OsapInfoInsert = {
+    student_id: studentId,
+    application_type: formData.osapApplication,
+    federal_need: formData.federalNeed,
+    provincial_need: formData.provincialNeed,
+    has_restrictions: formData.hasOSAPRestrictions,
+  };
+  addIfPresent(osapPayload, "restriction_type", formData.restrictionType);
+
+  const { error: osapError } = await supabase
+    .from("osap_info")
+    .insert(osapPayload);
+
+  if (osapError) throw osapError;
+
+  // 4. Insert into disability_info table
+  const disabilityPayload: DisabilityInfoInsert = {
+    student_id: studentId,
+    disability_type: formData.disabilityType,
+    needs_psycho_ed_assessment: formData.needsPsychoEdAssessment,
+  };
+  addIfPresent(disabilityPayload, "disability_verification_date", formData.disabilityVerificationDate);
+
+  // Handle functional limitations - convert object to array or use array directly
+  if (formData.functionalLimitations) {
+    if (Array.isArray(formData.functionalLimitations) && formData.functionalLimitations.length > 0) {
+      disabilityPayload.functional_limitations = formData.functionalLimitations.join(', ');
+    } else if (typeof formData.functionalLimitations === 'object') {
+      // Convert object to array of keys where value is true
+      const limitations = Object.keys(formData.functionalLimitations).filter(
+        key => (formData.functionalLimitations as any)[key] === true
+      );
+      if (limitations.length > 0) {
+        disabilityPayload.functional_limitations = limitations.join(', ');
+      }
+    }
+  }
+
+  const { error: disabilityError } = await supabase
+    .from("disability_info")
+    .insert(disabilityPayload);
+
+  if (disabilityError) throw disabilityError;
+
+  // 5. Insert requested items (if any)
+  if (formData.requestedItems && formData.requestedItems.length > 0) {
+    const requestedItemsPayload = formData.requestedItems.map(item => ({
+      student_id: studentId,
+      category: item.category,
+      item: item.item,
+      cost: item.cost,
+      funding_source: item.fundingSource,
+    }));
+
+    const { error: itemsError } = await supabase
+      .from("requested_items")
+      .insert(requestedItemsPayload);
+
+    if (itemsError) throw itemsError;
+  }
+
+  return { student_id: studentId };
+};
+
+/**
+ * Builds a clean structured JSON payload for AI model analysis
+ * @param formData - Raw form submission data
+ * @param ruleResults - Deterministic rule evaluation results
+ * @returns Structured JSON object with student data, rule evaluation, and summary context
+ */
+export const buildAnalysisPayload = (formData: FormData, deterministicChecksData: DeterministicChecksResult): AnalysisPayload => {
+  // Helper to convert null/undefined to empty string
+  const cleanValue = (value: unknown): string => {
+    if (value === null || value === undefined) return "";
+    return String(value);
+  };
+
+  // Any type that has cleanValue() is an optional type from the form
+  const manualReviewData: Partial<ManualReviewPayload> = {
+    student_id: parseInt(formData.studentId),
+    oen: parseInt(formData.oen),
+    first_name: formData.firstName,
+    last_name: formData.lastName,
+    address: formData.address,
+    city: formData.city,
+    province: formData.province,
+    postal_code: parseInt(formData.postalCode),
+    country: formData.country,
+    institution_name: formData.institution,
+    institution_type: formData.institutionType,
+    federal_need: formData.federalNeed,
+    provincial_need: formData.provincialNeed,
+    restriction_type: cleanValue(formData.restrictionType),
+    disability_verification_date: cleanValue(formData.disabilityVerificationDate),
+    functional_limitations: cleanValue(formData.functionalLimitations.join(', ')),
+    needs_psycho_ed_assessment: formData.needsPsychoEdAssessment,
+    submitted_disability_elsewhere: formData.submittedDisabilityElsewhere,
+    requested_items: formData.requestedItems?.map(item => ({
+      category: item.category,
+      item: item.item,
+      cost: item.cost,
+      funding_source: item.fundingSource,
+    }))
+  };
+
+  return {
+    manualReviewData,
+    deterministicChecksData
+  };
 };
