@@ -4,6 +4,9 @@
 frontend/node_modules/
 frontend/.next/
 
+# frontend debugger
+frontend/.vscode/launch.json
+
 ## env files
 frontend/.env
 frontend/.env.*
@@ -26,3 +29,5 @@ backend/app/__pycache__
 **/.env
 **/.env.local
 **/.env*.local
+
+.DS_Store

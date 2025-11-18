@@ -10,7 +10,6 @@
 
 // Base React imports
 import { useState, useRef } from "react";
-
 // shadcn UI components
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
@@ -37,14 +36,14 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
 // Icons
-import { CheckIcon, ChevronsUpDownIcon, CalendarIcon } from "lucide-react";
-
-// Utilities & types
-import { format } from "date-fns";
+import { CheckIcon, ChevronsUpDownIcon, ChevronDownIcon } from "lucide-react";
+// Utilities, types and hooks
+import { endOfMonth, format, set } from "date-fns";
 import { cn } from "@/lib/utils";
 import { FormData } from "@/types/bswd";
+import { useDateRange } from "@/hooks/UseDateRange";
+import { date } from "zod";
 
 const institutions = [
   {
@@ -151,39 +150,9 @@ export function ProgramInfoStep({
   setFormData,
 }: ProgramInfoStepProps) {
   const [value, setValue] = useState("");
-  const [open, setOpen] = useState(false);
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
-  const startRef = useRef<HTMLInputElement>(null);
-  const endRef = useRef<HTMLInputElement>(null);
-
-const handleSelectStart = (selected: Date | undefined) => {
-  if (!selected) return;
-  setStartDate(selected);
-  const formattedDate = format(selected, "dd/MM/yyyy"); 
-
-  if (startRef.current)
-    startRef.current.value = formattedDate;
-    // Save the formatted date to formData
-    setFormData((prev) => ({ 
-        ...prev, 
-        studyPeriodStart: formattedDate 
-    })); 
-};
-
-const handleSelectEnd = (selected: Date | undefined) => {
-  if (!selected) return;
-  setEndDate(selected);
-  const formattedDate = format(selected, "dd/MM/yyyy"); 
-
-  if (endRef.current) endRef.current.value = formattedDate;
-
-    // Save the formatted date to formData
-    setFormData((prev) => ({ 
-        ...prev, 
-        studyPeriodEnd: formattedDate 
-    }));
-};
+  const [institutionOpen, setInstitutionOpen] = useState(false);
+  const start = useDateRange();
+  const end = useDateRange();
 
   return (
     <div className="space-y-4">
@@ -197,21 +166,21 @@ const handleSelectEnd = (selected: Date | undefined) => {
             htmlFor="institutionName"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Institution Name *
+            Institution Name <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
-          <Popover open={open} onOpenChange={setOpen}>
+          <Popover open={institutionOpen} onOpenChange={setInstitutionOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
                 role="combobox"
-                aria-expanded={open}
+                aria-expanded={institutionOpen}
                 className="w-full justify-start text-left"
               >
                 {formData.institution
                   ? institutions.find(
-                      (institution) =>
-                        institution.value === formData.institution
-                    )?.label
+                    (institution) =>
+                      institution.value === formData.institution
+                  )?.label
                   : "Search for OSAP-approved institutions"}
                 <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
@@ -237,7 +206,7 @@ const handleSelectEnd = (selected: Date | undefined) => {
                             ...prev,
                             institution: newValue,
                           }));
-                          setOpen(false);
+                          setInstitutionOpen(false);
                         }}
                       >
                         {institution.label}
@@ -264,7 +233,7 @@ const handleSelectEnd = (selected: Date | undefined) => {
             htmlFor="institutionType"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Institution Type *
+            Institution Type <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Select
             value={formData.institutionType}
@@ -343,7 +312,7 @@ const handleSelectEnd = (selected: Date | undefined) => {
             htmlFor="studyType"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Study Type *
+            Study Type <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Select
             value={formData.studyType}
@@ -370,98 +339,95 @@ const handleSelectEnd = (selected: Date | undefined) => {
 
       <div className="border-t pt-4 grid md:grid-cols-2 gap-4 ">
         {/* Study Start Date div */}
-        <div>
-          <label
-            htmlFor="studyPeriodStart"
-            className="block text-base font-medium mb-1 text-brand-text-gray"
-          >
-            Study Start Date *
-          </label>
-          <Popover>
-            <div className="w-full relative">
-              <input
-                id="studyPeriodStart"
-                ref={startRef}
-                type="text" //Text disables native date picker
-                placeholder="DD/MM/YYYY"
-                value={formData.studyPeriodStart}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm"
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({ 
-                    ...prev, 
-                    studyPeriodStart: value 
-                  }));
+        <div className="flex flex-col gap-3">
+          <Label
+            htmlFor="startDate"
+            className="block text-base font-medium mb-1 text-brand-text-gray">
+            Study Start Date <span className="text-sm text-brand-light-red mt-1">*</span>
+          </Label>
+          <Popover open={start.open} onOpenChange={start.setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                id="startDate"
+                className="w-full justify-between font-normal"
+              >
+                {start.date ? start.date.toLocaleDateString() : "Select date"}
+                <ChevronDownIcon />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+              <Calendar
+                defaultMonth={start.date || new Date(2025, 0)}
+                startMonth={new Date(2025, 0)}
+                endMonth={new Date(2026, 11)}
+                mode="single"
+                selected={start.date}
+                captionLayout="dropdown"
+                disabled={(date) => {
+                  // Disable dates after the end date if end date is selected
+                  if (end.date) {
+                    return date > end.date
+                  }
+                  return false
+                }}
+                onSelect={(date) => {
+                  start.setDate(date)
+                  start.setOpen(false)
+                  if (date) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      studyPeriodStart: format(date, "dd/MM/yyyy")
+                    }))
+                  }
                 }}
               />
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  <CalendarIcon className="h-4 w-4" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent
-                side="bottom"
-                align="end"
-                className="w-auto p-0 z-50"
-              >
-                <Calendar
-                  mode="single"
-                  selected={startDate ?? undefined}
-                  onSelect={handleSelectStart}
-                />
-              </PopoverContent>
-            </div>
+            </PopoverContent>
           </Popover>
         </div>
 
         {/* Study End Date div */}
-        <div>
-          <label
-            htmlFor="studyPeriodEnd"
-            className="block text-base font-medium mb-1 text-brand-text-gray"
-          >
-            Study End Date *
-          </label>
-          <Popover>
-            <div className="w-full relative">
-              <input
-                id="studyPeriodEnd"
-                ref={endRef}
-                type="text"
-                placeholder="DD/MM/YYYY"
-                value={formData.studyPeriodEnd}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({ 
-                    ...prev, 
-                    studyPeriodEnd: value 
-                  }));
-                }}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm"
-              />
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  <CalendarIcon className="h-4 w-4" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent
-                side="bottom"
-                align="end"
-                className="w-auto p-0 z-50"
+        <div className="flex flex-col gap-3">
+          <Label htmlFor="endDate" className="block text-base font-medium mb-1 text-brand-text-gray">
+            Study End Date <span className="text-sm text-brand-light-red mt-1">*</span>
+          </Label>
+          <Popover open={end.open} onOpenChange={end.setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                id="endDate"
+                className="w-full justify-between font-normal"
               >
-                <Calendar
-                  mode="single"
-                  selected={endDate ?? undefined}
-                  onSelect={handleSelectEnd}
-                />
-              </PopoverContent>
-            </div>
+                {end.date ? end.date.toLocaleDateString() : "Select date"}
+                <ChevronDownIcon />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+              <Calendar
+                defaultMonth={end.date || new Date(2026, 11)}
+                startMonth={new Date(2025, 0)}
+                endMonth={new Date(2026, 11)}
+                mode="single"
+                selected={end.date}
+                captionLayout="dropdown"
+                disabled={(date) => {
+                  if (start.date) {
+                    return date < start.date
+                  }
+                  return false
+                }}
+                onSelect={(date) => {
+                  end.setDate(date)
+                  end.setOpen(false)
+                  if (date) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      studyPeriodEnd: format(date, "dd/MM/yyyy")
+                    }))
+                  }
+                }}
+              />
+            </PopoverContent>
           </Popover>
         </div>
       </div>
@@ -471,14 +437,14 @@ const handleSelectEnd = (selected: Date | undefined) => {
         <label className="block text-base font-medium mb-2 text-left text-brand-text-gray">
           Has the student submitted a completed OSAP Disability Verification
           Form or other disability documentation while attending another
-          institution? *
+          institution? <span className="text-sm text-brand-light-red mt-1">*</span>
         </label>
         <RadioGroup
-          value={formData.submittedDisabilityElsewhere || "no"}
+          value={formData.submittedDisabilityElsewhere ? "yes" : "no"}
           onValueChange={(value) =>
             setFormData((prev) => ({
               ...prev,
-              submittedDisabilityElsewhere: value as "yes",
+              submittedDisabilityElsewhere: value === "yes",
             }))
           }
           className="flex items-center justify-left space-x-6 mb-3"
@@ -494,10 +460,10 @@ const handleSelectEnd = (selected: Date | undefined) => {
         </RadioGroup>
 
         {/* Previous institution combobox (used when "Yes") */}
-        {formData.submittedDisabilityElsewhere === "yes" && (
+        {formData.submittedDisabilityElsewhere === true && (
           <div className="mb-3 text-left">
             <label className="block text-sm font-medium mb-1 text-brand-text-gray">
-              Previous institution *
+              Previous institution <span className="text-sm text-brand-light-red mt-1">*</span>
             </label>
 
             <Popover>
@@ -510,8 +476,8 @@ const handleSelectEnd = (selected: Date | undefined) => {
                 >
                   {formData.previousInstitution
                     ? institutions.find(
-                        (inst) => inst.value === formData.previousInstitution
-                      )?.label
+                      (inst) => inst.value === formData.previousInstitution
+                    )?.label
                     : "Search previous institution..."}
                   <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
