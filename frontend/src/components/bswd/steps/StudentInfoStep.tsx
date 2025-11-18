@@ -60,55 +60,6 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       </div>
       <h2 className="text-xl font-semibold mb-4">Section A: Student Information</h2>
 
-      {formData.hasOsapApplication === true && (
-        <div>
-          <label
-            htmlFor="osapApplicationStartDate"
-            className="block text-sm font-medium mb-1 text-brand-text-gray"
-          >
-            OSAP Application Start Date (DD/MM/YYYY){" "}
-            <span className="text-sm text-brand-light-red mt-1">*</span>
-          </label>
-          <Popover>
-            <div className="relative w-full">
-              <Input
-                id="osapApplicationStartDate"
-                ref={osapDateRef}
-                type="text"
-                placeholder="DD/MM/YYYY"
-                value={formData.osapApplicationStartDate || ""}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({
-                    ...prev,
-                    osapApplicationStartDate: value,
-                  }));
-                }}
-              />
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  <CalendarIcon className="h-4 w-4" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent
-                side="bottom"
-                align="end"
-                className="w-auto p-0 z-50"
-              >
-                <Calendar
-                  mode="single"
-                  selected={osapStartDate ?? undefined}
-                  onSelect={handleSelectOsapDate}
-                />
-              </PopoverContent>
-            </div>
-          </Popover>
-        </div>
-      )}
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
