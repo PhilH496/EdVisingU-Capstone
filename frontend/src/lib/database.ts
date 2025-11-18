@@ -85,7 +85,6 @@ export const saveSubmission = async (formData: FormData) => {
     has_restrictions: formData.hasOSAPRestrictions,
   };
   addIfPresent(osapPayload, "restriction_type", formData.restrictionType);
-  addIfPresent(osapPayload, "queued_for_manual_review", formData.queuedForManualReview);
 
   const { error: osapError } = await supabase
     .from("osap_info")

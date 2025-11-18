@@ -32,16 +32,6 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
   const lockCls = (base: string) => base + " " + (isLocked ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200" : "focus:outline-none focus:ring-2 focus:ring-brand-dark-blue");
   const dob = useDateRange();
 
-  const handleSelectOsapDate = (selected: Date | undefined) => {
-    if (!selected) return;
-    setOsapStartDate(selected);
-    const formattedDate = format(selected, "dd/MM/yyyy");
-    if (osapDateRef.current) {
-      osapDateRef.current.value = formattedDate;
-    }
-    setFormData(prev => ({ ...prev, osapApplicationStartDate: formattedDate }));
-  };
-
   return (
     <div className="space-y-4">
       <div>
@@ -162,7 +152,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="dob" className="block text-base font-medium mb-1 text-brand-text-gray">
-            Study End Date <span className="text-sm text-brand-light-red mt-1">*</span>
+            Date of Birth <span className="text-sm text-brand-light-red mt-1">*</span>
           </Label>
           <Popover open={dob.open} onOpenChange={dob.setOpen}>
             <PopoverTrigger asChild>
