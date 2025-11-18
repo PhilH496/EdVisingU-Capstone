@@ -1,5 +1,12 @@
 import { supabase } from "./supabase";
 import { FormData } from "@/types/bswd";
+import { DeterministicChecksResult } from "./deterministicChecks";
+import { Database } from "@/types/supabase";
+type StudentInsert = Database["public"]["Tables"]["student"]["Insert"];
+type OsapInfoInsert = Database["public"]["Tables"]["osap_info"]["Insert"];
+type DisabilityInfoInsert = Database["public"]["Tables"]["disability_info"]["Insert"];
+type ProgramInfoInsert = Database["public"]["Tables"]["program_info"]["Insert"];
+type RequestedItemsInsert = Database["public"]["Tables"]["requested_items"]["Insert"]
 
 // Helper to conditionally add optional fields
 const addIfPresent = (obj: Record<string, any>, key: string, value: any): void => {
@@ -16,7 +23,7 @@ const addIfPresent = (obj: Record<string, any>, key: string, value: any): void =
  */
 export const saveSubmission = async (formData: FormData) => {
   // 1. Insert into student table
-  const studentPayload: any = {
+  const studentPayload: StudentInsert = {
     student_id: +formData.studentId,
     oen: parseInt(formData.oen),
     first_name: formData.firstName,
@@ -43,7 +50,7 @@ export const saveSubmission = async (formData: FormData) => {
   const studentId = studentData.student_id;
 
   // 2. Insert into program_info table
-  const programPayload: any = {
+  const programPayload: ProgramInfoInsert = {
     student_id: studentId,
     institution_name: formData.institution,
     institution_type: formData.institutionType,
@@ -63,7 +70,7 @@ export const saveSubmission = async (formData: FormData) => {
   if (programError) throw programError;
 
   // 3. Insert into osap_info table
-  const osapPayload: any = {
+  const osapPayload: OsapInfoInsert = {
     student_id: studentId,
     application_type: formData.osapApplication,
     federal_need: formData.federalNeed,
@@ -81,7 +88,7 @@ export const saveSubmission = async (formData: FormData) => {
   if (osapError) throw osapError;
 
   // 4. Insert into disability_info table
-  const disabilityPayload: any = {
+  const disabilityPayload: DisabilityInfoInsert = {
     student_id: studentId,
     disability_type: formData.disabilityType,
     needs_psycho_ed_assessment: formData.needsPsychoEdAssessment,
