@@ -8,7 +8,7 @@
 // - Add validation in index.tsx > isStepComplete() function
 // - Use brand colors located in tailwind.config.js; reference StudentInfoStep.tsx
 
-import { FormData } from "@/types/bswd";
+import { FormData, FunctionalLimitationOption } from "@/types/bswd";
 import React, { useState } from "react";
 import { sendPsychoEdReferral } from "@/lib/notify";
 
@@ -81,21 +81,35 @@ export function DisabilityInfoStep({
     }
   };
 
-  // Handler for the multi-select functional limitations checkboxes
-  const handleLimitationsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const functionalLimitations: FunctionalLimitationOption[] = Array.isArray(
+    formData.functionalLimitations
+  )
+    ? (formData.functionalLimitations as FunctionalLimitationOption[])
+    : defaultFunctionalLimitations;
+
+  const handleLimitationsChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const { name, checked } = e.target;
-    const idx = formData.functionalLimitations.findIndex(
-      (limit) => limit.name === name
-    );
-    setFormData((prev) => ({
-      ...prev,
-      functionalLimitations: prev.functionalLimitations.map((limit) =>
+
+    setFormData((prev) => {
+      const current: FunctionalLimitationOption[] = Array.isArray(
+        prev.functionalLimitations
+      )
+        ? (prev.functionalLimitations as FunctionalLimitationOption[])
+        : defaultFunctionalLimitations;
+
+      const updated = current.map((limit) =>
         limit.name !== name ? limit : { ...limit, checked }
-      ),
-    }));
+      );
+
+      return {
+        ...prev,
+        functionalLimitations: updated,
+      };
+    });
   };
 
-  // Disable verification date if not verified or not selected
   const isVerificationDisabled =
     !formData.disabilityType || formData.disabilityType === "not-verified";
 
@@ -223,7 +237,7 @@ export function DisabilityInfoStep({
             Functional Limitations (optional - check all that apply)
           </legend>
           <div className="grid grid-cols-2 gap-x-8 gap-y-3">
-            {formData.functionalLimitations.map((limitation) => (
+            {functionalLimitations.map((limitation) => (
               <div key={limitation.name} className="flex items-center">
                 <input
                   id={limitation.name}
