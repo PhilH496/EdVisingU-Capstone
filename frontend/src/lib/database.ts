@@ -24,21 +24,20 @@ const addIfPresent = (obj: Record<string, any>, key: string, value: any): void =
 export const saveSubmission = async (formData: FormData) => {
   // 1. Insert into student table
   const studentPayload: StudentInsert = {
+    has_osap_application: formData.hasOsapApplication,
     student_id: +formData.studentId,
     oen: parseInt(formData.oen),
     first_name: formData.firstName,
     last_name: formData.lastName,
     dob: formData.dateOfBirth,
-    sin: formData.sin,
+    sin: parseInt(formData.sin),
     email: formData.email,
     address: formData.address,
     city: formData.city,
     province: formData.province,
-    postal_code: formData.postalCode,
+    postal_code: parseInt(formData.postalCode),
     country: formData.country,
-    has_osap_application: formData.hasOsapApplication,
   };
-  addIfPresent(studentPayload, "phone", formData.phone);
 
   const { data: studentData, error: studentError } = await supabase
     .from("student")
@@ -76,7 +75,6 @@ export const saveSubmission = async (formData: FormData) => {
     federal_need: formData.federalNeed,
     provincial_need: formData.provincialNeed,
     has_restrictions: formData.hasOSAPRestrictions,
-    osap_on_file_status: formData.osapOnFileStatus || null,
   };
   addIfPresent(osapPayload, "restriction_type", formData.restrictionType);
   addIfPresent(osapPayload, "queued_for_manual_review", formData.queuedForManualReview);
@@ -98,14 +96,14 @@ export const saveSubmission = async (formData: FormData) => {
   // Handle functional limitations - convert object to array or use array directly
   if (formData.functionalLimitations) {
     if (Array.isArray(formData.functionalLimitations) && formData.functionalLimitations.length > 0) {
-      disabilityPayload.functional_limitations = formData.functionalLimitations;
+      disabilityPayload.functional_limitations = formData.functionalLimitations.join(', ');
     } else if (typeof formData.functionalLimitations === 'object') {
       // Convert object to array of keys where value is true
       const limitations = Object.keys(formData.functionalLimitations).filter(
         key => (formData.functionalLimitations as any)[key] === true
       );
       if (limitations.length > 0) {
-        disabilityPayload.functional_limitations = limitations;
+        disabilityPayload.functional_limitations = limitations.join(', ');
       }
     }
   }
