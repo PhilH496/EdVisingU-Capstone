@@ -1,12 +1,10 @@
 /**
  * Step 1: StudentInfoStep Component
- * 
+ *
  * First step of the BSWD application form that collects basic student information.
  * Includes validation for OEN (Ontario Education Number) format.
- * 
- * @param formData - Current state of all form data
- * @param setFormData - Function to update form data state
  */
+
 import { FormData } from "@/types/bswd";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
@@ -34,9 +32,14 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
 
   return (
     <div className="space-y-4">
+      {/* OSAP application question + start date */}
       <div>
-        <label htmlFor="hasOsapApplication" className="block text-sm font-medium mb-1 text-brand-text-gray">
-          Do you have an OSAP application? <span className="text-sm text-brand-light-red mt-1">*</span>
+        <label
+          htmlFor="hasOsapApplication"
+          className="block text-sm font-medium mb-1 text-brand-text-gray"
+        >
+          Do you have an OSAP application?{" "}
+          <span className="text-sm text-brand-light-red mt-1">*</span>
         </label>
         <select
           id="hasOsapApplication"
@@ -57,10 +60,64 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       </div>
       <h2 className="text-xl font-semibold mb-4">Section A: Student Information</h2>
 
+      {formData.hasOsapApplication === true && (
+        <div>
+          <label
+            htmlFor="osapApplicationStartDate"
+            className="block text-sm font-medium mb-1 text-brand-text-gray"
+          >
+            OSAP Application Start Date (DD/MM/YYYY){" "}
+            <span className="text-sm text-brand-light-red mt-1">*</span>
+          </label>
+          <Popover>
+            <div className="relative w-full">
+              <Input
+                id="osapApplicationStartDate"
+                ref={osapDateRef}
+                type="text"
+                placeholder="DD/MM/YYYY"
+                value={formData.osapApplicationStartDate || ""}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFormData((prev) => ({
+                    ...prev,
+                    osapApplicationStartDate: value,
+                  }));
+                }}
+              />
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <CalendarIcon className="h-4 w-4" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent
+                side="bottom"
+                align="end"
+                className="w-auto p-0 z-50"
+              >
+                <Calendar
+                  mode="single"
+                  selected={osapStartDate ?? undefined}
+                  onSelect={handleSelectOsapDate}
+                />
+              </PopoverContent>
+            </div>
+          </Popover>
+        </div>
+      )}
+
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="studentId" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            Student ID <span className="text-sm text-brand-light-red mt-1">*</span>
+          <label
+            htmlFor="studentId"
+            className="block text-sm font-medium mb-1 text-brand-text-gray"
+          >
+            Student ID{" "}
+            <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
             id="studentId"
@@ -68,9 +125,9 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             value={formData.studentId}
             disabled={isLocked}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              const value = e.target.value.replace(/\D/g, '');
-              if (value.length <= 15) { //For versatility incase ID not always 8 numbers
-                setFormData(prev => ({ ...prev, studentId: value }));
+              const value = e.target.value.replace(/\D/g, "");
+              if (value.length <= 15) {
+                setFormData((prev) => ({ ...prev, studentId: value }));
               }
             }}
             className={lockCls("w-full px-3 py-2 border rounded-md")}
@@ -78,13 +135,19 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             maxLength={15}
           />
           {formData.studentId && formData.studentId.length < 7 && (
-            <p className="text-sm text-brand-light-red mt-1">Student ID must be at least 7 digits</p>
+            <p className="text-sm text-brand-light-red mt-1">
+              Student ID must be at least 7 digits
+            </p>
           )}
         </div>
 
         <div>
-          <label htmlFor="oen" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            Ontario Education Number (OEN) <span className="text-sm text-brand-light-red mt-1">*</span>
+          <label
+            htmlFor="oen"
+            className="block text-sm font-medium mb-1 text-brand-text-gray"
+          >
+            Ontario Education Number (OEN){" "}
+            <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
             id="oen"
@@ -92,9 +155,9 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             value={formData.oen}
             disabled={isLocked}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              const value = e.target.value.replace(/\D/g, '');
+              const value = e.target.value.replace(/\D/g, "");
               if (value.length <= 9) {
-                setFormData(prev => ({ ...prev, oen: value }));
+                setFormData((prev) => ({ ...prev, oen: value }));
               }
             }}
             className={lockCls("w-full px-3 py-2 border rounded-md")}
@@ -102,15 +165,21 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             maxLength={9}
           />
           {formData.oen && formData.oen.length !== 9 && (
-            <p className="text-sm text-brand-light-red mt-1">OEN must be exactly 9 digits</p>
+            <p className="text-sm text-brand-light-red mt-1">
+              OEN must be exactly 9 digits
+            </p>
           )}
         </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="firstName" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            First Name <span className="text-sm text-brand-light-red mt-1">*</span>
+          <label
+            htmlFor="firstName"
+            className="block text-sm font-medium mb-1 text-brand-text-gray"
+          >
+            First Name{" "}
+            <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
             id="firstName"
@@ -120,7 +189,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               const value = e.target.value;
               if (/^[A-Za-z\s'-]*$/.test(value)) {
-                setFormData(prev => ({ ...prev, firstName: value }));
+                setFormData((prev) => ({ ...prev, firstName: value }));
               }
             }}
             className={lockCls("w-full px-3 py-2 border rounded-md")}
@@ -129,8 +198,12 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
         </div>
 
         <div>
-          <label htmlFor="lastName" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            Last Name <span className="text-sm text-brand-light-red mt-1">*</span>
+          <label
+            htmlFor="lastName"
+            className="block text-sm font-medium mb-1 text-brand-text-gray"
+          >
+            Last Name{" "}
+            <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
             id="lastName"
@@ -140,7 +213,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               const value = e.target.value;
               if (/^[A-Za-z\s'-]*$/.test(value)) {
-                setFormData(prev => ({ ...prev, lastName: value }));
+                setFormData((prev) => ({ ...prev, lastName: value }));
               }
             }}
             className={lockCls("w-full px-3 py-2 border rounded-md")}
@@ -187,8 +260,12 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
         </div>
 
         <div>
-          <label htmlFor="sin" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            Social Insurance Number <span className="text-sm text-brand-light-red mt-1">*</span>
+          <label
+            htmlFor="sin"
+            className="block text-sm font-medium mb-1 text-brand-text-gray"
+          >
+            Social Insurance Number{" "}
+            <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
             id="sin"
@@ -196,31 +273,40 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             value={formData.sin}
             disabled={isLocked}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              let value = e.target.value.replace(/\D/g, '');
+              let value = e.target.value.replace(/\D/g, "");
               if (value.length <= 9) {
-                // Format as XXX-XXX-XXX
                 if (value.length > 6) {
-                  value = `${value.slice(0, 3)}-${value.slice(3, 6)}-${value.slice(6)}`;
+                  value = `${value.slice(0, 3)}-${value.slice(
+                    3,
+                    6
+                  )}-${value.slice(6)}`;
                 } else if (value.length > 3) {
                   value = `${value.slice(0, 3)}-${value.slice(3)}`;
                 }
-                setFormData(prev => ({ ...prev, sin: value }));
+                setFormData((prev) => ({ ...prev, sin: value }));
               }
             }}
             className={lockCls("w-full px-3 py-2 border rounded-md")}
             placeholder="XXX-XXX-XXX"
             maxLength={11}
           />
-          {formData.sin && formData.sin.replace(/\D/g, '').length !== 9 && (
-            <p className="text-sm text-brand-light-red mt-1">SIN must be exactly 9 digits</p>
-          )}
+          {formData.sin &&
+            formData.sin.replace(/\D/g, "").length !== 9 && (
+              <p className="text-sm text-brand-light-red mt-1">
+                SIN must be exactly 9 digits
+              </p>
+            )}
         </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            Email Address <span className="text-sm text-brand-light-red mt-1">*</span>
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium mb-1 text-brand-text-gray"
+          >
+            Email Address{" "}
+            <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
             id="email"
@@ -228,7 +314,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             value={formData.email}
             disabled={isLocked}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setFormData(prev => ({ ...prev, email: e.target.value }))
+              setFormData((prev) => ({ ...prev, email: e.target.value }))
             }
             className={lockCls("w-full px-3 py-2 border rounded-md")}
             placeholder="YourEmail@example.com"
@@ -236,7 +322,10 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
         </div>
 
         <div>
-          <label htmlFor="phone" className="block text-sm font-medium mb-1 text-brand-text-gray">
+          <label
+            htmlFor="phone"
+            className="block text-sm font-medium mb-1 text-brand-text-gray"
+          >
             Phone Number
           </label>
           <Input
@@ -245,16 +334,19 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             value={formData.phone}
             disabled={isLocked}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              let value = e.target.value.replace(/\D/g, '');
+              let value = e.target.value.replace(/\D/g, "");
               if (value.length <= 10) {
                 if (value.length > 6) {
-                  value = `(${value.slice(0, 3)}) ${value.slice(3, 6)}-${value.slice(6)}`;
+                  value = `(${value.slice(0, 3)}) ${value.slice(
+                    3,
+                    6
+                  )}-${value.slice(6)}`;
                 } else if (value.length > 3) {
                   value = `(${value.slice(0, 3)}) ${value.slice(3)}`;
                 } else if (value.length > 0) {
                   value = `(${value}`;
                 }
-                setFormData(prev => ({ ...prev, phone: value }));
+                setFormData((prev) => ({ ...prev, phone: value }));
               }
             }}
             className={lockCls("w-full px-3 py-2 border rounded-md")}
@@ -266,20 +358,26 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
 
       {/* Mailing Address */}
       <div>
-        <h3 className="text-lg font-semibold mb-3 text-brand-text-gray">Mailing Address</h3>
+        <h3 className="text-lg font-semibold mb-3 text-brand-text-gray">
+          Mailing Address
+        </h3>
 
         <div className="space-y-4">
           <div>
-            <label htmlFor="address" className="block text-sm font-medium mb-1 text-brand-text-gray">
-              Street Address <span className="text-sm text-brand-light-red mt-1">*</span>
+            <label
+              htmlFor="address"
+              className="block text-sm font-medium mb-1 text-brand-text-gray"
+            >
+              Street Address{" "}
+              <span className="text-sm text-brand-light-red mt-1">*</span>
             </label>
             <Input
               id="address"
               type="text"
-              value={formData.address || ''}
+              value={formData.address || ""}
               disabled={isLocked}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setFormData(prev => ({ ...prev, address: e.target.value }))
+                setFormData((prev) => ({ ...prev, address: e.target.value }))
               }
               className={lockCls("w-full px-3 py-2 border rounded-md")}
               placeholder="123 Main Street"
@@ -288,16 +386,20 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="city" className="block text-sm font-medium mb-1 text-brand-text-gray">
-                City <span className="text-sm text-brand-light-red mt-1">*</span>
+              <label
+                htmlFor="city"
+                className="block text-sm font-medium mb-1 text-brand-text-gray"
+              >
+                City{" "}
+                <span className="text-sm text-brand-light-red mt-1">*</span>
               </label>
               <Input
                 id="city"
                 type="text"
-                value={formData.city || ''}
+                value={formData.city || ""}
                 disabled={isLocked}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setFormData(prev => ({ ...prev, city: e.target.value }))
+                  setFormData((prev) => ({ ...prev, city: e.target.value }))
                 }
                 className={lockCls("w-full px-3 py-2 border rounded-md")}
                 placeholder="Toronto"
@@ -305,15 +407,19 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             </div>
 
             <div>
-              <label htmlFor="province" className="block text-sm font-medium mb-1 text-brand-text-gray">
-                Province/Territory <span className="text-sm text-brand-light-red mt-1">*</span>
+              <label
+                htmlFor="province"
+                className="block text-sm font-medium mb-1 text-brand-text-gray"
+              >
+                Province/Territory{" "}
+                <span className="text-sm text-brand-light-red mt-1">*</span>
               </label>
               <select
                 id="province"
-                value={formData.province || ''}
+                value={formData.province || ""}
                 disabled={isLocked}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                  setFormData(prev => ({ ...prev, province: e.target.value }))
+                  setFormData((prev) => ({ ...prev, province: e.target.value }))
                 }
                 className={lockCls("w-full px-3 py-2 border rounded-md")}
               >
@@ -334,21 +440,31 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="postalCode" className="block text-sm font-medium mb-1 text-brand-text-gray">
-                Postal Code <span className="text-sm text-brand-light-red mt-1">*</span>
+              <label
+                htmlFor="postalCode"
+                className="block text-sm font-medium mb-1 text-brand-text-gray"
+              >
+                Postal Code{" "}
+                <span className="text-sm text-brand-light-red mt-1">*</span>
               </label>
               <Input
                 id="postalCode"
                 type="text"
-                value={formData.postalCode || ''}
+                value={formData.postalCode || ""}
                 disabled={isLocked}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                  const value = e.target.value
+                    .toUpperCase()
+                    .replace(/[^A-Z0-9]/g, "");
                   if (value.length <= 6) {
-                    const formatted = value.length > 3
-                      ? `${value.slice(0, 3)} ${value.slice(3)}`
-                      : value;
-                    setFormData(prev => ({ ...prev, postalCode: formatted }));
+                    const formatted =
+                      value.length > 3
+                        ? `${value.slice(0, 3)} ${value.slice(3)}`
+                        : value;
+                    setFormData((prev) => ({
+                      ...prev,
+                      postalCode: formatted,
+                    }));
                   }
                 }}
                 className={lockCls("w-full px-3 py-2 border rounded-md")}
@@ -358,16 +474,20 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             </div>
 
             <div>
-              <label htmlFor="country" className="block text-sm font-medium mb-1 text-brand-text-gray">
-                Country <span className="text-sm text-brand-light-red mt-1">*</span>
+              <label
+                htmlFor="country"
+                className="block text-sm font-medium mb-1 text-brand-text-gray"
+              >
+                Country{" "}
+                <span className="text-sm text-brand-light-red mt-1">*</span>
               </label>
               <Input
                 id="country"
                 type="text"
-                value={formData.country || 'Canada'}
+                value={formData.country || "Canada"}
                 disabled={isLocked}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setFormData(prev => ({ ...prev, country: e.target.value }))
+                  setFormData((prev) => ({ ...prev, country: e.target.value }))
                 }
                 className={lockCls("w-full px-3 py-2 border rounded-md")}
                 placeholder="Canada"
