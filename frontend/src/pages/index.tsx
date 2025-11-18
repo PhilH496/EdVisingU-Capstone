@@ -8,9 +8,11 @@
  * - Multi-step form navigation (6 total steps)
  * - Form data state management
  * - Step validation before allowing progression
- * - Saves data to Supabase ONLY on final submission (Step 6)
+ * - Saves data to Supabase ONLY on final submission
  */
+
 import { useState, useMemo, useEffect, useRef } from "react";
+import Link from "next/link";
 import { FormData } from "@/types/bswd";
 import { FormLayout } from "@/components/bswd/FormLayout";
 import { StudentInfoStep } from "@/components/bswd/steps/StudentInfoStep";
@@ -55,6 +57,7 @@ export default function BSWDApplicationPage() {
     studyType: "",
     submittedDisabilityElsewhere: false,
     previousInstitution: "",
+
     osapApplication: "full-time",
     osapApplicationStartDate: "",
     restrictionType: "DEFAULT",
@@ -63,6 +66,8 @@ export default function BSWDApplicationPage() {
     provincialNeed: 0,
     hasOSAPRestrictions: false,
     restrictionDetails: "",
+    osapOnFileStatus: "",
+
     hasVerifiedDisability: false,
     disabilityType: "not-verified",
     disabilityVerificationDate: "",
@@ -76,7 +81,11 @@ export default function BSWDApplicationPage() {
       { name: "communication", label: "Communication", checked: false },
       { name: "dexterity", label: "Dexterity", checked: false },
       { name: "chronicPain", label: "Chronic Pain", checked: false },
-      { name: "attention", label: "Attention/Concentration", checked: false },
+      {
+        name: "attention",
+        label: "Attention/Concentration",
+        checked: false,
+      },
     ],
     needsPsychoEdAssessment: false,
     requestedItems: [],
@@ -103,12 +112,12 @@ export default function BSWDApplicationPage() {
       stepName: "Service & Equipment",
       stepIconFaClass: "fa-solid fa-wrench",
     },
-
     {
       stepName: "Review & Submit",
       stepIconFaClass: "fa-solid fa-receipt",
     },
   ];
+
   const TOTAL_STEPS = stepsInfo.length;
 
   const isStepComplete = (stepCheck: number): boolean => {
@@ -153,15 +162,15 @@ export default function BSWDApplicationPage() {
       }
 
       case 3: {
-        // Step 3 (OSAP): require application type; if not 'none', needs must be >= 0
-        // If restrictions are checked, details must be provided
         const hasChosenOnFile =
           formData.osapOnFileStatus === "APPROVED" ||
           formData.osapOnFileStatus === "NONE";
+
         const appTypeOk =
           formData.osapOnFileStatus === "APPROVED"
             ? formData.osapApplication !== "none"
             : true;
+
         const needsOk =
           formData.osapOnFileStatus === "APPROVED"
             ? !Number.isNaN(Number(formData.federalNeed)) &&
@@ -169,50 +178,41 @@ export default function BSWDApplicationPage() {
               Number(formData.federalNeed) >= 0 &&
               Number(formData.provincialNeed) >= 0
             : true;
-        const restrictionsOk = true; // Restrictions never block navigation
+
+        const restrictionsOk = true;
+
         return hasChosenOnFile && appTypeOk && needsOk && restrictionsOk;
       }
+
       case 4: {
-        // Disability info step
-        // If Psycho-Ed referral is required, email must be non-empty
-        if (formData.needsPsychoEdAssessment && !formData.email?.trim())
+        if (formData.needsPsychoEdAssessment && !formData.email?.trim()) {
           return false;
+        }
         return true;
       }
+
       case 5: {
-        // Assume this step is optional
         return true;
       }
 
       case 6: {
-        // Step 6 (Review and Submit): Check if confirmation checkbox is checked
-        // Assume this step is optional
-        return true;
-      }
-      case 7: {
-        // Step 7 (Review and Submit): Check if confirmation checkbox is checked
         return isConfirmed;
       }
+
       default:
         return false;
     }
   };
 
-  // Memoize canProceed to ensure it updates when isConfirmed changes
   const canProceed = useMemo(() => {
     return isStepComplete(currentStep) && !saving;
   }, [currentStep, formData, isConfirmed, saving]);
 
   const handleNext = async () => {
-    // Check if current step is complete before proceeding
-    if (!isStepComplete(currentStep)) {
-      return;
-    }
+    if (!isStepComplete(currentStep)) return;
 
     if (currentStep < TOTAL_STEPS) {
       setCurrentStep((prev) => prev + 1);
-      // Increase max step when user processes to the next step
-      // ** Only unlock new step when you click next on the last unlocked step **
       if (currentStep === maxStep) {
         setMaxStep((m) => m + 1);
       }
@@ -228,6 +228,8 @@ export default function BSWDApplicationPage() {
   };
 
   const handleSubmit = async () => {
+    if (saving) return;
+
     setSaving(true);
     setError(null);
 
@@ -312,26 +314,26 @@ export default function BSWDApplicationPage() {
     }
   };
 
-  // Client component for step bar
   function StepBar() {
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const stepRefs = useRef<(HTMLButtonElement | null)[]>([]);
     const prevStepRef = useRef(currentStep);
+
     useEffect(() => {
-    // Scrolls to top if step is changed
-    if (prevStepRef.current !== currentStep) {
-      const el = scrollRef.current;
-      const target = stepRefs.current[currentStep - 1];
-      if (el && target) {
-        target.scrollIntoView({
-          behavior: "smooth",
-          inline: "end",
-          block: "nearest",
-        });
+      if (prevStepRef.current !== currentStep) {
+        const el = scrollRef.current;
+        const target = stepRefs.current[currentStep - 1];
+        if (el && target) {
+          target.scrollIntoView({
+            behavior: "smooth",
+            inline: "end",
+            block: "nearest",
+          });
+        }
+        prevStepRef.current = currentStep;
       }
-      prevStepRef.current = currentStep;
-    }
-  }, [currentStep]);
+    }, [currentStep]);
+
     return (
       <div
         className="overflow-x-scroll pb-4"
@@ -343,7 +345,7 @@ export default function BSWDApplicationPage() {
             <button
               key={stepInfo.stepName}
               onClick={() => handleStepClick(index + 1)}
-              disabled={index >= maxStep}
+              disabled={index + 1 > maxStep}
               ref={(el) => {
                 stepRefs.current[index] = el;
               }}
@@ -360,7 +362,7 @@ export default function BSWDApplicationPage() {
               >
                 <i className={`${stepInfo.stepIconFaClass} text-[150%]`}></i>
               </span>
-              <span className={index >= maxStep ? "opacity-40" : ""}>
+              <span className={index + 1 > maxStep ? "opacity-40" : ""}>
                 {stepInfo.stepName}
               </span>
             </button>
@@ -370,30 +372,38 @@ export default function BSWDApplicationPage() {
     );
   }
 
-  // Make sure the current step is complete before moving forward
   useEffect(() => {
-    // If the form is uncomplete when user has not filled up or user edit the forn
     if (!isStepComplete(currentStep)) {
       setMaxStep(currentStep);
     } else {
-      // Unlock new step (optional: unlock steps that already filled in before)
       setMaxStep(currentStep + 1);
       let stepCheck = currentStep + 1;
-      while (isStepComplete(stepCheck)) {
+      while (stepCheck <= TOTAL_STEPS && isStepComplete(stepCheck)) {
         setMaxStep(stepCheck + 1);
         stepCheck++;
       }
     }
-  }, [currentStep, formData]);
+  }, [currentStep, formData, isConfirmed]);
+
   return (
     <FormLayout
       title="BSWD/CSG-DSE Application Form"
       description="Complete application for Bursary for Students with Disabilities (BSWD) and Canada Student Grant for Services and Equipment"
     >
-      <div className="mb-6"></div>
+      {/* admin button */}
+      <div className="mb-3 flex items-center justify-end">
+        <Link
+          href="/admin"
+          className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
+        >
+          Admin
+        </Link>
+      </div>
+
       <div className="mb-4 p-4 pb-2 py-6 border rounded-md">
         <StepBar />
       </div>
+
       {error && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
           <p className="text-sm text-red-600">{error}</p>

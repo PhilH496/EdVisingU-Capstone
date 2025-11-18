@@ -13,10 +13,12 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useDateRange } from "@/hooks/UseDateRange";
 import { Calendar } from "@/components/ui/calendar";
-import { FormData } from "@/types/bswd";
 import { ChevronDownIcon } from "lucide-react";
 import React, { useState } from "react";
 import { format } from "date-fns";
+import { FormData, FunctionalLimitationOption } from "@/types/bswd";
+import { sendPsychoEdReferral } from "@/lib/notify";
+
 interface DisabilityInfoStepProps {
   formData: FormData;
   setFormData: (data: FormData | ((prev: FormData) => FormData)) => void;
@@ -25,21 +27,92 @@ interface DisabilityInfoStepProps {
 export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStepProps) {
   const verificationDate = useDateRange();
   // Local state for the psycho-educational assessment checkbox
-  const [requiresPsychoEducational, setRequiresPsychoEducational] =
-    useState(false);
+  const [requiresPsychoEducational, setRequiresPsychoEducational] = useState(
+    Boolean((formData as any).needsPsychoEdAssessment)
+  );
+  
+  // State for email sending status
+  const [emailStatus, setEmailStatus] = useState<{
+    sending: boolean;
+    sent: boolean;
+    error: string | null;
+  }>({
+    sending: false,
+    sent: false,
+    error: null,
+  });
 
-  // Handler for the multi-select functional limitations checkboxes
-  const handleLimitationsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    const idx = formData.functionalLimitations.findIndex(
-      (limit) => limit.name === name
-    );
-    setFormData((prev) => ({
+  // Handler for psycho-educational assessment checkbox
+  const handlePsychoEdChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isChecked = e.target.checked;
+    setRequiresPsychoEducational(isChecked);
+    
+    // Update form data
+    setFormData(prev => ({
       ...prev,
-      functionalLimitations: prev.functionalLimitations.map((limit) =>
-        limit.name !== name ? limit : { ...limit, checked }
-      ),
+      needsPsychoEdAssessment: isChecked,
     }));
+
+    // Send referral email when checkbox is checked
+    if (isChecked && formData.email) {
+      setEmailStatus({ sending: true, sent: false, error: null });
+      
+      try {
+        const result = await sendPsychoEdReferral(
+          formData.email,
+          `${formData.firstName} ${formData.lastName}`,
+          formData.studentId
+        );
+        
+        if (result.success) {
+          setEmailStatus({ sending: false, sent: true, error: null });
+          // Auto-hide success message after 5 seconds
+          setTimeout(() => {
+            setEmailStatus(prev => ({ ...prev, sent: false }));
+          }, 5000);
+        } else {
+          setEmailStatus({ sending: false, sent: false, error: result.message });
+        }
+      } catch (error) {
+        setEmailStatus({
+          sending: false,
+          sent: false,
+          error: "Failed to send referral email. Please contact support.",
+        });
+      }
+    } else if (!isChecked) {
+      // Reset email status when unchecked
+      setEmailStatus({ sending: false, sent: false, error: null });
+    }
+  };
+
+  const functionalLimitations: FunctionalLimitationOption[] = Array.isArray(
+    formData.functionalLimitations
+  )
+    ? (formData.functionalLimitations as FunctionalLimitationOption[])
+    : defaultFunctionalLimitations;
+
+  const handleLimitationsChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { name, checked } = e.target;
+
+    setFormData((prev) => {
+      const current: FunctionalLimitationOption[] = Array.isArray(
+        prev.functionalLimitations
+      )
+        ? (prev.functionalLimitations as FunctionalLimitationOption[])
+        : defaultFunctionalLimitations;
+
+      const updated = current.map((limit) =>
+        limit.name !== name ? limit : { ...limit, checked }
+      );
+
+      return {
+        ...prev,
+        functionalLimitations: updated,
+      };
+    });
   };
   // Disable verification date if not verified or not selected
   const isVerificationDisabled =
@@ -173,7 +246,7 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
             Functional Limitations (optional - check all that apply)
           </legend>
           <div className="grid grid-cols-2 gap-x-8 gap-y-3">
-            {formData.functionalLimitations.map((limitation) => (
+            {functionalLimitations.map((limitation) => (
               <div key={limitation.name} className="flex items-center">
                 <input
                   id={limitation.name}
@@ -203,8 +276,9 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
             name="requiresPsychoEducational"
             type="checkbox"
             checked={requiresPsychoEducational}
-            onChange={(e) => setRequiresPsychoEducational(e.target.checked)}
-            className="h-5 w-5 border-gray-300 rounded focus:ring-[#0071a9]"
+            onChange={handlePsychoEdChange}
+            disabled={!formData.email || emailStatus.sending}
+            className="h-5 w-5 border-gray-300 rounded focus:ring-[#0071a9] disabled:opacity-50 disabled:cursor-not-allowed"
           />
           <label
             htmlFor="requiresPsychoEducational"
@@ -214,6 +288,36 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
             Verification
           </label>
         </div>
+
+        {/* Email validation warning */}
+        {!formData.email && (
+          <div className="ml-8 mb-4 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md p-3">
+            ⚠️ Please enter your email address in Section A (Student Info) before requesting an assessment.
+          </div>
+        )}
+
+        {/* Email sending status */}
+        {emailStatus.sending && (
+          <div className="ml-8 mb-4 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded-md p-3 flex items-center">
+            <svg className="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Sending referral email...
+          </div>
+        )}
+
+        {emailStatus.sent && (
+          <div className="ml-8 mb-4 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md p-3">
+            ✓ Referral email sent successfully to {formData.email}
+          </div>
+        )}
+
+        {emailStatus.error && (
+          <div className="ml-8 mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md p-3">
+            ✗ {emailStatus.error}
+          </div>
+        )}
 
         {/* Conditional Email Input - Only shows when checkbox is checked */}
         {requiresPsychoEducational && (

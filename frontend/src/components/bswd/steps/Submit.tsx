@@ -1,4 +1,4 @@
-import { FormData } from "@/types/bswd";
+import { FormData, FunctionalLimitationOption } from "@/types/bswd";
 import { FileText, User, GraduationCap, DollarSign, Heart } from "lucide-react";
 
 interface ReviewAndSubmitProps {
@@ -14,9 +14,17 @@ export function ReviewAndSubmit({
   isConfirmed,
   setIsConfirmed,
 }: ReviewAndSubmitProps) {
-  const functionalLimitationLabels = formData.functionalLimitations
+  // Normalize functionalLimitations so filter/map are always safe
+  const functionalLimitations: FunctionalLimitationOption[] = Array.isArray(
+    formData.functionalLimitations
+  )
+    ? (formData.functionalLimitations as FunctionalLimitationOption[])
+    : [];
+
+  const functionalLimitationLabels = functionalLimitations
     .filter((limit) => limit.checked)
     .map((limit) => limit.label);
+
   return (
     <div className="space-y-6">
       <div>
@@ -41,94 +49,132 @@ export function ReviewAndSubmit({
             <p className="text-gray-500">
               Student ID <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">{formData.studentId || 'Not provided'}</p>
+            <p className="font-medium text-gray-900">
+              {formData.studentId || "Not provided"}
+            </p>
           </div>
           <div>
             <p className="text-gray-500">
-              Ontario Education Number (OEN) <span className="text-brand-light-red">*</span>
+              Ontario Education Number (OEN){" "}
+              <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">{formData.oen || 'Not provided'}</p>
+            <p className="font-medium text-gray-900">
+              {formData.oen || "Not provided"}
+            </p>
           </div>
           <div>
             <p className="text-gray-500">
               First Name <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">{formData.firstName || 'Not provided'}</p>
+            <p className="font-medium text-gray-900">
+              {formData.firstName || "Not provided"}
+            </p>
           </div>
           <div>
             <p className="text-gray-500">
               Last Name <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">{formData.lastName || 'Not provided'}</p>
+            <p className="font-medium text-gray-900">
+              {formData.lastName || "Not provided"}
+            </p>
           </div>
           <div>
             <p className="text-gray-500">
-              Date of Birth <span className="text-brand-light-red">*</span>
+              Date of Birth{" "}
+              <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">{formData.dateOfBirth || 'Not provided'}</p>
+            <p className="font-medium text-gray-900">
+              {formData.dateOfBirth || "Not provided"}
+            </p>
           </div>
           <div>
             <p className="text-gray-500">
-              Social Insurance Number <span className="text-brand-light-red">*</span>
+              Social Insurance Number{" "}
+              <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">{formData.sin || 'Not provided'}</p>
+            <p className="font-medium text-gray-900">
+              {formData.sin || "Not provided"}
+            </p>
           </div>
           <div>
             <p className="text-gray-500">
-              Email Address <span className="text-brand-light-red">*</span>
+              Email Address{" "}
+              <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">{formData.email || 'Not provided'}</p>
+            <p className="font-medium text-gray-900">
+              {formData.email || "Not provided"}
+            </p>
           </div>
           <div>
             <p className="text-gray-500">Phone Number</p>
-            <p className="font-medium text-gray-900">{formData.phone || 'Not provided'}</p>
+            <p className="font-medium text-gray-900">
+              {formData.phone || "Not provided"}
+            </p>
           </div>
           <div>
             <p className="text-gray-500">
-              Street Address <span className="text-brand-light-red">*</span>
+              Street Address{" "}
+              <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">{formData.address || 'Not provided'}</p>
+            <p className="font-medium text-gray-900">
+              {formData.address || "Not provided"}
+            </p>
           </div>
           <div>
             <p className="text-gray-500">
               City <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">{formData.city || 'Not provided'}</p>
+            <p className="font-medium text-gray-900">
+              {formData.city || "Not provided"}
+            </p>
           </div>
           <div>
             <p className="text-gray-500">
-              Province/Territory <span className="text-brand-light-red">*</span>
+              Province/Territory{" "}
+              <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">{formData.province || 'Not provided'}</p>
+            <p className="font-medium text-gray-900">
+              {formData.province || "Not provided"}
+            </p>
           </div>
           <div>
             <p className="text-gray-500">
               Postal Code <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">{formData.postalCode || 'Not provided'}</p>
+            <p className="font-medium text-gray-900">
+              {formData.postalCode || "Not provided"}
+            </p>
           </div>
           <div>
             <p className="text-gray-500">
               Country <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">{formData.country || 'Not provided'}</p>
+            <p className="font-medium text-gray-900">
+              {formData.country || "Not provided"}
+            </p>
           </div>
           <div>
             <p className="text-gray-500">
-              Has OSAP Application <span className="text-brand-light-red">*</span>
+              Has OSAP Application{" "}
+              <span className="text-brand-light-red">*</span>
             </p>
             <p className="font-medium text-gray-900">
-              {formData.hasOsapApplication === true ? 'Yes' : 
-               formData.hasOsapApplication === false ? 'No' : 
-               'Not provided'}
+              {formData.hasOsapApplication === true
+                ? "Yes"
+                : formData.hasOsapApplication === false
+                ? "No"
+                : "Not provided"}
             </p>
           </div>
           {formData.hasOsapApplication === true && (
             <div>
               <p className="text-gray-500">
-                OSAP Application Start Date <span className="text-brand-light-red">*</span>
+                OSAP Application Start Date{" "}
+                <span className="text-brand-light-red">*</span>
               </p>
-              <p className="font-medium text-gray-900">{formData.osapApplicationStartDate || 'Not provided'} </p>
+              <p className="font-medium text-gray-900">
+                {formData.osapApplicationStartDate || "Not provided"}
+              </p>
             </div>
           )}
         </div>
