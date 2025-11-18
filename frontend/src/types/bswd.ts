@@ -23,7 +23,7 @@ export interface FormData {
   province: string;
   postalCode: string;
   country: string;
-  hasOsapApplication: boolean | null;
+  hasOsapApplication: boolean;
   osapApplicationStartDate: string;
   
   // Program Information
