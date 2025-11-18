@@ -1,5 +1,3 @@
-// Layout wrapper - Provides consistent left-aligned design for all form pages
-
 /**
  * FormLayout Component
  * 

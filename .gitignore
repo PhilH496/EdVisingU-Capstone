@@ -29,3 +29,7 @@ backend/app/__pycache__
 **/.env
 **/.env.local
 **/.env*.local
+
+.DS_Store
+# Supabase temporary files
+supabase/.temp/

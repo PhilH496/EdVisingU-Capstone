@@ -8,6 +8,12 @@ export type ApplicationStatus =
   | "accepted"
   | "denied";
 
+export type FunctionalLimitationOption = {
+  name: string;
+  label: string;
+  checked: boolean;
+};
+
 export interface FormData {
   // Student Information
   studentId: string;
@@ -23,7 +29,7 @@ export interface FormData {
   province: string;
   postalCode: string;
   country: string;
-  hasOsapApplication: boolean | null;
+  hasOsapApplication: boolean;
   osapApplicationStartDate: string;
   
   // Program Information
@@ -33,18 +39,20 @@ export interface FormData {
   code: string;
   studyPeriodStart: string;
   studyPeriodEnd: string;
-  studyType: "" | "full-time" | "part-time" | "institution-funded-SB";
-  submittedDisabilityElsewhere: "yes" | "no";
+  studyType: '' | 'full-time' | 'part-time' | 'institution-funded-SB';
+  submittedDisabilityElsewhere: boolean;
   previousInstitution: string;
+
   // OSAP Information
   osapApplication: "full-time" | "part-time" | "none";
+  osapApplicationStartDate: string;
   federalNeed: number;
   provincialNeed: number;
   hasOSAPRestrictions: boolean;
   restrictionDetails: string;
   osapOnFileStatus?: "APPROVED" | "NONE" | "";
-  queuedForManualReview: boolean;
-  restrictionType:
+  queuedForManualReview?: boolean;
+  restrictionType?:
     | "DEFAULT"
     | "OVERPAYMENT"
     | "BANKRUPTCY"
@@ -56,26 +64,18 @@ export interface FormData {
   hasVerifiedDisability: boolean;
   disabilityType: "permanent" | "persistent-prolonged" | "not-verified";
   disabilityVerificationDate: string;
-  functionalLimitations: { name: string; label: string; checked: boolean }[];
+  functionalLimitations: FunctionalLimitationOption[];
   needsPsychoEdAssessment: boolean;
 
   // Requested Services & Equipment
   requestedItems: RequestedItem[];
-
 }
 
 export interface RequestedItem {
   category: string;
   item: string;
   cost: number;
-  justification: string;
-  fundingSource: "bswd" | "csg-dse" | "both";
-}
-
-export interface RiskAssessment {
-  score: number;
-  level: "Low" | "Medium" | "High";
-  factors: string[];
+  fundingSource: 'bswd' | 'csg-dse' | 'both';
 }
 
 export interface Application {
