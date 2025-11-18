@@ -1,4 +1,3 @@
-// src/components/admin/AdminLayout.tsx
 import Head from "next/head";
 
 type Props = {

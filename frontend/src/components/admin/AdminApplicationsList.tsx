@@ -1,12 +1,3 @@
-// Admin: Applications List
-// AdminApplicationsList Component Goes Here
-//
-// HELPFUL INFO:
-// - applications: Array of { id: string (UUID), status: "ACCEPTED" | "REJECTED" | "NEEDS MANUAL REVIEW" | "<APP STATUS>" }
-// - onViewAnalysis: Callback fired when the user clicks the "View Analysis" button
-// - Keep only: UUID, "View Analysis" button, and status pill (colors preserved)
-// - Use brand colors located in tailwind.config.js; reference StudentInfoStep.tsx
-// - Add to Admin Dashboard page (pages/admin/index.tsx)
 
 type AppStatus = "ACCEPTED" | "REJECTED" | "NEEDS MANUAL REVIEW" | "<APP STATUS>";
 interface ApplicationRow { id: string; status: AppStatus; }

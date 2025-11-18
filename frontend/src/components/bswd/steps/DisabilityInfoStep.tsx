@@ -1,12 +1,8 @@
-// Step 4: Disability verification and documentation
-// DisabilityInfoStep Component Goes Here
-//
-// HELPFUL INFO:
-// - formData: Object containing all form data (see @/types/bswd.ts for available fields)
-// - setFormData: Updates form data using: setFormData(prev => ({ ...prev, fieldName: value }))
-// - Reference StudentInfoStep.tsx for examples
-// - Add validation in index.tsx > isStepComplete() function
-// - Use brand colors located in tailwind.config.js; reference StudentInfoStep.tsx
+/**
+ * Step 1: DisabilityInfoStep component
+ *
+ * Fourth step of the BSWD application form that collects disability information about the student.
+ */
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";

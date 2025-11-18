@@ -1,20 +1,13 @@
 /**
- * Step 3: OsapInfoStep Component
+ * Step 3: OsapInfoStep component
  *
  * Collects OSAP application details and assessed financial needs for the BSWD application.
  * Includes a confirmation for active OSAP status and automated notifications when none is on file.
- * Restriction details box removed; restriction types linked to OSAP manual.
  *
  * @param formData - Current state of all form data
  * @param setFormData - Function to update form data state
  */
 
-// HELPFUL INFO:
-// - formData: Object containing all form data (see @/types/bswd.ts for available fields)
-// - setFormData: Updates form data using: setFormData(prev => ({ ...prev, fieldName: value }))
-// - Reference StudentInfoStep.tsx for examples
-// - Add validation in index.tsx > isStepComplete() function
-// - Use brand colors located in tailwind.config.js; reference StudentInfoStep.tsx
 
 import { FormData } from "@/types/bswd";
 import { notifyNoOsap } from "@/lib/notify";

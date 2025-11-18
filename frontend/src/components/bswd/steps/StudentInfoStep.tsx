@@ -1,8 +1,7 @@
 /**
  * Step 1: StudentInfoStep Component
  *
- * First step of the BSWD application form that collects basic student information.
- * Includes validation for OEN (Ontario Education Number) format.
+ * First step of the BSWD application form that collects student information.
  */
 
 import { FormData } from "@/types/bswd";

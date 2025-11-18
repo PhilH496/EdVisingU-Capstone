@@ -1,12 +1,8 @@
-// Step 2: Institution and program information
-// ProgramInfoStep Component Goes Here
-//
-// HELPFUL INFO:
-// - formData: Object containing all form data (see @/types/bswd.ts for available fields)
-// - setFormData: Updates form data using: setFormData(prev => ({ ...prev, fieldName: value }))
-// - Reference StudentInfoStep.tsx for examples
-// - Add validation in index.tsx > isStepComplete() function
-// - Use brand colors located in tailwind.config.js; reference StudentInfoStep.tsx
+/**
+ * Step 2: ProgramInfoStep component
+ *
+ * Second step of the BSWD application form that collects program information.
+ */
 
 // Base React imports
 import { useState, useRef } from "react";
