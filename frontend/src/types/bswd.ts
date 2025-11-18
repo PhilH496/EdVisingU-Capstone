@@ -8,6 +8,12 @@ export type ApplicationStatus =
   | "accepted"
   | "denied";
 
+export type FunctionalLimitationOption = {
+  name: string;
+  label: string;
+  checked: boolean;
+};
+
 export interface FormData {
   // Student Information
   studentId: string;
@@ -24,8 +30,7 @@ export interface FormData {
   postalCode: string;
   country: string;
   hasOsapApplication: boolean | null;
-  osapApplicationStartDate: string;
-  
+
   // Program Information
   institution: string;
   institutionType: "" | "public-ontario" | "private-ontario";
@@ -36,15 +41,17 @@ export interface FormData {
   studyType: "" | "full-time" | "part-time" | "institution-funded-SB";
   submittedDisabilityElsewhere: "yes" | "no";
   previousInstitution: string;
+
   // OSAP Information
   osapApplication: "full-time" | "part-time" | "none";
+  osapApplicationStartDate: string;
   federalNeed: number;
   provincialNeed: number;
   hasOSAPRestrictions: boolean;
   restrictionDetails: string;
   osapOnFileStatus?: "APPROVED" | "NONE" | "";
-  queuedForManualReview: boolean;
-  restrictionType:
+  queuedForManualReview?: boolean;
+  restrictionType?:
     | "DEFAULT"
     | "OVERPAYMENT"
     | "BANKRUPTCY"
@@ -56,12 +63,11 @@ export interface FormData {
   hasVerifiedDisability: boolean;
   disabilityType: "permanent" | "persistent-prolonged" | "not-verified";
   disabilityVerificationDate: string;
-  functionalLimitations: { name: string; label: string; checked: boolean }[];
+  functionalLimitations: FunctionalLimitationOption[];
   needsPsychoEdAssessment: boolean;
 
   // Requested Services & Equipment
   requestedItems: RequestedItem[];
-
 }
 
 export interface RequestedItem {

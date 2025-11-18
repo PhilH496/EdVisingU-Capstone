@@ -8,7 +8,7 @@
 // - Add validation in index.tsx > isStepComplete() function
 // - Use brand colors located in tailwind.config.js; reference StudentInfoStep.tsx
 
-import { FormData } from "@/types/bswd";
+import { FormData, FunctionalLimitationOption } from "@/types/bswd";
 import React, { useState } from "react";
 
 interface DisabilityInfoStepProps {
@@ -20,25 +20,56 @@ export function DisabilityInfoStep({
   formData,
   setFormData,
 }: DisabilityInfoStepProps) {
-  // Local state for the psycho-educational assessment checkbox
-  const [requiresPsychoEducational, setRequiresPsychoEducational] =
-    useState(false);
+  const [requiresPsychoEducational, setRequiresPsychoEducational] = useState(
+    formData.needsPsychoEdAssessment ?? false
+  );
 
-  // Handler for the multi-select functional limitations checkboxes
-  const handleLimitationsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const defaultFunctionalLimitations: FunctionalLimitationOption[] = [
+    { name: "mobility", label: "Mobility", checked: false },
+    { name: "vision", label: "Vision", checked: false },
+    { name: "hearing", label: "Hearing", checked: false },
+    { name: "learning", label: "Learning", checked: false },
+    { name: "cognitive", label: "Cognitive", checked: false },
+    { name: "mentalHealth", label: "Mental Health", checked: false },
+    { name: "communication", label: "Communication", checked: false },
+    { name: "dexterity", label: "Dexterity", checked: false },
+    { name: "chronicPain", label: "Chronic Pain", checked: false },
+    {
+      name: "attention",
+      label: "Attention/Concentration",
+      checked: false,
+    },
+  ];
+
+  const functionalLimitations: FunctionalLimitationOption[] = Array.isArray(
+    formData.functionalLimitations
+  )
+    ? (formData.functionalLimitations as FunctionalLimitationOption[])
+    : defaultFunctionalLimitations;
+
+  const handleLimitationsChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const { name, checked } = e.target;
-    const idx = formData.functionalLimitations.findIndex(
-      (limit) => limit.name === name
-    );
-    setFormData((prev) => ({
-      ...prev,
-      functionalLimitations: prev.functionalLimitations.map((limit) =>
+
+    setFormData((prev) => {
+      const current: FunctionalLimitationOption[] = Array.isArray(
+        prev.functionalLimitations
+      )
+        ? (prev.functionalLimitations as FunctionalLimitationOption[])
+        : defaultFunctionalLimitations;
+
+      const updated = current.map((limit) =>
         limit.name !== name ? limit : { ...limit, checked }
-      ),
-    }));
+      );
+
+      return {
+        ...prev,
+        functionalLimitations: updated,
+      };
+    });
   };
 
-  // Disable verification date if not verified or not selected
   const isVerificationDisabled =
     !formData.disabilityType || formData.disabilityType === "not-verified";
 
@@ -166,7 +197,7 @@ export function DisabilityInfoStep({
             Functional Limitations (optional - check all that apply)
           </legend>
           <div className="grid grid-cols-2 gap-x-8 gap-y-3">
-            {formData.functionalLimitations.map((limitation) => (
+            {functionalLimitations.map((limitation) => (
               <div key={limitation.name} className="flex items-center">
                 <input
                   id={limitation.name}
@@ -196,7 +227,14 @@ export function DisabilityInfoStep({
             name="requiresPsychoEducational"
             type="checkbox"
             checked={requiresPsychoEducational}
-            onChange={(e) => setRequiresPsychoEducational(e.target.checked)}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              setRequiresPsychoEducational(checked);
+              setFormData((prev) => ({
+                ...prev,
+                needsPsychoEdAssessment: checked,
+              }));
+            }}
             className="h-5 w-5 border-gray-300 rounded focus:ring-[#0071a9]"
           />
           <label
@@ -208,7 +246,6 @@ export function DisabilityInfoStep({
           </label>
         </div>
 
-        {/* Conditional Email Input - Only shows when checkbox is checked */}
         {requiresPsychoEducational && (
           <div className="mt-6 ml-8 p-6 rounded-md border-l-4 border-[#0071a9] bg-[#e6fad2] my-6">
             <div className="flex items-start mb-4">
