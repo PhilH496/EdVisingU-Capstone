@@ -15,15 +15,36 @@ export function ReviewAndSubmit({
   setIsConfirmed,
 }: ReviewAndSubmitProps) {
   // Normalize functionalLimitations so filter/map are always safe
-  const functionalLimitations: FunctionalLimitationOption[] = Array.isArray(
-    formData.functionalLimitations
-  )
-    ? (formData.functionalLimitations as FunctionalLimitationOption[])
-    : [];
+// -- FIX: normalize functionalLimitations from any format --
+const rawLimits = formData.functionalLimitations;
 
-  const functionalLimitationLabels = functionalLimitations
-    .filter((limit) => limit.checked)
-    .map((limit) => limit.label);
+let functionalLimitationLabels: string[] = [];
+
+// 1) If it's an array
+if (Array.isArray(rawLimits)) {
+  functionalLimitationLabels = rawLimits
+    .map((lim) => {
+      if (typeof lim === "string") return lim;
+
+      if (lim && typeof lim === "object") {
+        // normal case
+        if (lim.checked && lim.label) return lim.label;
+
+        // fallback: if admin UI saved only the name
+        if (lim.checked && lim.name) return lim.name;
+      }
+
+      return null;
+    })
+    .filter(Boolean) as string[];
+}
+
+// 2) If it's an object (backend or admin wrote it like {mobility:true})
+else if (rawLimits && typeof rawLimits === "object") {
+  functionalLimitationLabels = Object.entries(rawLimits)
+    .filter(([_, v]) => Boolean(v))
+    .map(([key]) => key);
+}
 
   return (
     <div className="space-y-6">

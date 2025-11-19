@@ -234,6 +234,40 @@ export default function AdminApplicationDetailPage() {
     fundingSource?: string;
   }> = Array.isArray(form.requestedItems) ? form.requestedItems : [];
 
+  // Normalize functionalLimitations for Admin View
+  const normalizeFunctionalLimitations = (raw: any): string[] => {
+    if (!raw) return [];
+
+    // If array
+    if (Array.isArray(raw)) {
+      return raw
+        .map((lim) => {
+          if (typeof lim === "string") return lim;
+
+          if (lim && typeof lim === "object") {
+            if (lim.label && lim.checked) return lim.label;
+            if (lim.name && lim.checked) return lim.name;
+          }
+          return null;
+        })
+        .filter(Boolean) as string[];
+    }
+
+    // Object { mobility: true }
+    if (typeof raw === "object") {
+      return Object.entries(raw)
+        .filter(([_, val]) => Boolean(val))
+        .map(([key]) => key);
+    }
+
+    return [];
+  };
+
+  const adminFunctionalLimits = normalizeFunctionalLimitations(
+    form.functionalLimitations
+  );
+
+
   // dirty detection
   const isDirty =
     !!initialSnapshot.current &&
@@ -493,13 +527,13 @@ export default function AdminApplicationDetailPage() {
                       {/* Functional Limitations as chips */}
                       <div className="text-sm">
                         <div className="text-gray-500 mb-1">Functional Limitations</div>
-                        {toChips(form.functionalLimitations).length === 0 ? (
+                        {adminFunctionalLimits.length === 0 ? (
                           <div>—</div>
                         ) : (
                           <div className="flex flex-wrap gap-2">
-                            {toChips(form.functionalLimitations).map((chip: string) => (
+                            {adminFunctionalLimits.map((chip, idx) => (
                               <span
-                                key={chip}
+                                key={idx}
                                 className="px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-700 border border-gray-200"
                               >
                                 {chip}
