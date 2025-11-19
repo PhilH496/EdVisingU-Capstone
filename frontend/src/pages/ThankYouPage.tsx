@@ -1,7 +1,7 @@
 /**
- * ThankYouPage
- *
- * Displays confirmation after successful submission of the BSWD/CSG-DSE application.
+ * ThankYouPage component
+ * 
+ * Displays confirmation page after successful submission of the BSWD/CSG-DSE application.
  * Shows the generated Application ID and a brief success message.
  */
 
@@ -13,17 +13,17 @@ export default function ThankYouPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const raw = localStorage.getItem("currentApplication");
-      if (raw) {
+      const rawData = localStorage.getItem("currentApplication");
+      if (rawData) {
         try {
-          const data = JSON.parse(raw);
+          const data = JSON.parse(rawData);
           setApp({ id: data.id, studentName: data.studentName });
-        } catch {
-          console.error("Error parsing application data");
+        } catch (err){
+          console.error("Error parsing application data: ", err);
         }
       }
     }
-  }, []);
+  });
 
   return (
     <div
