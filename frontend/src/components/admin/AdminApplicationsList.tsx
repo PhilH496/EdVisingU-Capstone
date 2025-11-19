@@ -1,4 +1,3 @@
-
 type AppStatus = "ACCEPTED" | "REJECTED" | "NEEDS MANUAL REVIEW" | "<APP STATUS>";
 interface ApplicationRow { id: string; status: AppStatus; }
 
@@ -24,11 +23,7 @@ function StatusPill({ status }: { status: AppStatus }) {
   );
 }
 
-export default function AdminApplicationsList({
-  applications,
-  onViewAnalysis,
-  isLoading = false,
-}: AdminApplicationsListProps) {
+export default function AdminApplicationsList({applications, onViewAnalysis, isLoading = false}: AdminApplicationsListProps) {
   return (
     <div
       className="border border-gray-200 rounded-2xl shadow-sm"

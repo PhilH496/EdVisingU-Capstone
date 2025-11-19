@@ -1,10 +1,11 @@
 import Head from "next/head";
+import { ReactNode } from "react";
 
 type Props = {
   title: string;
   description?: string;
-  rightSlot?: React.ReactNode;
-  children: React.ReactNode;
+  rightSlot?: ReactNode;
+  children: ReactNode;
 };
 
 export function AdminLayout({ title, description, rightSlot, children }: Props) {
