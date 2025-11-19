@@ -4,6 +4,7 @@
  * - Per-row Status dropdown only visible in Edit Mode (badge always visible)
  * - Institution names rendered in Title Case for consistency
  * - Persists assignee, violations, details, attachments, status per application
+ * - Integrate ApplicationChatbot for analysis viewing
  */
 
 import { useEffect, useMemo, useState } from "react";
@@ -11,7 +12,8 @@ import Link from "next/link";
 import { AdminLayout } from "@/components/bswd/AdminLayout";
 import StatusBadge from "@/components/bswd/StatusBadge";
 import { ApplicationAnalysisCard } from "@/components/admin/ApplicationAnalysisCard";
-import { Play } from "lucide-react";
+import { Play, MessageCircle } from "lucide-react";
+import ApplicationChatbot from '@/components/admin/ApplicationChatbot';
 
 import {
   AppSummary,
@@ -68,6 +70,11 @@ export default function AdminDashboardPage() {
   const [analyses, setAnalyses] = useState<Record<string, any>>({});
   const [analyzing, setAnalyzing] = useState<string | null>(null);
   const [expandedApps, setExpandedApps] = useState<Set<string>>(new Set());
+
+  //Chatbot
+  const [activeChatApplication, setActiveChatApplication] = useState<any>(null);
+  const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
+
 
 const analyzeApplication = async (row: Row) => {
   setAnalyzing(row.id);
@@ -173,6 +180,12 @@ const analyzeApplication = async (row: Row) => {
       console.log('Analysis result:', analysis);
       setAnalyses((prev) => ({ ...prev, [row.id]: analysis }));
       setExpandedApps((prev) => new Set(prev).add(row.id));
+      
+      const appDataWithAnalysis = {
+        ...payload,
+        analysis: analysis,
+      };
+      setActiveChatApplication(appDataWithAnalysis);
     } else {
       const errorText = await response.text();
       console.error("Analysis failed:", errorText);
@@ -715,6 +728,27 @@ const analyzeApplication = async (row: Row) => {
           </div>
           ))}
         </div>
+      )}
+
+      {/* Admin Chatbot + button */}
+      {activeChatApplication && (
+        <>
+          {!isChatOpen && (
+            <button
+              onClick={() => setIsChatOpen(true)}
+              className="fixed bottom-6 right-6 w-16 h-16 bg-red-800 hover:bg-red-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 z-40"
+            >
+              <MessageCircle className="w-7 h-7" />
+            </button>
+          )}
+
+          <ApplicationChatbot
+            mode="floating"
+            isOpen={isChatOpen}
+            onClose={() => setIsChatOpen(false)}
+            applicationData={activeChatApplication}
+          />
+        </>
       )}
     </AdminLayout>
   );
