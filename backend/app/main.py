@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 from contextlib import asynccontextmanager
+from .analysis_routes import router as analysis_router
 import sys
 import os
 
@@ -144,6 +145,7 @@ async def reset_conversation():
             detail=f"Error resetting conversation: {str(e)}"
         )
 
+app.include_router(analysis_router)
 
 if __name__ == "__main__":
     import uvicorn

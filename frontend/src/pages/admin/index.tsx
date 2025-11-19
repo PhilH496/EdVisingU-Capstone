@@ -10,6 +10,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AdminLayout } from "@/components/bswd/AdminLayout";
 import StatusBadge from "@/components/bswd/StatusBadge";
+import { ApplicationAnalysisCard } from "@/components/admin/ApplicationAnalysisCard";
+import { Play } from "lucide-react";
 
 import {
   AppSummary,
@@ -63,6 +65,126 @@ export default function AdminDashboardPage() {
   const [allChecked, setAllChecked] = useState<boolean>(false);
   const [toolbarMsg, setToolbarMsg] = useState<string>("");
   const [editMode, setEditMode] = useState<boolean>(false);
+  const [analyses, setAnalyses] = useState<Record<string, any>>({});
+  const [analyzing, setAnalyzing] = useState<string | null>(null);
+  const [expandedApps, setExpandedApps] = useState<Set<string>>(new Set());
+
+const analyzeApplication = async (row: Row) => {
+  setAnalyzing(row.id);
+  try {
+    const snapshot = await storeLoadSnapshot(row.id);
+    
+    console.log('=== ANALYSIS DEBUG ===');
+    console.log('Application ID:', row.id);
+    console.log('Snapshot data:', snapshot);
+    
+    const formData = snapshot?.formData || {
+      studentId: row.studentId,
+      firstName: row.studentName.split(' ')[0],
+      lastName: row.studentName.split(' ').slice(1).join(' '),
+      institution: row.institution,
+      program: row.program,
+      disabilityType: "permanent",
+      studyType: "full-time",
+      hasOSAPRestrictions: false,
+      federalNeed: 0,
+      provincialNeed: 0,
+      functionalLimitations: [],
+      needsPsychoEdAssessment: false,
+      requestedItems: [],
+    };
+
+    // Parse financial need - handle string, number, null, undefined
+    const parseFederalNeed = () => {
+      const value = formData.federalNeed;
+      console.log('Federal Need raw:', value, '(type:', typeof value, ')');
+      if (value === null || value === undefined || value === '') return 0;
+      const parsed = typeof value === 'number' ? value : parseFloat(String(value));
+      return isNaN(parsed) ? 0 : parsed;
+    };
+
+    const parseProvincialNeed = () => {
+      const value = formData.provincialNeed;
+      console.log('Provincial Need raw:', value, '(type:', typeof value, ')');
+      if (value === null || value === undefined || value === '') return 0;
+      const parsed = typeof value === 'number' ? value : parseFloat(String(value));
+      return isNaN(parsed) ? 0 : parsed;
+    };
+
+    const federalNeed = parseFederalNeed();
+    const provincialNeed = parseProvincialNeed();
+    
+    console.log('Parsed Financial Need:', { 
+      federal: federalNeed, 
+      provincial: provincialNeed, 
+      total: federalNeed + provincialNeed 
+    });
+
+    // Process functional limitations - handle both object and string formats
+    const functionalLimitations = Array.isArray(formData.functionalLimitations) 
+      ? formData.functionalLimitations
+          .filter((limit: any) => {
+            if (typeof limit === 'string') return true;
+            if (typeof limit === 'object' && limit.checked) return true;
+            return false;
+          })
+          .map((limit: any) => {
+            if (typeof limit === 'string') return limit;
+            return limit.label || '';
+          })
+          .filter(Boolean)
+      : [];
+
+    const payload = {
+      application_id: row.id,
+      student_id: formData.studentId,
+      first_name: formData.firstName || row.studentName.split(' ')[0],
+      last_name: formData.lastName || row.studentName.split(' ').slice(1).join(' '),
+      disability_type: formData.disabilityType || "permanent",
+      study_type: formData.studyType,
+      has_osap_restrictions: formData.hasOSAPRestrictions || false,
+      federal_need: federalNeed,
+      provincial_need: provincialNeed,
+      disability_verification_date: formData.disabilityVerificationDate || "",
+      functional_limitations: functionalLimitations,
+      needs_psycho_ed_assessment: formData.needsPsychoEdAssessment || false,
+      requested_items: Array.isArray(formData.requestedItems)
+        ? formData.requestedItems.map((item: any) => ({
+            category: item.category || "",
+            item: item.item || "",
+            cost: typeof item.cost === 'number' ? item.cost : parseFloat(String(item.cost)) || 0,
+            funding_source: String(item.fundingSource || "bswd")
+          }))
+        : [],
+      institution: formData.institution || row.institution,
+      program: formData.program || row.program,
+    };
+
+    console.log('Sending payload to API:', JSON.stringify(payload, null, 2));
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/analysis/application`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      const analysis = await response.json();
+      console.log('Analysis result:', analysis);
+      setAnalyses((prev) => ({ ...prev, [row.id]: analysis }));
+      setExpandedApps((prev) => new Set(prev).add(row.id));
+    } else {
+      const errorText = await response.text();
+      console.error("Analysis failed:", errorText);
+      alert(`Analysis failed: ${response.statusText}\n\nCheck browser console for details.`);
+    }
+  } catch (error) {
+    console.error("Analysis error:", error);
+    alert(`Analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  } finally {
+    setAnalyzing(null);
+  }
+};
 
   // storage I/O 
   useEffect(() => {
@@ -176,7 +298,7 @@ export default function AdminDashboardPage() {
     );
     setRows(updated);
 
-    // persist each selected snapshot change
+// persist each selected snapshot change
     await Promise.all(
       updated.map(async (r: Row) => {
         if (r._selected) await storeSaveSnapshotMerge(r);
@@ -297,57 +419,64 @@ export default function AdminDashboardPage() {
       ) : (
         <div className="space-y-6">
           {rows.map((r: Row) => (
-            <div key={r.id} className="border rounded-xl bg-white shadow-sm p-5 space-y-4">
-              {/* Header */}
-              <div className="flex items-start justify-between flex-wrap gap-3">
-                <div className="flex items-start gap-3">
-                  {editMode && (
-                    <input
-                      type="checkbox"
-                      checked={!!r._selected}
-                      onChange={(e) => updateRow(r.id, { _selected: e.target.checked })}
-                      className="mt-1 h-4 w-4"
-                      title="Select for bulk actions"
-                    />
-                  )}
-                  <div>
-                    <h2 className="font-semibold text-gray-900">
-                      {r.studentName} ({r.studentId})
-                    </h2>
-                    <p className="text-sm text-gray-600">
-                      {titleCase(r.institution)} — {r.program || "—"}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Application ID: <span className="font-mono">{r.id}</span>
-                    </p>
+            <div key={r.id} className="flex gap-4">
+              <div className="flex-1 border rounded-xl bg-white shadow-sm p-5 space-y-4">
+                {/* Header */}
+                <div className="flex items-start justify-between flex-wrap gap-3">
+                  <div className="flex items-start gap-3">
+                    {editMode && (
+                      <input
+                        type="checkbox"
+                        checked={!!r._selected}
+                        onChange={(e) => updateRow(r.id, { _selected: e.target.checked })}
+                        className="mt-1 h-4 w-4"
+                        title="Select for bulk actions"
+                      />
+                    )}
+                    <div>
+                      <h2 className="font-semibold text-gray-900">
+                        {r.studentName} ({r.studentId})
+                      </h2>
+                      <p className="text-sm text-gray-600">
+                        {titleCase(r.institution)} — {r.program || "—"}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Application ID: <span className="font-mono">{r.id}</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Right side — Status + Buttons */}
+                  <div className="flex items-center gap-3">
+                    <StatusBadge status={r.status} />
+                    {editMode && (
+                      <select
+                        value={r.status}
+                        onChange={(e) => updateRow(r.id, { status: e.target.value })}
+                        className="px-2 py-1.5 border rounded-md text-xs"
+                      >
+                        {STATUS_OPTIONS.map((s) => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    )}
+                    <button
+                      onClick={() => analyzeApplication(r)}
+                      disabled={analyzing === r.id}
+                      className="px-3 py-1.5 text-sm rounded-xl border border-cyan-200 bg-cyan-50 hover:bg-cyan-100 flex items-center gap-1"
+                    >
+                      <Play className="w-3 h-3" />
+                      {analyzing === r.id ? "Analyzing..." : "Analyze"}
+                    </button>
+
+                    <Link
+                      href={`/admin/${encodeURIComponent(r.id)}`}
+                      className="px-3 py-1.5 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
+                    >
+                      View Submission
+                    </Link>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <StatusBadge status={r.status} />
-                  {editMode && (
-                    <select
-                      value={r.status}
-                      onChange={(e) => updateRow(r.id, { status: e.target.value })}
-                      className="px-2 py-1.5 border rounded-md text-xs"
-                      title="Edit status"
-                    >
-                      {STATUS_OPTIONS.map((s: string) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-
-                  <Link
-                    href={`/admin/${encodeURIComponent(r.id)}`}
-                    className="px-3 py-1.5 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
-                  >
-                    View Submission
-                  </Link>
-                </div>
-              </div>
 
               {/* Assigned To */}
               <div>
@@ -575,6 +704,15 @@ export default function AdminDashboardPage() {
                 </button>
               </div>
             </div>
+            {/* Analysis Card - OUTSIDE and to the RIGHT */}
+            {analyses[r.id] && (
+              <div className="w-96 flex-shrink-0">
+                <div className="sticky top-4">
+                  <ApplicationAnalysisCard analysis={analyses[r.id]} />
+                </div>
+              </div>
+            )}
+          </div>
           ))}
         </div>
       )}

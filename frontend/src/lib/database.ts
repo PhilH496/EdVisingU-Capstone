@@ -102,15 +102,13 @@ export const saveSubmission = async (formData: FormData) => {
 
   // Handle functional limitations - convert object to array or use array directly
   if (formData.functionalLimitations) {
-    if (Array.isArray(formData.functionalLimitations) && formData.functionalLimitations.length > 0) {
-      disabilityPayload.functional_limitations = formData.functionalLimitations.join(', ');
-    } else if (typeof formData.functionalLimitations === 'object') {
-      // Convert object to array of keys where value is true
-      const limitations = Object.keys(formData.functionalLimitations).filter(
-        key => (formData.functionalLimitations as any)[key] === true
-      );
-      if (limitations.length > 0) {
-        disabilityPayload.functional_limitations = limitations.join(', ');
+    if (Array.isArray(formData.functionalLimitations)) {
+      const selected = formData.functionalLimitations
+        .filter(lim => lim.checked)
+        .map(lim => lim.label);
+
+      if (selected.length > 0) {
+        disabilityPayload.functional_limitations = selected.join(", ");
       }
     }
   }
@@ -171,7 +169,10 @@ export const buildAnalysisPayload = (formData: FormData, deterministicChecksData
     provincial_need: formData.provincialNeed,
     restriction_type: cleanValue(formData.restrictionType),
     disability_verification_date: cleanValue(formData.disabilityVerificationDate),
-    functional_limitations: cleanValue(formData.functionalLimitations.join(', ')),
+    functional_limitations: formData.functionalLimitations
+      ?.filter(x => x.checked)
+      ?.map(x => x.label)
+      ?.join(", "),
     needs_psycho_ed_assessment: formData.needsPsychoEdAssessment,
     submitted_disability_elsewhere: formData.submittedDisabilityElsewhere,
     requested_items: formData.requestedItems?.map(item => ({

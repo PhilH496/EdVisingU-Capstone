@@ -17,6 +17,9 @@ import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { AdminLayout } from "@/components/bswd/AdminLayout";
+import { ApplicationAnalysisCard } from "@/components/admin/ApplicationAnalysisCard";
+import { ApplicationChatbot } from "@/components/admin/ApplicationChatbot";
+import { Play } from "lucide-react";
 
 // using app’s existing types/steps
 import { FormData } from "@/types/bswd";
@@ -126,6 +129,55 @@ export default function AdminApplicationDetailPage() {
   const [editForm, setEditForm] = useState<FormData | null>(null);
   const initialSnapshot = useRef<FormData | null>(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [analysis, setAnalysis] = useState<any>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [showChatbot, setShowChatbot] = useState(false);
+
+
+  const analyzeApplication = async () => {
+    if (!editForm || !summary) return;
+    setAnalyzing(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/analysis/application`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          application_id: summary.id,
+          student_id: editForm.studentId,
+          first_name: editForm.firstName,
+          last_name: editForm.lastName,
+          disability_type: editForm.disabilityType || "not-verified",
+          study_type: editForm.studyType || "full-time",
+          has_osap_restrictions: editForm.hasOSAPRestrictions || false,
+          federal_need: editForm.federalNeed || 0, 
+          provincial_need: editForm.provincialNeed || 0, 
+          disability_verification_date: editForm.disabilityVerificationDate,
+          functional_limitations: toChips(editForm.functionalLimitations),
+          needs_psycho_ed_assessment: editForm.needsPsychoEdAssessment || false,
+          requested_items: requestedItems.map(item => ({ 
+            category: item.category || "",
+            item: item.item || "",
+            cost: typeof item.cost === 'number' ? item.cost : parseFloat(String(item.cost)) || 0,
+            funding_source: String(item.fundingSource || "bswd")
+          })),
+          institution: editForm.institution,
+          program: editForm.program,
+        }),
+      });
+
+      if (response.ok) {
+        const analysisResult = await response.json();
+        setAnalysis(analysisResult);
+        setShowChatbot(true);
+      }
+    } catch (error) {
+      console.error("Analysis failed:", error);
+      alert("Analysis failed. Make sure backend is running.");
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
 
   // Load from centralized store (Supabase + local fallback)
   useEffect(() => {
@@ -289,6 +341,16 @@ export default function AdminApplicationDetailPage() {
       title="Application Details"
       rightSlot={
         <div className="flex gap-2">
+          {hasForm && (
+            <button
+              onClick={analyzeApplication}
+              disabled={analyzing}
+              className="px-4 py-2 text-sm rounded-xl border border-cyan-200 bg-cyan-50 text-cyan-800 hover:bg-cyan-100 disabled:opacity-50 flex items-center gap-2"
+            >
+              <Play className="w-4 h-4" />
+              {analyzing ? "Analyzing..." : "AI Analysis"}
+            </button>
+          )}
           <Link
             href="/admin"
             className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
@@ -409,8 +471,8 @@ export default function AdminApplicationDetailPage() {
                     <Section title="OSAP Info">
                       <Grid>
                         <Field label="OSAP Application" value={form.osapApplication} />
-                        <Field label="Federal Need" value={String(form.federalNeed ?? "")} />
-                        <Field label="Provincial Need" value={String(form.provincialNeed ?? "")} />
+                        <Field label="Federal Need" value={String(form.federalNeed)} />
+                        <Field label="Provincial Need" value={String(form.provincialNeed)} />
                         <Field label="OSAP Restrictions" value={String(form.hasOSAPRestrictions)} />
                         <Field label="Restriction Details" value={form.restrictionDetails} />
                       </Grid>
@@ -535,6 +597,45 @@ export default function AdminApplicationDetailPage() {
               </>
             )}
           </div>
+          {/* AI Analysis Section*/}
+          {analysis && (
+            <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {}
+              <div>
+                <ApplicationAnalysisCard analysis={analysis} />
+              </div>
+              
+              {/* Right side: Chatbot */}
+              {showChatbot && editForm && (
+                <div>
+                  <ApplicationChatbot
+                    applicationData={{
+                      application_id: summary?.id || "",
+                      student_id: editForm.studentId,
+                      first_name: editForm.firstName,
+                      last_name: editForm.lastName,
+                      disability_type: editForm.disabilityType || "not-verified",
+                      study_type: editForm.studyType || "full-time",
+                      has_osap_restrictions: editForm.hasOSAPRestrictions || false,
+                      federal_need: editForm.federalNeed || 0,
+                      provincial_need: editForm.provincialNeed || 0,
+                      disability_verification_date: editForm.disabilityVerificationDate,
+                      functional_limitations: toChips(editForm.functionalLimitations),
+                      needs_psycho_ed_assessment: editForm.needsPsychoEdAssessment || false,
+                      requested_items: requestedItems.map(item => ({
+                        category: item.category || "",
+                        item: item.item || "",
+                        cost: typeof item.cost === 'number' ? item.cost : parseFloat(String(item.cost)) || 0,
+                        funding_source: String(item.fundingSource || "bswd")
+                      })),
+                      institution: editForm.institution,
+                      program: editForm.program || "",
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </>
       )}
     </AdminLayout>
