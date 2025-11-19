@@ -8,9 +8,7 @@
  * @param setFormData - Function to update form data state
  */
 
-
 import { FormData } from "@/types/bswd";
-import { notifyNoOsap } from "@/lib/notify";
 
 const OSAP_MANUAL_URL = "https://osap.gov.on.ca/dc/TCONT003225";
 
