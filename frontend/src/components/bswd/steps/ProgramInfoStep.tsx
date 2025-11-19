@@ -5,7 +5,7 @@
  */
 
 // Base React imports
-import { useState, useRef } from "react";
+import { useState } from "react";
 // shadcn UI components
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
@@ -35,12 +35,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 // Icons
 import { CheckIcon, ChevronsUpDownIcon, ChevronDownIcon } from "lucide-react";
 // Utilities, types and hooks
-import { endOfMonth, format, set } from "date-fns";
+import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { FormData } from "@/types/bswd";
 import { useDateRange } from "@/hooks/UseDateRange";
-import { date } from "zod";
-
 const institutions = [
   {
     value: "algoma",
