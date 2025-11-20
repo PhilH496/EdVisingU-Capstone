@@ -29,8 +29,9 @@ export interface FormData {
   province: string;
   postalCode: string;
   country: string;
-  hasOsapApplication: boolean | null;
-
+  hasOsapApplication: boolean;
+  osapApplicationStartDate: string;
+  
   // Program Information
   institution: string;
   institutionType: "" | "public-ontario" | "private-ontario";
@@ -38,8 +39,8 @@ export interface FormData {
   code: string;
   studyPeriodStart: string;
   studyPeriodEnd: string;
-  studyType: "" | "full-time" | "part-time" | "institution-funded-SB";
-  submittedDisabilityElsewhere: "yes" | "no";
+  studyType: '' | 'full-time' | 'part-time' | 'institution-funded-SB';
+  submittedDisabilityElsewhere: boolean;
   previousInstitution: string;
 
   // OSAP Information
@@ -74,14 +75,7 @@ export interface RequestedItem {
   category: string;
   item: string;
   cost: number;
-  justification: string;
-  fundingSource: "bswd" | "csg-dse" | "both";
-}
-
-export interface RiskAssessment {
-  score: number;
-  level: "Low" | "Medium" | "High";
-  factors: string[];
+  fundingSource: 'bswd' | 'csg-dse' | 'both';
 }
 
 export interface Application {
