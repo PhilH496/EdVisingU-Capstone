@@ -17,7 +17,6 @@
 // - Use brand colors located in tailwind.config.js; reference StudentInfoStep.tsx
 
 import { FormData } from "@/types/bswd";
-import { notifyNoOsap } from "@/lib/notify";
 
 const OSAP_MANUAL_URL = "https://osap.gov.on.ca/dc/TCONT003225";
 
@@ -27,27 +26,20 @@ interface OsapInfoStepProps {
 }
 
 export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
-  // helper to update a single field while preserving the rest of the formData
   const setField = <K extends keyof FormData>(key: K, value: FormData[K]) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
 
-  // local state shortcuts
   const onFileStatus: "APPROVED" | "NONE" | "" =
-    formData.osapOnFileStatus ?? "";
-  const queuedForManualReview: boolean = formData.queuedForManualReview;
+    (formData.osapOnFileStatus as "APPROVED" | "NONE" | "") ?? "";
   const applicationType = formData.osapApplication ?? "none";
   const federalNeed = Number(formData.federalNeed ?? 0);
   const provincialNeed = Number(formData.provincialNeed ?? 0);
   const hasRestrictions = Boolean(formData.hasOSAPRestrictions ?? false);
   const restrictionType = formData.restrictionType ?? "";
 
-  // caps
-  // Federal: Full-Time -> 20000; Part-Time -> 0
-  // Provincial: up to 2000 unless restrictions (then 0)
   const FED_CAP = applicationType === "full-time" ? 20000 : 0;
   const PROV_CAP = hasRestrictions ? 0 : 2000;
 
-  // eligibility flags for display
   const federalEligible =
     onFileStatus === "APPROVED" && applicationType === "full-time";
   const provincialEligible =
@@ -55,20 +47,8 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
     applicationType !== "none" &&
     !hasRestrictions;
 
-  // combined maximum (updates automatically from flags above)
   const combinedDisplay =
     (federalEligible ? FED_CAP : 0) + (provincialEligible ? PROV_CAP : 0);
-
-  // handler for OSAP on-file status change
-  const handleOnFileChange = async (status: "APPROVED" | "NONE" | "") => {
-    setFormData((prev) => ({ ...prev, osapOnFileStatus: status }));
-    if (status === "NONE" && !queuedForManualReview) {
-      try {
-        await notifyNoOsap(formData.email);
-      } catch {}
-      setFormData((prev) => ({ ...prev, queuedForManualReview: true }));
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -79,42 +59,6 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
         Confirm your OSAP status, enter assessed needs, and note any
         restrictions.
       </p>
-      {/* OSAP Application On-File Confirmation */}
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-brand-text-gray">Do you have an active & approved OSAP application on file? <span className="text-brand-light-red">*</span></label>
-        <div className="flex gap-4">
-          <label className="inline-flex items-center gap-2 text-brand-text-gray">
-            <input
-              type="radio"
-              name="osapOnFileStatus"
-              checked={onFileStatus === "APPROVED"}
-              onChange={() => handleOnFileChange("APPROVED")}
-            />
-            Yes — Active & Approved
-          </label>
-          <label className="inline-flex items-center gap-2 text-brand-text-gray">
-            <input
-              type="radio"
-              name="osapOnFileStatus"
-              checked={onFileStatus === "NONE"}
-              onChange={() => handleOnFileChange("NONE")}
-            />
-            No application on file
-          </label>
-        </div>
-        {onFileStatus === "NONE" && (
-          <div className="mt-2 rounded-md border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-900">
-            An email has been sent requesting you to apply for OSAP. Your
-            BSWD/CSG-DSE application has been marked{" "}
-            <span className="font-semibold">Pending Manual Review</span>.{" "}
-            {queuedForManualReview && (
-              <div className="mt-1 text-xs text-yellow-800">
-                Status: queued for manual review.
-              </div>
-            )}
-          </div>
-        )}
-      </div>
 
       {/* OSAP Application Type */}
       <div className="space-y-1">
@@ -143,11 +87,12 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
         )}
       </div>
 
-      {/* Assessed Needs (kept, but not gating display caps) */}
+      {/* Assessed Needs */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-1">
           <label className="block text-sm font-medium text-brand-text-gray">
-            Federal Financial Need ($) <span className="text-brand-light-red">*</span>
+            Federal Financial Need ($){" "}
+            <span className="text-brand-light-red">*</span>
           </label>
           <input
             type="number"
@@ -271,6 +216,7 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
     </div>
   );
 }
+
 function getOsapApplication(value: string) {
   return value !== "full-time" && value !== "part-time" ? "none" : value;
 }
