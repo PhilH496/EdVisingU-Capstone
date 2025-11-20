@@ -79,14 +79,10 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
   const { has_disability, is_full_time, has_osap_restrictions } =
     analysis.deterministic_checks;
 
-  // ========================================================================
-  // BACKEND CONFIDENCE SCORE (0-1 scale, convert to 0-100)
-  // ========================================================================
+  // Backend confidence score
   const finalScore = Math.round(analysis.ai_analysis.confidence_score * 100);
 
-  // ========================================================================
-  // Donut Chart Data (color based on overall_status)
-  // ========================================================================
+  // Pie chart
   const scoreColor = STATUS_COLORS[analysis.overall_status] || "#0ea5e9";
 
   const pieData = [

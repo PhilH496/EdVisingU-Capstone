@@ -9,11 +9,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { AdminLayout } from "@/components/bswd/AdminLayout";
-import StatusBadge from "@/components/bswd/StatusBadge";
+import { AdminLayout } from "@/components/admin/AdminLayout";
+import StatusBadge from "@/components/admin/StatusBadge";
 import { ApplicationAnalysisCard } from "@/components/admin/ApplicationAnalysisCard";
 import { Play, MessageCircle } from "lucide-react";
-import ApplicationChatbot from '@/components/admin/ApplicationChatbot';
+import ApplicationChatbot from '@/components/admin/AdminChatbot';
 
 import {
   AppSummary,

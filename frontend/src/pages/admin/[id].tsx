@@ -7,9 +7,9 @@
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { AdminLayout } from "@/components/bswd/AdminLayout";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ApplicationAnalysisCard } from "@/components/admin/ApplicationAnalysisCard";
-import ApplicationChatbot from "@/components/admin/ApplicationChatbot";
+import ApplicationChatbot from "@/components/admin/AdminChatbot";
 import { Play, MessageCircle } from "lucide-react";
 
 // using app's existing types/steps
