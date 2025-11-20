@@ -93,6 +93,7 @@ const analyzeApplication = async (row: Row) => {
       program: row.program,
       disabilityType: "permanent",
       studyType: "full-time",
+      osapApplication: "none",
       hasOSAPRestrictions: false,
       federalNeed: 0,
       provincialNeed: 0,
@@ -149,6 +150,7 @@ const analyzeApplication = async (row: Row) => {
       last_name: formData.lastName || row.studentName.split(' ').slice(1).join(' '),
       disability_type: formData.disabilityType || "permanent",
       study_type: formData.studyType,
+      osap_application: formData.osapApplication || "none",
       has_osap_restrictions: formData.hasOSAPRestrictions || false,
       federal_need: federalNeed,
       provincial_need: provincialNeed,
@@ -176,14 +178,48 @@ const analyzeApplication = async (row: Row) => {
     });
 
     if (response.ok) {
-      const analysis = await response.json();
-      console.log('Analysis result:', analysis);
-      setAnalyses((prev) => ({ ...prev, [row.id]: analysis }));
+      const analysisResult = await response.json();
+      console.log('Analysis result:', analysisResult);
+      setAnalyses((prev) => ({ ...prev, [row.id]: analysisResult }));
       setExpandedApps((prev) => new Set(prev).add(row.id));
       
+      // Structure properly for chatbot
       const appDataWithAnalysis = {
-        ...payload,
-        analysis: analysis,
+        application_id: row.id,
+        student_id: formData.studentId,
+        first_name: formData.firstName || row.studentName.split(' ')[0],
+        last_name: formData.lastName || row.studentName.split(' ').slice(1).join(' '),
+        disability_type: formData.disabilityType || "permanent",
+        study_type: formData.studyType,
+        osap_application: formData.osapApplication || "none",
+        has_osap_restrictions: formData.hasOSAPRestrictions || false,
+        federal_need: federalNeed,
+        provincial_need: provincialNeed,
+        functional_limitations: functionalLimitations,
+        needs_psycho_ed_assessment: formData.needsPsychoEdAssessment || false,
+        requested_items: Array.isArray(formData.requestedItems)
+          ? formData.requestedItems.map((item: any) => ({
+              category: item.category || "",
+              item: item.item || "",
+              cost: typeof item.cost === 'number' ? item.cost : parseFloat(String(item.cost)) || 0,
+              funding_source: String(item.fundingSource || "bswd")
+            }))
+          : [],
+        institution: formData.institution || row.institution,
+        program: formData.program || row.program,
+        analysis: {
+          decision: analysisResult.overall_status,
+          confidence: Math.round(analysisResult.ai_analysis.confidence_score * 100),
+          reasoning: analysisResult.ai_analysis.reasoning,
+          eligibility: {
+            verified_disability: analysisResult.deterministic_checks.has_disability,
+            full_time_student: analysisResult.deterministic_checks.is_full_time,
+            no_osap_restrictions: !analysisResult.deterministic_checks.has_osap_restrictions,
+          },
+          strengths: analysisResult.ai_analysis.strengths,
+          risk_factors: analysisResult.ai_analysis.risk_factors,
+          recommended_funding: analysisResult.ai_analysis.funding_recommendation,
+        },
       };
       setActiveChatApplication(appDataWithAnalysis);
     } else {
@@ -311,7 +347,6 @@ const analyzeApplication = async (row: Row) => {
     );
     setRows(updated);
 
-// persist each selected snapshot change
     await Promise.all(
       updated.map(async (r: Row) => {
         if (r._selected) await storeSaveSnapshotMerge(r);
@@ -691,10 +726,10 @@ const analyzeApplication = async (row: Row) => {
                     type="file"
                     multiple
                     onChange={async (e) => {
-                      const input = e.currentTarget as HTMLInputElement; // capture before await
-                      const files = input.files; // snapshot files
+                      const input = e.currentTarget as HTMLInputElement;
+                      const files = input.files;
                       await attachFiles(r.id, files);
-                      if (input) input.value = ""; // clear safely to allow re-upload same file name
+                      if (input) input.value = "";
                     }}
                     className="block w-full text-sm text-gray-700 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-800 hover:file:bg-gray-200"
                   />
@@ -717,7 +752,7 @@ const analyzeApplication = async (row: Row) => {
                 </button>
               </div>
             </div>
-            {/* Analysis Card - OUTSIDE and to the RIGHT */}
+            {/* Analysis Card */}
             {analyses[r.id] && (
               <div className="w-96 flex-shrink-0">
                 <div className="sticky top-4">

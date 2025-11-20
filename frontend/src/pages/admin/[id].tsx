@@ -2,15 +2,6 @@
  * Application Detail 
  *
  * Focused, readable view of the submitted student application.
- * Renders:
- *  - Summary card
- *  - Student Info
- *  - Program Info
- *  - OSAP Info
- *  - Disability Info (chips for functional limitations)
- *  - Services & Equipment (table for requested items)
- *
- * Edit Mode uses the same step components then persists via adminStore.
  */
 
 import { useRouter } from "next/router";
@@ -21,7 +12,7 @@ import { ApplicationAnalysisCard } from "@/components/admin/ApplicationAnalysisC
 import ApplicationChatbot from "@/components/admin/ApplicationChatbot";
 import { Play, MessageCircle } from "lucide-react";
 
-// using app’s existing types/steps
+// using app's existing types/steps
 import { FormData } from "@/types/bswd";
 import { StudentInfoStep } from "@/components/bswd/steps/StudentInfoStep";
 import { ProgramInfoStep } from "@/components/bswd/steps/ProgramInfoStep";
@@ -44,7 +35,7 @@ import {
 const StudentInfoStepShim = ({
   formData,
   setFormData,
-  readOnly, // ignored
+  readOnly,
 }: {
   formData: FormData;
   setFormData: any;
@@ -140,6 +131,35 @@ export default function AdminApplicationDetailPage() {
     if (!editForm || !summary) return;
     setAnalyzing(true);
     try {
+      // Parse financial need - handle string, number, null, undefined
+      const parseFederalNeed = () => {
+        const value = editForm.federalNeed;  // Changed from formData to editForm
+        console.log('Federal Need raw:', value, '(type:', typeof value, ')');
+        if (value === null || value === undefined || String(value).trim() === '') return 0;
+        const parsed = typeof value === 'number' ? value : parseFloat(String(value));
+        return isNaN(parsed) ? 0 : parsed;
+      };
+
+      const parseProvincialNeed = () => {
+        const value = editForm.provincialNeed;  // Changed from formData to editForm
+        console.log('Provincial Need raw:', value, '(type:', typeof value, ')');
+        if (value === null || value === undefined || String(value).trim() === '') return 0;
+        const parsed = typeof value === 'number' ? value : parseFloat(String(value));
+        return isNaN(parsed) ? 0 : parsed;
+      };
+
+      const federalNeed = parseFederalNeed();
+      const provincialNeed = parseProvincialNeed();
+
+      console.log('Parsed Financial Need:', { 
+        federal: federalNeed, 
+        provincial: provincialNeed, 
+        total: federalNeed + provincialNeed 
+      });
+
+      // Process functional limitations
+      const functionalLimitations = toChips(editForm.functionalLimitations);
+
       const payload = {
         application_id: summary.id,
         student_id: editForm.studentId,
@@ -147,11 +167,12 @@ export default function AdminApplicationDetailPage() {
         last_name: editForm.lastName,
         disability_type: editForm.disabilityType || "not-verified",
         study_type: editForm.studyType || "full-time",
+        osap_application: editForm.osapApplication || "none",
         has_osap_restrictions: editForm.hasOSAPRestrictions || false,
-        federal_need: editForm.federalNeed || 0, 
-        provincial_need: editForm.provincialNeed || 0, 
+        federal_need: federalNeed, 
+        provincial_need: provincialNeed, 
         disability_verification_date: editForm.disabilityVerificationDate,
-        functional_limitations: toChips(editForm.functionalLimitations),
+        functional_limitations: functionalLimitations,
         needs_psycho_ed_assessment: editForm.needsPsychoEdAssessment || false,
         requested_items: requestedItems.map(item => ({ 
           category: item.category || "",
@@ -173,9 +194,41 @@ export default function AdminApplicationDetailPage() {
         const analysisResult = await response.json();
         setAnalysis(analysisResult);
 
+        // Structure properly for chatbot
         const appDataWithAnalysis = {
-          ...payload,
-          analysis: analysisResult, 
+          application_id: summary.id,
+          student_id: editForm.studentId,
+          first_name: editForm.firstName,
+          last_name: editForm.lastName,
+          disability_type: editForm.disabilityType || "not-verified",
+          study_type: editForm.studyType || "full-time",
+          osap_application: editForm.osapApplication || "none",
+          has_osap_restrictions: editForm.hasOSAPRestrictions || false,
+          federal_need: federalNeed,
+          provincial_need: provincialNeed,
+          functional_limitations: functionalLimitations,
+          needs_psycho_ed_assessment: editForm.needsPsychoEdAssessment || false,
+          requested_items: requestedItems.map(item => ({
+            category: item.category || "",
+            item: item.item || "",
+            cost: typeof item.cost === 'number' ? item.cost : parseFloat(String(item.cost)) || 0,
+            funding_source: String(item.fundingSource || "bswd")
+          })),
+          institution: editForm.institution,
+          program: editForm.program,
+          analysis: {
+            decision: analysisResult.overall_status,
+            confidence: Math.round(analysisResult.ai_analysis.confidence_score * 100),
+            reasoning: analysisResult.ai_analysis.reasoning,
+            eligibility: {
+              verified_disability: analysisResult.deterministic_checks.has_disability,
+              full_time_student: analysisResult.deterministic_checks.is_full_time,
+              no_osap_restrictions: !analysisResult.deterministic_checks.has_osap_restrictions,
+            },
+            strengths: analysisResult.ai_analysis.strengths,
+            risk_factors: analysisResult.ai_analysis.risk_factors,
+            recommended_funding: analysisResult.ai_analysis.funding_recommendation,
+          },
         };
         setActiveChatApplication(appDataWithAnalysis);
       }
@@ -186,7 +239,6 @@ export default function AdminApplicationDetailPage() {
       setAnalyzing(false);
     }
   };
-
 
   // Load from centralized store (Supabase + local fallback)
   useEffect(() => {
@@ -247,7 +299,6 @@ export default function AdminApplicationDetailPage() {
   const normalizeFunctionalLimitations = (raw: any): string[] => {
     if (!raw) return [];
 
-    // If array
     if (Array.isArray(raw)) {
       return raw
         .map((lim) => {
@@ -262,7 +313,6 @@ export default function AdminApplicationDetailPage() {
         .filter(Boolean) as string[];
     }
 
-    // Object { mobility: true }
     if (typeof raw === "object") {
       return Object.entries(raw)
         .filter(([_, val]) => Boolean(val))
@@ -276,18 +326,16 @@ export default function AdminApplicationDetailPage() {
     form.functionalLimitations
   );
 
-
   // dirty detection
   const isDirty =
     !!initialSnapshot.current &&
     !!editForm &&
     JSON.stringify(initialSnapshot.current) !== JSON.stringify(editForm);
 
-  // Persist snapshot and  refresh list (centralized store)
+  // Persist snapshot and refresh list (centralized store)
   const persistEverywhere = async (fd: FormData) => {
     if (!summary) return;
 
-    // derive a refreshed summary from edited form
     const nowIso = new Date().toISOString();
     const nextSummary: Summary = {
       ...summary,
@@ -301,18 +349,15 @@ export default function AdminApplicationDetailPage() {
       statusUpdatedDate: nowIso,
     };
 
-    // save snapshot (formData)
     await storeSaveSnapshotMerge(
       {
         ...nextSummary,
-      } as any, // Row shape is compatible with Summary for fields we pass
+      } as any,
       fd
     );
 
-    // refresh applications list (only this summary change required)
     await storeSaveApplicationsList([nextSummary]);
 
-    // reflect locally
     const nextSnap: Snapshot = {
       summary: nextSummary,
       formData: fd,
@@ -325,7 +370,6 @@ export default function AdminApplicationDetailPage() {
     initialSnapshot.current = fd;
   };
 
-  // Validate a minimal set from Student block 
   const validateAndSaveStudentBlock = async (fd: FormData) => {
     try {
       const [dayStr, monthStr, yearStr] = (fd.dateOfBirth || "").split("/");
@@ -356,7 +400,6 @@ export default function AdminApplicationDetailPage() {
         return false;
       }
 
-      // it may also persist to a dedicated table/service here
       return true;
     } catch (e) {
       console.error(e);
@@ -597,7 +640,6 @@ export default function AdminApplicationDetailPage() {
                         </Section>
                       </>
                     ) : (
-                      // edit mode: use the same step components
                       <div className="space-y-6">
                         {editForm ? (
                           <>

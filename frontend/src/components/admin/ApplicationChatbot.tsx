@@ -5,6 +5,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Loader2, X, MessageCircle } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 interface Message {
   role: "user" | "assistant";
@@ -19,6 +20,7 @@ interface ApplicationData {
   last_name: string;
   disability_type: string;
   study_type: string;
+  osap_application: string;
   has_osap_restrictions: boolean;
   federal_need: number;
   provincial_need: number;
@@ -39,9 +41,9 @@ interface ApplicationData {
 interface Props {
   applicationData: ApplicationData;
   apiBaseUrl?: string;
-  mode?: "embedded" | "floating"; //Support both modes
-  isOpen?: boolean; // For floating mode
-  onClose?: () => void; // For floating mode
+  mode?: "embedded" | "floating"; 
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 export function ApplicationChatbot({ 
@@ -92,57 +94,102 @@ export function ApplicationChatbot({
 
     try {
       let enhancedPrompt = `
-You are a BSWD/CSG-DSE application assessment assistant.
-
-You must answer using the official BSWD policy voice and the following rules:
+  You are a BSWD/CSG-DSE application assessment assistant with complete knowledge of the scoring system.
 
 CRITICAL RESPONSE RULES:
 1. Maximum 2 sentences OR 1 sentence + a bullet list
-2. Bullet list must use the • symbol (NOT - or *)
+2. Bullet list must use standard Markdown (* or -)
 3. Bullets must be concise (15–20 words max)
-4. Use official terminology from BSWD/CSG-DSE policy
-5. Do not explain internal reasoning; answer as a decision-support specialist
-6. If data is missing, say so directly and list what is missing
-7. When referencing the student, use “the student” rather than name
+4. Use official BSWD/CSG-DSE policy terminology
+5. When explaining scores, cite SPECIFIC penalty amounts and dollar amounts
+6. NEVER suggest the scoring logic might be wrong - it is deterministic and correct
+7. When referencing the student, use "the student"
+8. ALWAYS return bullets in standard Markdown list format (e.g., * item)
+9. EACH BULLET MUST BE ON ITS OWN LINE (use a newline between bullets)
 
-You are reviewing the following BSWD/CSG-DSE application data (JSON):
-${JSON.stringify(applicationData, null, 2)}
-`;
+CRITICAL TERMINOLOGY:
+- "Federal/Provincial Need" = Federal/Provincial FUNDING REQUESTED (not equipment cost)
+- "Requested Items" = EQUIPMENT/SERVICE COSTS (the actual needs)
+- Ratio = (Provincial + Federal) / Equipment Costs = Funding / Equipment
 
-if (applicationData.analysis) {
-    enhancedPrompt += `
+BSWD CONFIDENCE SCORING SYSTEM:
 
-AI ANALYSIS RESULTS:
-Decision: ${applicationData.analysis.decision || 'PENDING'}
-Confidence: ${applicationData.analysis.confidence || 0}%
-${applicationData.analysis.reasoning ? `Reasoning: ${applicationData.analysis.reasoning}` : ''}
+Step 1 - Eligibility (start at 100, -33 each):
+* No verified permanent/persistent disability
+* Has OSAP restrictions
 
-Eligibility Checks:
-- Verified Disability: ${applicationData.analysis.eligibility?.verified_disability ? 'PASS ✓' : 'FAIL ✗'}
-- Full-Time Student: ${applicationData.analysis.eligibility?.full_time_student ? 'PASS ✓' : 'FAIL ✗'}
-- No OSAP Restrictions: ${applicationData.analysis.eligibility?.no_osap_restrictions ? 'PASS ✓' : 'FAIL ✗'}
+Step 2 - Funding Limits:
+* Full-time OSAP: BSWD $2K (provincial) + CSG $20K (federal) = $22K max
+* Part-time OSAP: BSWD $2K (provincial) only, NO federal CSG
+* No OSAP: BSWD $2K (provincial) only, NO federal CSG
 
-${applicationData.analysis.strengths && applicationData.analysis.strengths.length > 0 ? `
-Strengths:
-${applicationData.analysis.strengths.map((s: string) => `- ${s}`).join('\n')}
-` : ''}
+Penalties (-30 each, can stack):
+* Provincial funding > $2,000
+* Federal funding > $20,000 (full-time only)
+* Federal funding > $0 (part-time or no OSAP)
 
-${applicationData.analysis.risk_factors && applicationData.analysis.risk_factors.length > 0 ? `
-Risk Factors:
-${applicationData.analysis.risk_factors.map((r: string) => `- ${r}`).join('\n')}
-` : ''}
+Step 3 - Funding/Equipment Ratio (ratio = funding / equipment):
+* Ratio ≥ 4.0 (funding 4x+ equipment, severe over-funding): -60
+* Ratio ≥ 2.0 (funding 2x+ equipment, major over-funding): -30
+* Ratio > 1.2 (funding 21%+ over equipment): -15
+* Ratio 1.0-1.2 (funding 0-20% over equipment): -2 per 10%
+* Ratio ≤ 0.5 (funding 2x under equipment, major gap): -15
+* Ratio 0.5-1.0 (funding is under equipment, minor gap): -5
 
-${applicationData.analysis.recommended_funding ? `
-Recommended Funding: $${applicationData.analysis.recommended_funding}
-` : ''}
-`;
+Thresholds: 90-100=APPROVED | 75-89=MANUAL REVIEW | 0-74=REJECTED
+
+Example: Equipment $6,900, Funding $9,000 (provincial $1 + federal $6,899)
+- Step 1: 100 (passes)
+- Step 2: 100 (within limits)
+- Step 3: -15 (ratio 9000/6900 = 1.30, funding exceeds equipment by 30%)
+- Final: 85 → MANUAL REVIEW
+
+Example: Equipment $6,900, Funding $4,301 (provincial $1 + federal $3,300)
+- Step 1: 100 (passes)
+- Step 2: 100 (within limits)
+- Step 3: -5 (ratio 3301/6900 = 0.623, funding is under equipment costs by 37.7%)
+- Final: 95 → APPROVED
+
+  Application Data:
+  ${JSON.stringify(applicationData, null, 2)}
+  `;
+
+      if (applicationData.analysis) {
+        enhancedPrompt += `
+
+  AI ANALYSIS RESULTS:
+  Decision: ${applicationData.analysis.decision || 'PENDING'}
+  Confidence: ${applicationData.analysis.confidence || 0}%
+  ${applicationData.analysis.reasoning ? `Reasoning: ${applicationData.analysis.reasoning}` : ''}
+
+  Eligibility Checks:
+  - Verified Disability: ${applicationData.analysis.eligibility?.verified_disability ? 'PASS ✓' : 'FAIL ✗'}
+  - Full-Time Student: ${applicationData.analysis.eligibility?.full_time_student ? 'PASS ✓' : 'FAIL ✗'}
+  - No OSAP Restrictions: ${applicationData.analysis.eligibility?.no_osap_restrictions ? 'PASS ✓' : 'FAIL ✗'}
+
+  ${applicationData.analysis.strengths && applicationData.analysis.strengths.length > 0 ? `
+  Strengths:
+  ${applicationData.analysis.strengths.map((s: string) => `- ${s}`).join('\n')}
+  ` : ''}
+
+  ${applicationData.analysis.risk_factors && applicationData.analysis.risk_factors.length > 0 ? `
+  Risk Factors:
+  ${applicationData.analysis.risk_factors.map((r: string) => `- ${r}`).join('\n')}
+  ` : ''}
+
+  ${applicationData.analysis.recommended_funding ? `
+  Recommended Funding: $${applicationData.analysis.recommended_funding}
+  ` : ''}
+  `;
       }
 
       enhancedPrompt += `
 
-Now answer the user's question clearly and professionally:
-${input}
-`;
+  Now answer the user's question clearly and professionally:
+  ${input}
+
+  Remember: The scoring is deterministic. Never suggest the logic might be incorrect.
+  `;
 
       const response = await fetch(`${apiBaseUrl}/api/chat`, {
         method: "POST",
@@ -192,7 +239,6 @@ ${input}
     }
   };
 
-  // Suggested questions
   const suggestedQuestions = [
     "Is this student eligible for BSWD funding?",
     "What is the recommended funding amount?",
@@ -208,7 +254,6 @@ ${input}
 
   if (mode === "floating" && !isOpen) return null;
 
-  // Determine container and header classes based on mode
   const containerClasses = mode === "floating"
     ? "fixed bottom-6 right-6 w-96 sm:w-[450px] h-[500px] border rounded-lg bg-white shadow-2xl flex flex-col z-50 animate-slideUp"
     : "border rounded-xl bg-white shadow-sm flex flex-col h-[600px]";
@@ -264,10 +309,30 @@ ${input}
                   : "bg-white text-gray-800 rounded-tl-none"
               }`}
             >
-              <p className="text-base leading-relaxed whitespace-pre-wrap">{message.content}</p>
+              {message.role === "assistant" ? (
+                <ReactMarkdown
+                  components={{
+                    p: ({node, ...props}) => <p className="mb-2" {...props} />,
+                    ul: ({node, ...props}) => <ul className="space-y-1 my-2 pl-0" {...props} />,
+                    li: ({node, children, ...props}) => (
+                      <li className="flex" {...props}>
+                        <span className="mr-2 font-bold text-gray-800 flex-shrink-0">•</span>
+                        <span className="flex-1">{children}</span>
+                      </li>
+                    ),
+                  }}
+                >
+                  {message.content}
+                </ReactMarkdown>
+              ) : (
+                <p className="text-base leading-relaxed whitespace-pre-wrap">
+                  {message.content}
+                </p>
+              )}
             </div>
           </div>
         ))}
+
         {loading && (
           <div className="flex justify-start">
             <div className="bg-white rounded-lg rounded-tl-none px-4 py-3 shadow-sm">
@@ -275,10 +340,11 @@ ${input}
             </div>
           </div>
         )}
+
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Suggested Questions (only show if no user messages yet) */}
+      {/* Suggested Questions */}
       {messages.filter((m) => m.role === "user").length === 0 && (
         <div className="px-4 py-3 border-t bg-gray-50">
           <p className="text-xs font-semibold text-gray-600 mb-2">Suggested questions:</p>
