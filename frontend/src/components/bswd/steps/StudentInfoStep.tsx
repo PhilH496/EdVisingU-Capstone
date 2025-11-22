@@ -29,6 +29,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
   const isLocked = formData.hasOsapApplication === false;
   const lockCls = (base: string) => base + " " + (isLocked ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200" : "focus:outline-none focus:ring-2 focus:ring-brand-dark-blue");
   const dob = useDateRange();
+  const osapStartDate = useDateRange();
 
   return (
     <div className="space-y-4">
@@ -58,6 +59,46 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
           <option value="no">No</option>
         </select>
       </div>
+
+      {/* OSAP Application Start Date */}
+      {formData.hasOsapApplication === true && (
+        <div>
+          <Label htmlFor="osapApplicationStartDate" className="block text-sm font-medium mb-1 text-brand-text-gray">
+            OSAP Application Start Date{" "}
+            <span className="text-sm text-brand-light-red mt-1">*</span>
+          </Label>
+          <Popover open={osapStartDate.open} onOpenChange={osapStartDate.setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                id="osapApplicationStartDate"
+                className="w-full justify-between font-normal"
+              >
+                {osapStartDate.date ? osapStartDate.date.toLocaleDateString() : "Select OSAP start date"}
+                <ChevronDownIcon />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={osapStartDate.date}
+                captionLayout="dropdown"
+                onSelect={(date) => {
+                  osapStartDate.setDate(date)
+                  osapStartDate.setOpen(false)
+                  if (date) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      osapApplicationStartDate: format(date, "dd/MM/yyyy")
+                    }))
+                  }
+                }}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+      )}
+
       <h2 className="text-xl font-semibold mb-4">Section A: Student Information</h2>
 
 
@@ -77,13 +118,13 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             disabled={isLocked}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               const value = e.target.value.replace(/\D/g, "");
-              if (value.length <= 15) {
+              if (value.length <= 8) {
                 setFormData((prev) => ({ ...prev, studentId: value }));
               }
             }}
             className={lockCls("w-full px-3 py-2 border rounded-md")}
             placeholder="Enter student ID"
-            maxLength={15}
+            maxLength={8}
           />
           {formData.studentId && formData.studentId.length < 7 && (
             <p className="text-sm text-brand-light-red mt-1">
@@ -422,6 +463,11 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 placeholder="A1A 1A1"
                 maxLength={7}
               />
+              {formData.postalCode && formData.postalCode.replace(/\s/g, "").length !== 6 && (
+                <p className="text-sm text-brand-light-red mt-1">
+                  Postal code must be 6 characters (e.g., A1A 1A1)
+                </p>
+              )}
             </div>
 
             <div>

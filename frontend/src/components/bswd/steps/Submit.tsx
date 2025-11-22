@@ -15,7 +15,6 @@ export function ReviewAndSubmit({
   setIsConfirmed,
 }: ReviewAndSubmitProps) {
   // Normalize functionalLimitations so filter/map are always safe
-// -- FIX: normalize functionalLimitations from any format --
 const rawLimits = formData.functionalLimitations;
 
 let functionalLimitationLabels: string[] = [];

@@ -28,7 +28,7 @@ async def lifespan(app: FastAPI):
         print(f"Error initializing chain: {str(e)}")
         raise
     
-    yield
+    yield  # Application runs here
 
 app = FastAPI(
     title="BSWD Chatbot API",

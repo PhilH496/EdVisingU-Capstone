@@ -44,7 +44,7 @@ export const saveSubmission = async (formData: FormData) => {
     address: formData.address,
     city: formData.city,
     province: formData.province,
-    postal_code: parseInt(formData.postalCode),
+    postal_code: formData.postalCode,
     country: formData.country,
   };
 
@@ -165,7 +165,7 @@ export const buildAnalysisPayload = (formData: FormData, deterministicChecksData
     address: formData.address,
     city: formData.city,
     province: formData.province,
-    postal_code: parseInt(formData.postalCode),
+    postal_code: formData.postalCode,
     country: formData.country,
     institution_name: formData.institution,
     institution_type: formData.institutionType,

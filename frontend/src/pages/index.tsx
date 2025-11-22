@@ -127,6 +127,7 @@ export default function BSWDApplicationPage() {
         return Boolean(
           formData.studentId &&
           formData.studentId.length >= 7 &&
+          formData.studentId.length <= 8 &&
           formData.firstName &&
           formData.lastName &&
           formData.email &&
@@ -137,6 +138,7 @@ export default function BSWDApplicationPage() {
           formData.city &&
           formData.province &&
           formData.postalCode &&
+          formData.postalCode.replace(/\s/g, "").length === 6 && 
           formData.country &&
           formData.hasOsapApplication !== null
         );
