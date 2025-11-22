@@ -9,16 +9,13 @@ from enum import Enum
 from datetime import datetime
 import json
 import os
-# Import existing chain setup
 from .chain import get_or_create_chain, chat_with_memory
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
 router = APIRouter(prefix="/api/analysis", tags=["analysis"])
 
-# ============================================================================
 # CONSTANTS
-# ============================================================================
 
 FUNDING_LIMITS = {
     "technology": {"bswd": 2000, "csg": 8000, "items": ["laptop", "computer", "tablet", "ipad"]},
@@ -31,9 +28,7 @@ FUNDING_LIMITS = {
 
 ANNUAL_CAP = 22000
 
-# ============================================================================
 # MODELS
-# ============================================================================
 
 class ApplicationStatus(str, Enum):
     APPROVED = "APPROVED"
@@ -98,9 +93,7 @@ class ApplicationData(BaseModel):
     institution: str
     program: Optional[str] = None
 
-# ============================================================================
 # ANALYSIS FUNCTIONS
-# ============================================================================
 
 def run_deterministic_checks(app_data: ApplicationData) -> DeterministicCheckResult:
     """Check eligibility requirements"""
@@ -320,29 +313,29 @@ async def run_ai_analysis(
     prompt = ChatPromptTemplate.from_messages([
         ("system", """You are a BSWD application analyst. Provide concise, factual analysis.
 
-INSTRUCTIONS:
-1. Write EXACTLY 2-3 sentences
-2. Use precise dollar amounts
-3. Be direct and factual
+        INSTRUCTIONS:
+        1. Write EXACTLY 2-3 sentences
+        2. Use precise dollar amounts
+        3. Be direct and factual
 
-TERMINOLOGY:
-- Ratio = Funding / Equipment
-- Ratio < 1.0: funding gap (equipment costs more)
-- Ratio > 1.0: funding excess (over-funded)
+        TERMINOLOGY:
+        - Ratio = Funding / Equipment
+        - Ratio < 1.0: funding gap (equipment costs more)
+        - Ratio > 1.0: funding excess (over-funded)
 
-Format as JSON: {{"risk_factors": ["..."], "reasoning": "..."}}"""),
-        
-        ("human", """Score: {confidence_score}/100 → {status}
+        Format as JSON: {{"risk_factors": ["..."], "reasoning": "..."}}"""),
+                
+                ("human", """Score: {confidence_score}/100 → {status}
 
-Student: {first_name} {last_name}
-Equipment: ${equipment_cost:.2f}
-Funding: ${total_funding:.2f} (Provincial: ${provincial_need:.2f}, Federal: ${federal_need:.2f})
-Ratio: {ratio:.3f}
-Gap/Excess: ${gap_amount:.2f}
-Failed Checks: {failed_checks}
+        Student: {first_name} {last_name}
+        Equipment: ${equipment_cost:.2f}
+        Funding: ${total_funding:.2f} (Provincial: ${provincial_need:.2f}, Federal: ${federal_need:.2f})
+        Ratio: {ratio:.3f}
+        Gap/Excess: ${gap_amount:.2f}
+        Failed Checks: {failed_checks}
 
-Provide JSON with "risk_factors" and "reasoning".""")
-    ])
+        Provide JSON with "risk_factors" and "reasoning".""")
+        ])
     
     try:
         response = await (prompt | llm).ainvoke({
@@ -389,9 +382,7 @@ Provide JSON with "risk_factors" and "reasoning".""")
         reasoning=reasoning
     )
 
-# ============================================================================
 # ROUTES
-# ============================================================================
 
 @router.post("/application", response_model=ApplicationAnalysis)
 async def analyze_application(app_data: ApplicationData):
@@ -446,12 +437,12 @@ async def chat_about_application(request: Dict[str, Any]):
     try:
         app_data = request.get("application_data")
         context = f"""Application Context:
-Student: {app_data.get('first_name')} {app_data.get('last_name')} (ID: {app_data.get('student_id')})
-Disability: {app_data.get('disability_type')} | Study: {app_data.get('study_type')}
-OSAP Restrictions: {app_data.get('has_osap_restrictions')}
-Financial Need: Provincial ${app_data.get('provincial_need')}, Federal ${app_data.get('federal_need')}
-Requested Items: {len(app_data.get('requested_items', []))} items
-"""
+        Student: {app_data.get('first_name')} {app_data.get('last_name')} (ID: {app_data.get('student_id')})
+        Disability: {app_data.get('disability_type')} | Study: {app_data.get('study_type')}
+        OSAP Restrictions: {app_data.get('has_osap_restrictions')}
+        Financial Need: Provincial ${app_data.get('provincial_need')}, Federal ${app_data.get('federal_need')}
+        Requested Items: {len(app_data.get('requested_items', []))} items
+        """
         
         chain, memory = get_or_create_chain()
         response = chat_with_memory(chain, memory, f"{context}\n\nQuestion: {request.get('message')}")

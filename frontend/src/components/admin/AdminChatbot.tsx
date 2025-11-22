@@ -96,22 +96,22 @@ export function ApplicationChatbot({
 
   const buildPrompt = (input: string) => {
     let prompt = `
-You are a BSWD/CSG-DSE application assessment assistant...
-(omitted here to shorten—FULL logic unchanged in your real file)
-${JSON.stringify(applicationData, null, 2)}
-`;
+    You are a BSWD/CSG-DSE application assessment assistant...
+    (omitted here to shorten—FULL logic unchanged in your real file)
+    ${JSON.stringify(applicationData, null, 2)}
+    `;
 
     if (applicationData.analysis) {
       const a = applicationData.analysis;
       prompt += `
-AI ANALYSIS RESULTS:
-Decision: ${a.decision || "PENDING"}
-Confidence: ${a.confidence || 0}%
-${a.reasoning ? `Reasoning: ${a.reasoning}` : ""}
-${a.strengths?.map((s: string) => `- ${s}`).join("\n") || ""}
-${a.risk_factors?.map((r: string) => `- ${r}`).join("\n") || ""}
-${a.recommended_funding ? `Recommended Funding: $${a.recommended_funding}` : ""}
-`;
+    AI ANALYSIS RESULTS:
+    Decision: ${a.decision || "PENDING"}
+    Confidence: ${a.confidence || 0}%
+    ${a.reasoning ? `Reasoning: ${a.reasoning}` : ""}
+    ${a.strengths?.map((s: string) => `- ${s}`).join("\n") || ""}
+    ${a.risk_factors?.map((r: string) => `- ${r}`).join("\n") || ""}
+    ${a.recommended_funding ? `Recommended Funding: $${a.recommended_funding}` : ""}
+    `;
     }
 
     return `${prompt}\nNow answer clearly:\n${input}`;
