@@ -111,6 +111,8 @@ def run_deterministic_checks(app_data: ApplicationData) -> DeterministicCheckRes
     failed_checks = []
     if not has_disability:
         failed_checks.append("No verified permanent or persistent-prolonged disability")
+    if not is_full_time:
+        failed_checks.append("Not enrolled as full-time student")
     if has_restrictions:
         failed_checks.append("Has OSAP restrictions")
     
@@ -118,7 +120,7 @@ def run_deterministic_checks(app_data: ApplicationData) -> DeterministicCheckRes
         has_disability=has_disability,
         is_full_time=is_full_time,
         has_osap_restrictions=has_restrictions,
-        all_checks_passed=has_disability and not has_restrictions,
+        all_checks_passed=has_disability and is_full_time and not has_restrictions,
         failed_checks=failed_checks
     )
 
@@ -187,6 +189,8 @@ def calculate_confidence_score(
     
     # Step 1: Eligibility (-33 each)
     if not deterministic_result.has_disability:
+        score -= 33
+    if not deterministic_result.is_full_time:
         score -= 33
     if deterministic_result.has_osap_restrictions:
         score -= 33

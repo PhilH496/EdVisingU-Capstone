@@ -166,7 +166,7 @@ export default function AdminApplicationDetailPage() {
         first_name: editForm.firstName,
         last_name: editForm.lastName,
         disability_type: editForm.disabilityType || "not-verified",
-        study_type: editForm.studyType || "full-time",
+        study_type: editForm.studyType,
         osap_application: editForm.osapApplication || "none",
         has_osap_restrictions: editForm.hasOSAPRestrictions || false,
         federal_need: federalNeed, 

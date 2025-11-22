@@ -261,7 +261,12 @@ export default function BSWDApplicationPage() {
       };
 
       await saveSnapshotMerge(applicationData as any, formData);
-      await saveApplicationsList([applicationData]);
+      // Load existing applications
+      const existingRaw = localStorage.getItem("applications");
+      const existing = existingRaw ? JSON.parse(existingRaw) : [];
+
+      // Append and save
+      await saveApplicationsList([...existing, applicationData]);
 
       localStorage.setItem(
         "currentApplication",

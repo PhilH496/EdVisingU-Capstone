@@ -1,7 +1,8 @@
 import { supabase } from "./supabase";
 import { FormData } from "@/types/bswd";
-import { DeterministicChecksResult } from "./deterministicChecks";
+import { DeterministicChecks, DeterministicChecksResult } from "./deterministicChecks";
 import { Database } from "@/types/supabase";
+
 type StudentInsert = Database["public"]["Tables"]["student"]["Insert"];
 type OsapInfoInsert = Database["public"]["Tables"]["osap_info"]["Insert"];
 type DisabilityInfoInsert = Database["public"]["Tables"]["disability_info"]["Insert"];
@@ -145,12 +146,15 @@ export const saveSubmission = async (formData: FormData) => {
  * @param ruleResults - Deterministic rule evaluation results
  * @returns Structured JSON object with student data, rule evaluation, and summary context
  */
-export const buildAnalysisPayload = (formData: FormData, deterministicChecksData: DeterministicChecksResult): AnalysisPayload => {
+export const buildAnalysisPayload = (formData: FormData, deterministicChecksData?: DeterministicChecksResult): AnalysisPayload => {
   // Helper to convert null/undefined to empty string
   const cleanValue = (value: unknown): string => {
     if (value === null || value === undefined) return "";
     return String(value);
   };
+
+  // Run deterministic checks if not provided
+  const checksData = deterministicChecksData || DeterministicChecks.runDeterministicChecks(formData);
 
   // Any type that has cleanValue() is an optional type from the form
   const manualReviewData: Partial<ManualReviewPayload> = {
@@ -185,6 +189,6 @@ export const buildAnalysisPayload = (formData: FormData, deterministicChecksData
 
   return {
     manualReviewData,
-    deterministicChecksData
+    deterministicChecksData: checksData
   };
 };
