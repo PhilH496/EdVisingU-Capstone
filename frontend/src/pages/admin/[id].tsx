@@ -133,7 +133,7 @@ export default function AdminApplicationDetailPage() {
     try {
       // Parse financial need - handle string, number, null, undefined
       const parseFederalNeed = () => {
-        const value = editForm.federalNeed;  // Changed from formData to editForm
+        const value = editForm.federalNeed;
         console.log('Federal Need raw:', value, '(type:', typeof value, ')');
         if (value === null || value === undefined || String(value).trim() === '') return 0;
         const parsed = typeof value === 'number' ? value : parseFloat(String(value));
@@ -141,7 +141,7 @@ export default function AdminApplicationDetailPage() {
       };
 
       const parseProvincialNeed = () => {
-        const value = editForm.provincialNeed;  // Changed from formData to editForm
+        const value = editForm.provincialNeed;
         console.log('Provincial Need raw:', value, '(type:', typeof value, ')');
         if (value === null || value === undefined || String(value).trim() === '') return 0;
         const parsed = typeof value === 'number' ? value : parseFloat(String(value));
@@ -427,16 +427,6 @@ export default function AdminApplicationDetailPage() {
       title="Application Details"
       rightSlot={
         <div className="flex gap-2">
-          {hasForm && (
-            <button
-              onClick={analyzeApplication}
-              disabled={analyzing}
-              className="px-4 py-2 text-sm rounded-xl border border-cyan-200 bg-cyan-50 text-cyan-800 hover:bg-cyan-100 disabled:opacity-50 flex items-center gap-2"
-            >
-              <Play className="w-4 h-4" />
-              {analyzing ? "Analyzing..." : "AI Analysis"}
-            </button>
-          )}
           <Link
             href="/admin"
             className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
@@ -445,7 +435,7 @@ export default function AdminApplicationDetailPage() {
           </Link>
           <Link
             href="/"
-            className="px-4 py-2 text-sm rounded-xl bg-cyan-800 text-white hover:bg-cyan-700"
+            className="px-4 py-2 text-sm rounded-xl bg-brand-dark-blue text-white hover:bg-opacity-90"
           >
             Back to Application
           </Link>
@@ -454,41 +444,53 @@ export default function AdminApplicationDetailPage() {
     >
       <div className="flex gap-4">
         <div className="flex-1">
-          {/* top edit controls */}
-          {hasForm ? (
-            <div className="mb-4 flex items-center gap-3">
+          {hasForm && (
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsEditMode((v) => !v)}
+                  className={`px-4 py-2 text-sm rounded-xl border transition-colors ${
+                    isEditMode
+                      ? "bg-yellow-50 border-yellow-200 text-yellow-800"
+                      : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+                  }`}
+                  title={isEditMode ? "Editing enabled" : "Enable Edit Mode to modify fields"}
+                >
+                  {isEditMode ? "Editing Enabled" : "Enable Edit Mode"}
+                </button>          
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={!isEditMode || !isDirty || saving}
+                  className={`px-4 py-2 text-sm rounded-xl transition-colors ${
+                    !isEditMode || !isDirty || saving
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-brand-dark-blue text-white hover:bg-opacity-90"
+                  }`}
+                >
+                  {saving ? "Saving…" : "Save Changes"}
+                </button>
+                {isDirty && (
+                  <span className="text-sm text-yellow-700 font-medium">Unsaved changes</span>
+                )}
+                
+                {error && (
+                  <span className="text-sm text-red-700 bg-red-50 border border-red-200 px-3 py-1.5 rounded-lg">
+                    {error}
+                  </span>
+                )}
+              </div>
               <button
-                type="button"
-                onClick={() => setIsEditMode((v) => !v)}
-                className={`px-4 py-2 text-sm rounded-xl border ${
-                  isEditMode
-                    ? "bg-amber-50 border-amber-200 text-amber-800"
-                    : "bg-white border-gray-200 text-gray-700 hover:bg-gray-100"
-                }`}
-                title={isEditMode ? "Editing enabled" : "Enable Edit Mode to modify fields"}
+                onClick={analyzeApplication}
+                disabled={analyzing}
+                className="px-4 py-2 text-sm rounded-xl bg-brand-dark-blue text-white hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
               >
-                {isEditMode ? "Editing Enabled" : "Enable Edit Mode"}
+                <Play className="w-4 h-4" />
+                {analyzing ? "Analyzing..." : "Run AI Analysis"}
               </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={!isEditMode || !isDirty || saving}
-                className={`px-4 py-2 text-sm rounded-xl ${
-                  !isEditMode || !isDirty || saving
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-cyan-800 text-white hover:bg-cyan-700"
-                }`}
-              >
-                {saving ? "Saving…" : "Save Changes"}
-              </button>
-              {isDirty && <span className="text-sm text-amber-700">Unsaved changes</span>}
-              {error && (
-                <span className="ml-auto text-sm text-red-700 bg-red-50 border border-red-200 px-3 py-1 rounded">
-                  {error}
-                </span>
-              )}
             </div>
-          ) : null}
+          )}
 
           {!summary ? (
             <div className="border rounded-xl p-6 bg-white shadow-sm">

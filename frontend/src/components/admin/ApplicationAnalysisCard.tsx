@@ -83,7 +83,7 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
   const finalScore = Math.round(analysis.ai_analysis.confidence_score * 100);
 
   // Pie chart
-  const scoreColor = STATUS_COLORS[analysis.overall_status] || "#0ea5e9";
+  const scoreColor = STATUS_COLORS[analysis.overall_status] || "#6b7280";
 
   const pieData = [
     { name: "score", value: finalScore },
@@ -130,7 +130,7 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
 
           {/* Status Badge */}
           <span
-            className={`px-4 py-2 rounded-full text-sm font-semibold border ${getBadgeClasses(
+            className={`px-4 py-2 rounded-full text-sm font-bold border ${getBadgeClasses(
               analysis.overall_status
             )}`}
           >
@@ -139,12 +139,14 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
         </div>
       </div>
 
-      {/* Legend */}
-      <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-1">
-        <p className="font-semibold">Score Meaning:</p>
-        <p><span className="text-green-600 font-bold">90–100</span>: Approved</p>
-        <p><span className="text-yellow-600 font-bold">75–89</span>: Needs Manual Review</p>
-        <p><span className="text-red-600 font-bold">0–74</span>: Rejected</p>
+      {/* Legend - Simpler */}
+      <div className="bg-gray-50 rounded-lg p-4 text-sm">
+        <p className="font-semibold mb-2">Score Meaning:</p>
+        <div className="space-y-1">
+          <p><span className="text-green-600 font-bold">90–100</span>: Approved</p>
+          <p><span className="text-yellow-600 font-bold">75–89</span>: Needs Manual Review</p>
+          <p><span className="text-red-600 font-bold">0–74</span>: Rejected</p>
+        </div>
       </div>
 
       {/* Eligibility Requirements */}
@@ -161,10 +163,11 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
       <div>
         <h4 className="font-semibold mb-3">AI Evaluation</h4>
 
+        {/* Recommended Funding - Simple */}
         {analysis.ai_analysis.funding_recommendation ? (
-          <div className="mb-4 p-3 bg-cyan-50 border border-cyan-200 rounded-lg">
-            <p className="text-sm">Recommended Funding</p>
-            <p className="text-2xl font-bold text-cyan-800">
+          <div className="mb-4">
+            <p className="text-sm text-gray-600 mb-1">Recommended Funding</p>
+            <p className="text-2xl font-bold text-brand-dark-blue">
               ${analysis.ai_analysis.funding_recommendation.toLocaleString()}
             </p>
           </div>
@@ -187,6 +190,7 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
           </div>
         )}
 
+        {/* AI Reasoning */}
         <div className="p-4 bg-gray-50 rounded-lg">
           <p className="font-semibold mb-2">AI Reasoning</p>
           <p className="text-sm">{analysis.ai_analysis.reasoning}</p>
