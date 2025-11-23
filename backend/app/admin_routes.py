@@ -5,7 +5,6 @@ Admin Chat Route - Context-aware RAG chatbot
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
-
 from .chain import get_or_create_chain, chat_with_memory
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -28,32 +27,32 @@ class AdminChatResponse(BaseModel):
 
 # HELPER FUNCTIONS
 
-def format_currency(value: float) -> str:
+def fmt_currency(val: float) -> str:
     """Format dollar amount"""
-    return f"${value:,.2f}"
+    return f"${val:,.2f}"
 
-def format_list(items: List[str], prefix: str = "  • ") -> str:
+def fmt_list(items: List[str], prefix: str = "  - ") -> str:
     """Format list items"""
     return '\n'.join(f"{prefix}{item}" for item in items) if items else "  None"
 
-def format_items(items: List[Dict]) -> str:
+def fmt_items(items: List[Dict]) -> str:
     """Format requested items"""
     if not items:
         return "  None"
     return '\n'.join(
-        f"  • {item.get('item', 'Unknown')}: {format_currency(item.get('cost', 0))} "
+        f"  - {item.get('item', 'Unknown')}: {fmt_currency(item.get('cost', 0))} "
         f"({item.get('funding_source', 'N/A')})"
         for item in items
     )
 
-def format_equipment_issues(issues: List[Dict]) -> str:
+def fmt_equipment_issues(issues: List[Dict]) -> str:
     """Format equipment issues"""
     if not issues:
         return "  None"
     return '\n'.join(
-        f"  {'⚠️ WARNING' if issue.get('severity') == 'warning' else '❌ VIOLATION'}: "
+        f"  [{'WARNING' if issue.get('severity') == 'warning' else 'VIOLATION'}]: "
         f"{issue.get('item', 'Unknown')} - {issue.get('issue', 'No details')} "
-        f"(Cost: {format_currency(issue.get('cost', 0))})"
+        f"(Cost: {fmt_currency(issue.get('cost', 0))})"
         for issue in issues
     )
 
@@ -78,17 +77,17 @@ def build_application_context(app: Dict[str, Any]) -> str:
     - Functional Limitations: {', '.join(app.get('functional_limitations', []))}
 
     Financial:
-    - Provincial Need: {format_currency(app.get('provincial_need', 0))}
-    - Federal Need: {format_currency(app.get('federal_need', 0))}
-    - Total Need: {format_currency(total_need)}
+    - Provincial Need: {fmt_currency(app.get('provincial_need', 0))}
+    - Federal Need: {fmt_currency(app.get('federal_need', 0))}
+    - Total Need: {fmt_currency(total_need)}
 
     Requested Items ({len(app.get('requested_items', []))} total):
-    {format_items(app.get('requested_items', []))}
+    {fmt_items(app.get('requested_items', []))}
 
-    Total Requested: {format_currency(total_requested)}
+    Total Requested: {fmt_currency(total_requested)}
     """
 
-    def build_analysis_context(analysis: Dict[str, Any]) -> str:
+def build_analysis_context(analysis: Dict[str, Any]) -> str:
         """Build analysis context section"""
         ai = analysis.get('ai_analysis', {})
         det = analysis.get('deterministic_checks', {})
@@ -102,32 +101,32 @@ def build_application_context(app: Dict[str, Any]) -> str:
     Confidence: {ai.get('confidence_score', 0) * 100:.0f}%
 
     Eligibility:
-    - Verified Disability: {'✓ PASS' if det.get('has_disability') else '✗ FAIL'}
-    - Full-Time Student: {'✓ PASS' if det.get('is_full_time') else '✗ FAIL'}
-    - No OSAP Restrictions: {'✓ PASS' if not det.get('has_osap_restrictions') else '✗ FAIL'}
+    - Verified Disability: {'[PASS]' if det.get('has_disability') else '[FAIL]'}
+    - Full-Time Student: {'[PASS]' if det.get('is_full_time') else '[FAIL]'}
+    - No OSAP Restrictions: {'[PASS]' if not det.get('has_osap_restrictions') else '[FAIL]'}
 
     Failed Checks:
-    {format_list(det.get('failed_checks', []))}
+    {fmt_list(det.get('failed_checks', []))}
 
     Financial:
-    - Total Need: {format_currency(fin.get('total_need', 0))}
-    - Total Requested: {format_currency(fin.get('total_requested', 0))}
-    - Within $22K Cap: {'✓ YES' if fin.get('within_cap') else '✗ NO'}
-    - Exceeds By: {format_currency(fin.get('exceeds_cap_by', 0))}
+    - Total Need: {fmt_currency(fin.get('total_need', 0))}
+    - Total Requested: {fmt_currency(fin.get('total_requested', 0))}
+    - Within $22K Cap: {'[YES]' if fin.get('within_cap') else '[NO]'}
+    - Exceeds By: {fmt_currency(fin.get('exceeds_cap_by', 0))}
 
     Equipment Issues:
-    {format_equipment_issues(analysis.get('equipment_review', []))}
+    {fmt_equipment_issues(analysis.get('equipment_review', []))}
 
     Risk Factors:
-    {format_list(ai.get('risk_factors', []))}
+    {fmt_list(ai.get('risk_factors', []))}
 
     AI Reasoning:
     {ai.get('reasoning', 'N/A')}
 
-    Recommended Funding: {format_currency(ai.get('funding_recommendation', 0) or 0)}
+    Recommended Funding: {fmt_currency(ai.get('funding_recommendation', 0) or 0)}
     """
 
-    SYSTEM_INSTRUCTIONS = """
+SYSTEM_INSTRUCTIONS = """
     Instructions: You are assisting a BSWD administrator. Use the BSWD manual knowledge and the application/analysis context to provide clear, policy-backed answers.
 
     CRITICAL TERMINOLOGY:
@@ -140,7 +139,7 @@ def build_application_context(app: Dict[str, Any]) -> str:
     CONFIDENCE SCORING SYSTEM:
 
     The scoring is deterministic and correct. When explaining:
-    1. Walk through each step (Eligibility → Funding → Ratio)
+    1. Walk through each step (Eligibility -> Funding -> Ratio)
     2. Cite specific penalties with dollar amounts
     3. Never suggest the logic might be wrong
     4. Explain manual overrides are available
@@ -160,36 +159,32 @@ def build_application_context(app: Dict[str, Any]) -> str:
     - Federal funding > $0 (part-time or no OSAP)
 
     Step 3 - Funding/Equipment Ratio (ratio = funding / equipment):
-    - Ratio ≥ 4.0: -60 (severe over-funding)
-    - Ratio ≥ 2.0: -30 (major over-funding)
+    - Ratio >= 4.0: -60 (severe over-funding)
+    - Ratio >= 2.0: -30 (major over-funding)
     - Ratio > 1.2: -15 (funding exceeds equipment 21%+)
     - Ratio 1.0-1.2: -2 per 10% (funding 0-20% over equipment)
-    - Ratio ≤ 0.5: -15 (major funding gap)
+    - Ratio <= 0.5: -15 (major funding gap)
     - Ratio 0.5-1.0: -5 (minor funding gap)
 
     Thresholds: 90+=APPROVED | 75-89=MANUAL REVIEW | 0-74=REJECTED
 
     Examples:
-    - Equipment $6,900, Funding $4,459 → Ratio 0.646 → Gap $2,441 → -5 → Score 95 → APPROVED
-    - Equipment $6,900, Funding $10,000 → Ratio 1.449 → Excess $3,100 → -15 → Score 85 → MANUAL REVIEW
+    - Equipment $6,900, Funding $4,459 -> Ratio 0.646 -> Gap $2,441 -> -5 -> Score 95 -> APPROVED
+    - Equipment $6,900, Funding $10,000 -> Ratio 1.449 -> Excess $3,100 -> -15 -> Score 85 -> MANUAL REVIEW
     """
 
 # ROUTE
 
 @router.post("/chat", response_model=AdminChatResponse)
 async def admin_chat(request: AdminChatRequest):
-    """
-    Admin chatbot with BSWD manual access and application context
-    """
+    """Admin chatbot with BSWD manual access and application context"""
     try:
         chain, memory = get_or_create_chain()
         
         # Build context
         context_parts = []
-        
         if request.application_context:
             context_parts.append(build_application_context(request.application_context))
-        
         if request.analysis_context:
             context_parts.append(build_analysis_context(request.analysis_context))
         
@@ -213,10 +208,7 @@ async def admin_chat(request: AdminChatRequest):
             for doc in response.get("source_documents", [])
         ]
         
-        return AdminChatResponse(
-            answer=response["answer"],
-            source_documents=source_docs
-        )
+        return AdminChatResponse(answer=response["answer"], source_documents=source_docs)
         
     except Exception as e:
         print(f"Admin chat error: {str(e)}")
