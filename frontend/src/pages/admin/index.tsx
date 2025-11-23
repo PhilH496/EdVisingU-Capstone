@@ -76,12 +76,25 @@ export default function AdminDashboardPage() {
       const hydrated: Row[] = await Promise.all(
         summaries.map(async (s: AppSummary): Promise<Row> => {
           const snap = await storeLoadSnapshot(s.id);
+          let calculatedStatus = s.status;
+          
           if (snap?.formData) {
-            // Use consolidated DeterministicChecks
-            scoreMap[s.id] = DeterministicChecks.calculateConfidenceScore(snap.formData);
+            const score = DeterministicChecks.calculateConfidenceScore(snap.formData);
+            scoreMap[s.id] = score;
+            
+            // Auto-set status based on score
+            if (score >= 90) {
+              calculatedStatus = "Approved";
+            } else if (score >= 75) {
+              calculatedStatus = "In Review";
+            } else {
+              calculatedStatus = "Rejected";
+            }
           }
+          
           return {
             ...s,
+            status: calculatedStatus,
             assignee: snap?.assignee ?? "",
             violationTags: Array.isArray(snap?.violationTags) ? snap!.violationTags : [],
             violationDetails: snap?.violationDetails ?? "",
@@ -350,37 +363,48 @@ export default function AdminDashboardPage() {
                       </div>
                     </div>
 
-                    {/* Right side — Status + inline status select + buttons */}
-                    <div className="flex items-center gap-3">
-                      <StatusBadge status={r.status} />
+                    {/* Right side — Status + Score + buttons */}
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <StatusBadge status={r.status} />
+                        {typeof score === "number" && (
+                          <div
+                            className={`px-3 py-1 rounded-full text-xs font-semibold border ${getScoreBadgeClasses(score)}`}
+                            title={`AI Confidence Score: ${score}/100`}
+                          >
+                            {score}
+                          </div>
+                        )}
+                      </div>
+
                       {editMode && (
                         <select
                           value={r.status}
                           onChange={(e) => updateRow(r.id, { status: e.target.value })}
-                          className="px-2 py-1.5 border rounded-md text-xs"
+                          className="px-2 py-1.5 border border-gray-300 rounded-md text-xs"
                         >
                           {STATUS_OPTIONS.map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
+                            <option key={s} value={s}>{s}</option>
                           ))}
                         </select>
                       )}
 
-                      <Link
-                        href={`/admin/${encodeURIComponent(r.id)}`}
-                        className="px-3 py-1.5 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
-                      >
-                        View Submission
-                      </Link>
+                      <div className="flex items-center gap-2 ml-auto">
+                        <Link
+                          href={`/admin/${encodeURIComponent(r.id)}`}
+                          className="px-3 py-1.5 text-xs rounded-lg border border-gray-300 bg-white hover:bg-gray-50 font-medium"
+                        >
+                          View
+                        </Link>
 
-                      <button
-                        type="button"
-                        onClick={() => toggleExpanded(r.id)}
-                        className="px-3 py-1.5 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
-                      >
-                        {isExpanded ? "− Details" : "+ Details"}
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => toggleExpanded(r.id)}
+                          className="px-3 py-1.5 text-xs rounded-lg border border-gray-300 bg-white hover:bg-gray-50 font-medium"
+                        >
+                          {isExpanded ? "− Details" : "+ Details"}
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -626,13 +650,6 @@ export default function AdminDashboardPage() {
                     </>
                   )}
                 </div>
-
-                {/* Score bubble outside card on the right */}
-                {typeof score === "number" && (
-                  <div className="w-20 flex items-center justify-center">
-                    <ScoreBubble score={score} />
-                  </div>
-                )}
               </div>
             );
           })}
@@ -642,26 +659,14 @@ export default function AdminDashboardPage() {
   );
 }
 
-// ---------------- Score bubble UI ----------------
+// Score bubble UI
 
-function getScoreBubbleClasses(score: number) {
+function getScoreBadgeClasses(score: number) {
   if (score >= 90) {
     return "bg-green-100 text-green-800 border-green-200";
   }
   if (score >= 75) {
-    return "bg-yellow-100 text-yellow-800 border-yellow-200";
+    return "bg-blue-100 text-blue-800 border-blue-200";
   }
   return "bg-red-100 text-red-800 border-red-200";
-}
-
-function ScoreBubble({ score }: { score: number }) {
-  const classes = getScoreBubbleClasses(score);
-  return (
-    <div
-      className={`w-14 h-14 rounded-full border flex items-center justify-center text-sm font-semibold ${classes}`}
-      title={`Deterministic score: ${score}/100`}
-    >
-      {score}
-    </div>
-  );
 }

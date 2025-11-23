@@ -50,7 +50,7 @@ interface Props {
 const STATUS_COLORS: Record<string, string> = {
   APPROVED: "#10b981",
   REJECTED: "#ef4444",
-  "NEEDS MANUAL REVIEW": "#f59e0b",
+  "NEEDS MANUAL REVIEW": "#3b82f6",
   PENDING: "#6b7280",
 };
 
@@ -144,7 +144,7 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
         <p className="font-semibold mb-2">Score Meaning:</p>
         <div className="space-y-1">
           <p><span className="text-green-600 font-bold">90–100</span>: Approved</p>
-          <p><span className="text-yellow-600 font-bold">75–89</span>: Needs Manual Review</p>
+          <p><span className="text-blue-600 font-bold">75–89</span>: Needs Manual Review</p>
           <p><span className="text-red-600 font-bold">0–74</span>: Rejected</p>
         </div>
       </div>
@@ -208,7 +208,7 @@ function getBadgeClasses(status: string) {
     case "REJECTED":
       return "bg-red-100 text-red-800 border-red-200";
     case "NEEDS MANUAL REVIEW":
-      return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      return "bg-blue-100 text-blue-800 border-blue-200";
     default:
       return "bg-gray-100 text-gray-800 border-gray-200";
   }

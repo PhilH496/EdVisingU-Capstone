@@ -19,7 +19,7 @@ interface Props {
 const STATUS_COLORS: Record<string, string> = {
   APPROVED: "#10b981",
   REJECTED: "#ef4444",
-  "NEEDS MANUAL REVIEW": "#f59e0b",
+  "NEEDS MANUAL REVIEW": "#3b82f6",
   PENDING: "#6b7280",
 };
 
