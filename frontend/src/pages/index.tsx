@@ -242,7 +242,7 @@ export default function BSWDApplicationPage() {
       // Capture the exact submission time
       const currentDateTime = new Date();
 
-      // Save form data to localStorage for the status page
+      // Save form data to localStorage for the thank you page
       const applicationData = {
         id: `APP-${currentDateTime.getFullYear()}-${Math.floor(
           Math.random() * 1000000
@@ -276,7 +276,7 @@ export default function BSWDApplicationPage() {
       );
 
       // Redirect to status page
-      window.location.href = "/application-status";
+      window.location.href = "/thank-you";
     } catch (err) {
       // Handle submission errors
       const errorMessage = err instanceof Error ? err.message : "Failed to submit application. Please try again.";
