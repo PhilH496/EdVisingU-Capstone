@@ -191,7 +191,7 @@ def calculate_confidence_score(
     score = max(0, score)
     
     # Step 2: Funding limits (-30 each)
-    osap_type = getattr(app_data, 'osap_application', app_data.study_type).lower()
+    osap_type = app_data.osap_application.lower()
     eligible_for_csg = osap_type == "full-time"
     
     if app_data.provincial_need > 2000:
