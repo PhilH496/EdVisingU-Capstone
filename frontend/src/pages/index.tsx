@@ -23,6 +23,7 @@ import { DisabilityInfoStep } from "@/components/bswd/steps/DisabilityInfoStep";
 import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
 import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
 import { saveSubmission } from "@/lib/database";
+import { saveSnapshotMerge, saveApplicationsList } from "@/lib/adminStore";
 
 // Store all form data in a single state object
 // Initial values are set to empty strings, zeros, or false depending on field type
@@ -126,6 +127,7 @@ export default function BSWDApplicationPage() {
         return Boolean(
           formData.studentId &&
           formData.studentId.length >= 7 &&
+          formData.studentId.length <= 8 &&
           formData.firstName &&
           formData.lastName &&
           formData.email &&
@@ -136,6 +138,7 @@ export default function BSWDApplicationPage() {
           formData.city &&
           formData.province &&
           formData.postalCode &&
+          formData.postalCode.replace(/\s/g, "").length === 6 && 
           formData.country &&
           formData.hasOsapApplication !== null
         );
@@ -239,7 +242,7 @@ export default function BSWDApplicationPage() {
       // Capture the exact submission time
       const currentDateTime = new Date();
 
-      // Save form data to localStorage for the status page
+      // Save form data to localStorage for the thank you page
       const applicationData = {
         id: `APP-${currentDateTime.getFullYear()}-${Math.floor(
           Math.random() * 1000000
@@ -259,13 +262,21 @@ export default function BSWDApplicationPage() {
         statusUpdatedDate: currentDateTime.toISOString(),
       };
 
+      await saveSnapshotMerge(applicationData as any, formData);
+      // Load existing applications
+      const existingRaw = localStorage.getItem("applications");
+      const existing = existingRaw ? JSON.parse(existingRaw) : [];
+
+      // Append and save
+      await saveApplicationsList([...existing, applicationData]);
+
       localStorage.setItem(
         "currentApplication",
         JSON.stringify(applicationData)
       );
 
       // Redirect to status page
-      window.location.href = "/application-status";
+      window.location.href = "/thank-you";
     } catch (err) {
       // Handle submission errors
       const errorMessage = err instanceof Error ? err.message : "Failed to submit application. Please try again.";

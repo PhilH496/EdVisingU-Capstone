@@ -86,11 +86,7 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
     }
   };
 
-  const functionalLimitations: FunctionalLimitationOption[] = Array.isArray(
-    formData.functionalLimitations
-  )
-    ? (formData.functionalLimitations as FunctionalLimitationOption[])
-    : defaultFunctionalLimitations;
+  const functionalLimitations = formData.functionalLimitations;
 
   const handleLimitationsChange = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -98,14 +94,8 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
     const { name, checked } = e.target;
 
     setFormData((prev) => {
-      const current: FunctionalLimitationOption[] = Array.isArray(
-        prev.functionalLimitations
-      )
-        ? (prev.functionalLimitations as FunctionalLimitationOption[])
-        : defaultFunctionalLimitations;
-
-      const updated = current.map((limit) =>
-        limit.name !== name ? limit : { ...limit, checked }
+      const updated = prev.functionalLimitations.map((limit) =>
+        limit.name === name ? { ...limit, checked } : limit
       );
 
       return {

@@ -107,6 +107,7 @@ export function ServiceAndEquip({
         category: itemType,
         item: item.name,
         cost: typeof item.cap === 'number' ? item.cap : 0,
+        justification: `${itemType} requested for disability support`,
         fundingSource: (item.bswdEligible && item.csgdseEligible) ? 'both' : 
                        (item.bswdEligible ? 'bswd' : 'csg-dse') as 'bswd' | 'csg-dse' | 'both'
       }));
@@ -306,6 +307,7 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
         category: itemType,
         item: itemInfo.name,
         cost: typeof itemInfo.cap === 'number' ? itemInfo.cap : 0,
+        justification: `${itemType} requested for disability support`,
         fundingSource: (itemInfo.bswdEligible && itemInfo.csgdseEligible) ? 'both' : 
                        (itemInfo.bswdEligible ? 'bswd' : 'csg-dse') as 'bswd' | 'csg-dse' | 'both'
       };

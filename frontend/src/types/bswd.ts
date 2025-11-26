@@ -30,8 +30,7 @@ export interface FormData {
   postalCode: string;
   country: string;
   hasOsapApplication: boolean;
-  osapApplicationStartDate: string;
-  
+
   // Program Information
   institution: string;
   institutionType: "" | "public-ontario" | "private-ontario";
@@ -51,7 +50,7 @@ export interface FormData {
   hasOSAPRestrictions: boolean;
   restrictionDetails: string;
   osapOnFileStatus?: "APPROVED" | "NONE" | "";
-  queuedForManualReview?: boolean;
+  queuedForManualReview: boolean;
   restrictionType?:
     | "DEFAULT"
     | "OVERPAYMENT"
@@ -75,6 +74,7 @@ export interface RequestedItem {
   category: string;
   item: string;
   cost: number;
+  justification: string;
   fundingSource: 'bswd' | 'csg-dse' | 'both';
 }
 
