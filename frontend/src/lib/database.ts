@@ -1,6 +1,5 @@
 import { supabase } from "./supabase";
 import { FormData } from "@/types/bswd";
-import { DeterministicChecks, DeterministicChecksResult } from "./deterministicChecks";
 import { Database } from "@/types/supabase";
 
 type StudentInsert = Database["public"]["Tables"]["student"]["Insert"];
@@ -8,14 +7,7 @@ type OsapInfoInsert = Database["public"]["Tables"]["osap_info"]["Insert"];
 type DisabilityInfoInsert = Database["public"]["Tables"]["disability_info"]["Insert"];
 type ProgramInfoInsert = Database["public"]["Tables"]["program_info"]["Insert"];
 type RequestedItemsInsert = Database["public"]["Tables"]["requested_items"]["Insert"]
-type ManualReviewPayload = StudentInsert & ProgramInfoInsert & OsapInfoInsert & DisabilityInfoInsert & {
-  requested_items?: RequestedItemsInsert[]
-};
 
-interface AnalysisPayload {
-  manualReviewData: Partial<ManualReviewPayload>;
-  deterministicChecksData: DeterministicChecksResult;
-}
 
 // Helper to conditionally add optional fields
 const addIfPresent = (obj: Record<string, any>, key: string, value: any): void => {
@@ -138,57 +130,4 @@ export const saveSubmission = async (formData: FormData) => {
   }
 
   return { student_id: studentId };
-};
-
-/**
- * Builds a clean structured JSON payload for AI model analysis
- * @param formData - Raw form submission data
- * @param ruleResults - Deterministic rule evaluation results
- * @returns Structured JSON object with student data, rule evaluation, and summary context
- */
-export const buildAnalysisPayload = (formData: FormData, deterministicChecksData?: DeterministicChecksResult): AnalysisPayload => {
-  // Helper to convert null/undefined to empty string
-  const cleanValue = (value: unknown): string => {
-    if (value === null || value === undefined) return "";
-    return String(value);
-  };
-
-  // Run deterministic checks if not provided
-  const checksData = deterministicChecksData || DeterministicChecks.runDeterministicChecks(formData);
-
-  // Any type that has cleanValue() is an optional type from the form
-  const manualReviewData: Partial<ManualReviewPayload> = {
-    student_id: parseInt(formData.studentId),
-    oen: parseInt(formData.oen),
-    first_name: formData.firstName,
-    last_name: formData.lastName,
-    address: formData.address,
-    city: formData.city,
-    province: formData.province,
-    postal_code: formData.postalCode,
-    country: formData.country,
-    institution_name: formData.institution,
-    institution_type: formData.institutionType,
-    federal_need: formData.federalNeed,
-    provincial_need: formData.provincialNeed,
-    restriction_type: cleanValue(formData.restrictionType),
-    disability_verification_date: cleanValue(formData.disabilityVerificationDate),
-    functional_limitations: formData.functionalLimitations
-      ?.filter(x => x.checked)
-      ?.map(x => x.label)
-      ?.join(", "),
-    needs_psycho_ed_assessment: formData.needsPsychoEdAssessment,
-    submitted_disability_elsewhere: formData.submittedDisabilityElsewhere,
-    requested_items: formData.requestedItems?.map(item => ({
-      category: item.category,
-      item: item.item,
-      cost: item.cost,
-      funding_source: item.fundingSource,
-    }))
-  };
-
-  return {
-    manualReviewData,
-    deterministicChecksData: checksData
-  };
 };

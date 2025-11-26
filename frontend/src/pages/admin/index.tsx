@@ -11,7 +11,6 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import StatusBadge from "@/components/admin/StatusBadge";
-import { DeterministicChecks } from "@/lib/deterministicChecks";
 import {
   AppSummary,
   Row,
@@ -79,17 +78,35 @@ export default function AdminDashboardPage() {
           let calculatedStatus = s.status;
           
           if (snap?.formData) {
-            const score = DeterministicChecks.calculateConfidenceScore(snap.formData);
-            scoreMap[s.id] = score;
-            
-            // Auto-set status based on score
-            if (score >= 90) {
-              calculatedStatus = "Approved";
-            } else if (score >= 75) {
-              calculatedStatus = "In Review";
-            } else {
-              calculatedStatus = "Rejected";
-            }
+              // Call backend to calculate score
+              const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/analysis/score`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  disability_type: snap.formData.disabilityType,
+                  study_type: snap.formData.studyType,
+                  has_osap_restrictions: snap.formData.hasOSAPRestrictions,
+                  osap_application: snap.formData.osapApplication,
+                  provincial_need: snap.formData.provincialNeed,
+                  federal_need: snap.formData.federalNeed,
+                  requested_items: snap.formData.requestedItems || []
+                })
+              });
+              
+              if (response.ok) {
+                const data = await response.json();
+                const score = data.confidence_score;
+                scoreMap[s.id] = score;
+                
+                // Auto-set status based on score
+                if (score >= 90) {
+                  calculatedStatus = "Approved";
+                } else if (score >= 75) {
+                  calculatedStatus = "In Review";
+                } else {
+                  calculatedStatus = "Rejected";
+                }
+              }
           }
           
           return {

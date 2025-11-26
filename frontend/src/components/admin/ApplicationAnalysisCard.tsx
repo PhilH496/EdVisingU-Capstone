@@ -7,7 +7,7 @@
 
 import { CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import { STATUS_COLORS, getBadgeClasses, ApplicationStatus } from "./constants";
+import { getStatusColor, getBadgeClasses, ApplicationStatus } from "./constants";
 
 interface DeterministicCheckResult {
   has_disability: boolean;
@@ -36,7 +36,7 @@ interface ApplicationAnalysis {
   application_id: string;
   deterministic_checks: DeterministicCheckResult;
   ai_analysis: AIAnalysisResult;
-  financial_analysis?: FinancialAnalysis;
+  financial_analysis: FinancialAnalysis;
   overall_status: ApplicationStatus;
   analysis_timestamp: string;
 }
@@ -75,7 +75,7 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
   const finalScore = Math.round(analysis.ai_analysis.confidence_score * 100);
 
   // Pie chart
-  const scoreColor = STATUS_COLORS[analysis.ai_analysis.recommended_status];
+  const scoreColor = getStatusColor(analysis.ai_analysis.recommended_status);
 
   const pieData = [
     { name: "score", value: finalScore },
@@ -192,6 +192,7 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
   );
 }
 
+//Helper functions
 function CheckItem({ label, passed }: { label: string; passed: boolean }) {
   return (
     <div className="flex items-center gap-3">

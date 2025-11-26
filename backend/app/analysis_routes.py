@@ -6,13 +6,17 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from enum import Enum
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import os
 from .chain import get_or_create_chain, chat_with_memory
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
-from datetime import datetime, timezone
+from .deterministic_checks import (
+    run_deterministic_checks,
+    calculate_confidence_score,
+    DeterministicCheckResult
+)
 
 router = APIRouter(prefix="/api/analysis", tags=["analysis"])
 
@@ -35,13 +39,6 @@ class ApplicationStatus(str, Enum):
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
     NEEDS_MANUAL_REVIEW = "NEEDS MANUAL REVIEW"
-
-class DeterministicCheckResult(BaseModel):
-    has_disability: bool
-    is_full_time: bool
-    has_osap_restrictions: bool
-    all_checks_passed: bool
-    failed_checks: List[str]
 
 class FinancialAnalysis(BaseModel):
     total_need: float
@@ -93,29 +90,17 @@ class ApplicationData(BaseModel):
     institution: str
     program: Optional[str] = None
 
-# ANALYSIS FUNCTIONS
+# Confidence Score bubble fields that are needed in admin/index.tsx when called  
+class ScoreRequest(BaseModel):
+    disability_type: str
+    study_type: str
+    has_osap_restrictions: bool
+    osap_application: str
+    provincial_need: float
+    federal_need: float
+    requested_items: List[Dict[str, Any]]
 
-def run_deterministic_checks(app_data: ApplicationData) -> DeterministicCheckResult:
-    """Check eligibility requirements"""
-    has_disability = app_data.disability_type in ["permanent", "persistent-prolonged"]
-    is_full_time = app_data.study_type == "full-time"
-    has_restrictions = app_data.has_osap_restrictions
-    
-    failed_checks = []
-    if not has_disability:
-        failed_checks.append("No verified permanent or persistent-prolonged disability")
-    if not is_full_time:
-        failed_checks.append("Not enrolled as full-time student")
-    if has_restrictions:
-        failed_checks.append("Has OSAP restrictions")
-    
-    return DeterministicCheckResult(
-        has_disability=has_disability,
-        is_full_time=is_full_time,
-        has_osap_restrictions=has_restrictions,
-        all_checks_passed=has_disability and is_full_time and not has_restrictions,
-        failed_checks=failed_checks
-    )
+# ANALYSIS FUNCTIONS
 
 def analyze_financial_need(app_data: ApplicationData) -> FinancialAnalysis:
     """Analyze financial metrics"""
@@ -171,63 +156,6 @@ def analyze_equipment_costs(app_data: ApplicationData) -> List[EquipmentIssue]:
     
     return issues
 
-def calculate_confidence_score(
-    deterministic_result: DeterministicCheckResult,
-    app_data: ApplicationData,
-    financial_analysis: FinancialAnalysis,
-    equipment_issues: List[EquipmentIssue]
-) -> float:
-    """Calculate confidence score (0-100)"""
-    score = 100.0
-    
-    # Step 1: Eligibility (-33 each)
-    if not deterministic_result.has_disability:
-        score -= 33
-    if not deterministic_result.is_full_time:
-        score -= 33
-    if deterministic_result.has_osap_restrictions:
-        score -= 33
-    
-    
-    # Step 2: Funding limits (-30 each)
-    osap_type = app_data.osap_application.lower()
-    eligible_for_csg = osap_type == "full-time"
-    
-    if app_data.provincial_need > 2000:
-        score -= 30
-    
-    if app_data.federal_need > 0:
-        if not eligible_for_csg:
-            score -= 30
-        elif app_data.federal_need > 20000:
-            score -= 30
-    
-    score = max(0, score)
-    
-    # Step 3: Funding/Equipment ratio
-    total_funding = financial_analysis.total_need
-    equipment_cost = financial_analysis.total_requested
-    
-    if equipment_cost > 0:
-        ratio = total_funding / equipment_cost
-        
-        if ratio >= 4.0:
-            score -= 60
-        elif ratio >= 2.0:
-            score -= 30
-        elif ratio > 1.2:
-            score -= 15
-        elif ratio >= 1.0:
-            score -= int((ratio - 1.0) * 100 / 10) * 2
-        elif ratio <= 0.5:
-            score -= 15
-        elif ratio < 1.0:
-            score -= 5
-    else:
-        score -= 60
-    
-    return max(0, score)
-
 def generate_fallback_reasoning(
     confidence_score: float,
     recommended_status: ApplicationStatus,
@@ -236,7 +164,6 @@ def generate_fallback_reasoning(
     equipment_cost: float,
     ratio: float
 ) -> tuple[str, List[str]]:
-    """Generate fallback reasoning and risk factors"""
     
     # Determine primary issue
     if app_data.provincial_need > 2000:
@@ -281,8 +208,18 @@ async def run_ai_analysis(
 ) -> AIAnalysisResult:
     """Run AI analysis with confidence scoring"""
     
+    total_funding = app_data.provincial_need + app_data.federal_need
+    equipment_cost = financial_analysis.total_requested
+    
     confidence_score = calculate_confidence_score(
-        deterministic_result, app_data, financial_analysis, equipment_issues
+        deterministic_result.has_disability,
+        deterministic_result.is_full_time,
+        deterministic_result.has_osap_restrictions,
+        app_data.osap_application,
+        app_data.provincial_need,
+        app_data.federal_need,
+        total_funding,
+        equipment_cost
     )
     
     # Determine status
@@ -297,8 +234,6 @@ async def run_ai_analysis(
         requires_human_review = confidence_score >= 60
     
     # Calculate metrics
-    total_funding = app_data.provincial_need + app_data.federal_need
-    equipment_cost = financial_analysis.total_requested
     ratio = (total_funding / equipment_cost) if equipment_cost > 0 else 0
     gap_amount = abs(total_funding - equipment_cost)
     
@@ -384,9 +319,12 @@ async def run_ai_analysis(
 
 @router.post("/application", response_model=ApplicationAnalysis)
 async def analyze_application(app_data: ApplicationData):
-    """Analyze single application"""
     try:
-        deterministic_result = run_deterministic_checks(app_data)
+        deterministic_result = run_deterministic_checks (
+            app_data.disability_type,
+            app_data.study_type,
+            app_data.has_osap_restrictions
+            )
         financial_analysis = analyze_financial_need(app_data)
         equipment_issues = analyze_equipment_costs(app_data)
         ai_result = await run_ai_analysis(
@@ -407,7 +345,6 @@ async def analyze_application(app_data: ApplicationData):
 
 @router.post("/batch")
 async def analyze_batch(request: Dict[str, List[ApplicationData]]):
-    """Analyze multiple applications"""
     try:
         analyses = [await analyze_application(app) for app in request.get("applications", [])]
         
@@ -431,7 +368,6 @@ async def analyze_batch(request: Dict[str, List[ApplicationData]]):
 
 @router.post("/chat")
 async def chat_about_application(request: Dict[str, Any]):
-    """Chat about specific application"""
     try:
         app_data = request.get("application_data")
         context = f"""Application Context:
@@ -451,3 +387,27 @@ async def chat_about_application(request: Dict[str, Any]):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Chat failed: {str(e)}")
+    
+@router.post("/score")
+async def calculate_score(request: ScoreRequest):
+    """Calculate confidence score only on admin dashboard"""
+    try:
+        total_funding = request.provincial_need + request.federal_need
+        equipment_cost = sum(item.get("cost", 0) for item in request.requested_items)
+        
+        checks = run_deterministic_checks(request.disability_type, request.study_type, request.has_osap_restrictions)
+        
+        score = calculate_confidence_score(
+            checks.has_disability,
+            checks.is_full_time,
+            checks.has_osap_restrictions,
+            request.osap_application,
+            request.provincial_need,
+            request.federal_need,
+            total_funding,
+            equipment_cost
+        )
+        
+        return {"confidence_score": score}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Score calculation failed: {str(e)}")
