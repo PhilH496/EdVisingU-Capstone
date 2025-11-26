@@ -123,7 +123,7 @@ def build_analysis_context(analysis: Dict[str, Any]) -> str:
     AI Reasoning:
     {ai.get('reasoning', 'N/A')}
 
-    Recommended Funding: {fmt_currency(ai.get('funding_recommendation', 0) or 0)}
+    Total Funding: {fmt_currency(ai.get('funding_recommendation', 0) or 0)}
     """
 
 SYSTEM_INSTRUCTIONS = """

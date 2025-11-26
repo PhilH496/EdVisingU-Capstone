@@ -12,6 +12,7 @@ import os
 from .chain import get_or_create_chain, chat_with_memory
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
+from datetime import datetime, timezone
 
 router = APIRouter(prefix="/api/analysis", tags=["analysis"])
 
@@ -62,7 +63,6 @@ class AIAnalysisResult(BaseModel):
     confidence_score: float
     funding_recommendation: Optional[float]
     risk_factors: List[str]
-    strengths: List[str]
     requires_human_review: bool
     reasoning: str
 
@@ -135,8 +135,8 @@ def analyze_equipment_costs(app_data: ApplicationData) -> List[EquipmentIssue]:
     issues = []
     
     for item in app_data.requested_items:
-        item_name = item.get("item", "").lower()
-        item_cost = item.get("cost", 0)
+        item_name = item.get("item").lower()
+        item_cost = item.get("cost")
         funding_source = item.get("funding_source", "bswd").lower()
         
         # Find matching category
@@ -188,7 +188,6 @@ def calculate_confidence_score(
     if deterministic_result.has_osap_restrictions:
         score -= 33
     
-    score = max(0, score)
     
     # Step 2: Funding limits (-30 each)
     osap_type = app_data.osap_application.lower()
@@ -227,7 +226,7 @@ def calculate_confidence_score(
     else:
         score -= 60
     
-    return round(max(0, score), 1)
+    return max(0, score)
 
 def generate_fallback_reasoning(
     confidence_score: float,
@@ -377,7 +376,6 @@ async def run_ai_analysis(
         confidence_score=confidence_score / 100.0,
         funding_recommendation=funding_recommendation,
         risk_factors=risk_factors,
-        strengths=[],
         requires_human_review=requires_human_review,
         reasoning=reasoning
     )
@@ -402,7 +400,7 @@ async def analyze_application(app_data: ApplicationData):
             equipment_review=equipment_issues,
             ai_analysis=ai_result,
             overall_status=ai_result.recommended_status,
-            analysis_timestamp=datetime.utcnow().isoformat()
+            analysis_timestamp=datetime.now(timezone.utc).isoformat()
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")

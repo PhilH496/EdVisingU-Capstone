@@ -5,9 +5,9 @@
  * - Score thresholds: 90-100 Approved, 75-89 Manual Review, 0-74 Rejected
  */
 
-import React from "react";
 import { CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { STATUS_COLORS, getBadgeClasses, ApplicationStatus } from "./constants";
 
 interface DeterministicCheckResult {
   has_disability: boolean;
@@ -24,7 +24,7 @@ interface FinancialAnalysis {
 }
 
 interface AIAnalysisResult {
-  recommended_status: "APPROVED" | "REJECTED" | "NEEDS MANUAL REVIEW";
+  recommended_status: ApplicationStatus;
   confidence_score: number; // 0–1 from backend
   funding_recommendation: number | null;
   risk_factors: string[];
@@ -38,7 +38,7 @@ interface ApplicationAnalysis {
   deterministic_checks: DeterministicCheckResult;
   ai_analysis: AIAnalysisResult;
   financial_analysis?: FinancialAnalysis;
-  overall_status: "APPROVED" | "REJECTED" | "NEEDS MANUAL REVIEW" | "PENDING";
+  overall_status: ApplicationStatus;
   analysis_timestamp: string;
 }
 
@@ -46,13 +46,6 @@ interface Props {
   analysis: ApplicationAnalysis | null;
   loading?: boolean;
 }
-
-const STATUS_COLORS: Record<string, string> = {
-  APPROVED: "#10b981",
-  REJECTED: "#ef4444",
-  "NEEDS MANUAL REVIEW": "#3b82f6",
-  PENDING: "#6b7280",
-};
 
 export function ApplicationAnalysisCard({ analysis, loading }: Props) {
   if (loading) {
@@ -83,7 +76,7 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
   const finalScore = Math.round(analysis.ai_analysis.confidence_score * 100);
 
   // Pie chart
-  const scoreColor = STATUS_COLORS[analysis.overall_status] || "#6b7280";
+  const scoreColor = STATUS_COLORS[analysis.ai_analysis.recommended_status];
 
   const pieData = [
     { name: "score", value: finalScore },
@@ -131,15 +124,15 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
           {/* Status Badge */}
           <span
             className={`px-4 py-2 rounded-full text-sm font-bold border ${getBadgeClasses(
-              analysis.overall_status
+              analysis.ai_analysis.recommended_status
             )}`}
           >
-            {analysis.overall_status}
+            {analysis.ai_analysis.recommended_status}
           </span>
         </div>
       </div>
 
-      {/* Legend - Simpler */}
+      {/* Legend */}
       <div className="bg-gray-50 rounded-lg p-4 text-sm">
         <p className="font-semibold mb-2">Score Meaning:</p>
         <div className="space-y-1">
@@ -163,16 +156,16 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
       <div>
         <h4 className="font-semibold mb-3">AI Evaluation</h4>
 
-        {/* Recommended Funding - Simple */}
-        {analysis.ai_analysis.funding_recommendation ? (
+        {/* Recommended Funding */}
+        {analysis.ai_analysis.funding_recommendation && (
           <div className="mb-4">
             <p className="text-sm text-gray-600 mb-1">Recommended Funding</p>
             <p className="text-2xl font-bold text-brand-dark-blue">
               ${analysis.ai_analysis.funding_recommendation.toLocaleString()}
             </p>
           </div>
-        ) : null}
-
+        )}
+        
 
         {/* Risk Factors */}
         {analysis.ai_analysis.risk_factors.length > 0 && (
@@ -198,20 +191,6 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
       </div>
     </div>
   );
-}
-
-// Helpers
-function getBadgeClasses(status: string) {
-  switch (status) {
-    case "APPROVED":
-      return "bg-green-100 text-green-800 border-green-200";
-    case "REJECTED":
-      return "bg-red-100 text-red-800 border-red-200";
-    case "NEEDS MANUAL REVIEW":
-      return "bg-blue-100 text-blue-800 border-blue-200";
-    default:
-      return "bg-gray-100 text-gray-800 border-gray-200";
-  }
 }
 
 function CheckItem({ label, passed }: { label: string; passed: boolean }) {

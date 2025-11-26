@@ -3,7 +3,7 @@
  * Context-aware chatbot for querying specific application details
  */
 
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Send, Bot, Loader2, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
@@ -30,15 +30,21 @@ interface ApplicationData {
   requested_items: Array<{ category: string; item: string; cost: number; funding_source: string }>;
   institution: string;
   program?: string;
-  analysis?: any;
+  analysis: {
+  decision: string;
+  confidence: number;
+  reasoning: string;
+  risk_factors: string[];
+  recommended_funding: number;
+  };
 }
 
 interface Props {
   applicationData: ApplicationData;
   apiBaseUrl?: string;
-  mode?: "embedded" | "floating";
-  isOpen?: boolean;
-  onClose?: () => void;
+  mode: "embedded" | "floating";
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 export function ApplicationChatbot({
@@ -100,21 +106,17 @@ export function ApplicationChatbot({
     (omitted here to shorten—FULL logic unchanged in your real file)
     ${JSON.stringify(applicationData, null, 2)}
     `;
-
-    if (applicationData.analysis) {
-      const a = applicationData.analysis;
-      prompt += `
+    const a = applicationData.analysis;
+    prompt += `
     AI ANALYSIS RESULTS:
-    Decision: ${a.decision || "PENDING"}
-    Confidence: ${a.confidence || 0}%
-    ${a.reasoning ? `Reasoning: ${a.reasoning}` : ""}
-    ${a.strengths?.map((s: string) => `- ${s}`).join("\n") || ""}
-    ${a.risk_factors?.map((r: string) => `- ${r}`).join("\n") || ""}
-    ${a.recommended_funding ? `Recommended Funding: $${a.recommended_funding}` : ""}
+    Decision: ${a.decision}
+    Confidence: ${a.confidence}%
+    Reasoning: ${a.reasoning}
+    Risk Factors: ${a.risk_factors.map((r: string) => `- ${r}`).join("\n")}
+    Total Funding: $${a.recommended_funding}
     `;
-    }
 
-    return `${prompt}\nNow answer clearly:\n${input}`;
+    return `${prompt}\n${input}`;
   };
 
   /** Send Message */
