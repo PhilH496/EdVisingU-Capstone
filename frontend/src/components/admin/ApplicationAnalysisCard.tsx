@@ -28,7 +28,6 @@ interface AIAnalysisResult {
   confidence_score: number; // 0–1 from backend
   funding_recommendation: number | null;
   risk_factors: string[];
-  strengths: string[];
   requires_human_review: boolean;
   reasoning: string;
 }
@@ -43,7 +42,7 @@ interface ApplicationAnalysis {
 }
 
 interface Props {
-  analysis: ApplicationAnalysis | null;
+  analysis: ApplicationAnalysis;
   loading?: boolean;
 }
 
@@ -165,7 +164,7 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
             </p>
           </div>
         )}
-        
+
 
         {/* Risk Factors */}
         {analysis.ai_analysis.risk_factors.length > 0 && (

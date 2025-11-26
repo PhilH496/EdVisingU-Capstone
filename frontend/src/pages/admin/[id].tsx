@@ -131,31 +131,6 @@ export default function AdminApplicationDetailPage() {
     if (!editForm || !summary) return;
     setAnalyzing(true);
     try {
-      // Parse financial need - handle string, number, null, undefined
-      const parseFederalNeed = () => {
-        const value = editForm.federalNeed;
-        console.log('Federal Need raw:', value, '(type:', typeof value, ')');
-        if (value === null || value === undefined || String(value).trim() === '') return 0;
-        const parsed = typeof value === 'number' ? value : parseFloat(String(value));
-        return isNaN(parsed) ? 0 : parsed;
-      };
-
-      const parseProvincialNeed = () => {
-        const value = editForm.provincialNeed;
-        console.log('Provincial Need raw:', value, '(type:', typeof value, ')');
-        if (value === null || value === undefined || String(value).trim() === '') return 0;
-        const parsed = typeof value === 'number' ? value : parseFloat(String(value));
-        return isNaN(parsed) ? 0 : parsed;
-      };
-
-      const federalNeed = parseFederalNeed();
-      const provincialNeed = parseProvincialNeed();
-
-      console.log('Parsed Financial Need:', { 
-        federal: federalNeed, 
-        provincial: provincialNeed, 
-        total: federalNeed + provincialNeed 
-      });
 
       // Process functional limitations
       const functionalLimitations = toChips(editForm.functionalLimitations);
@@ -165,20 +140,20 @@ export default function AdminApplicationDetailPage() {
         student_id: editForm.studentId,
         first_name: editForm.firstName,
         last_name: editForm.lastName,
-        disability_type: editForm.disabilityType || "not-verified",
+        disability_type: editForm.disabilityType,
         study_type: editForm.studyType,
-        osap_application: editForm.osapApplication || "none",
-        has_osap_restrictions: editForm.hasOSAPRestrictions || false,
-        federal_need: federalNeed, 
-        provincial_need: provincialNeed, 
+        osap_application: editForm.osapApplication,
+        has_osap_restrictions: editForm.hasOSAPRestrictions,
+        federal_need: editForm.federalNeed,
+        provincial_need: editForm.provincialNeed,
         disability_verification_date: editForm.disabilityVerificationDate,
         functional_limitations: functionalLimitations,
-        needs_psycho_ed_assessment: editForm.needsPsychoEdAssessment || false,
+        needs_psycho_ed_assessment: editForm.needsPsychoEdAssessment,
         requested_items: requestedItems.map(item => ({ 
-          category: item.category || "",
-          item: item.item || "",
-          cost: typeof item.cost === 'number' ? item.cost : parseFloat(String(item.cost)) || 0,
-          funding_source: String(item.fundingSource || "bswd")
+          category: item.category,
+          item: item.item,
+          cost: item.cost,
+          funding_source: item.fundingSource
         })),
         institution: editForm.institution,
         program: editForm.program,
@@ -200,32 +175,26 @@ export default function AdminApplicationDetailPage() {
           student_id: editForm.studentId,
           first_name: editForm.firstName,
           last_name: editForm.lastName,
-          disability_type: editForm.disabilityType || "not-verified",
-          study_type: editForm.studyType || "full-time",
-          osap_application: editForm.osapApplication || "none",
-          has_osap_restrictions: editForm.hasOSAPRestrictions || false,
-          federal_need: federalNeed,
-          provincial_need: provincialNeed,
+          disability_type: editForm.disabilityType,
+          study_type: editForm.studyType,
+          osap_application: editForm.osapApplication,
+          has_osap_restrictions: editForm.hasOSAPRestrictions,
+          federal_need: editForm.federalNeed,
+          provincial_need: editForm.provincialNeed,
           functional_limitations: functionalLimitations,
-          needs_psycho_ed_assessment: editForm.needsPsychoEdAssessment || false,
+          needs_psycho_ed_assessment: editForm.needsPsychoEdAssessment,
           requested_items: requestedItems.map(item => ({
-            category: item.category || "",
-            item: item.item || "",
-            cost: typeof item.cost === 'number' ? item.cost : parseFloat(String(item.cost)) || 0,
-            funding_source: String(item.fundingSource || "bswd")
+            category: item.category,
+            item: item.item,
+            cost: item.cost,
+            funding_source: item.fundingSource
           })),
           institution: editForm.institution,
           program: editForm.program,
           analysis: {
-            decision: analysisResult.overall_status,
+            decision: analysisResult.ai_analysis.recommended_status,
             confidence: Math.round(analysisResult.ai_analysis.confidence_score * 100),
             reasoning: analysisResult.ai_analysis.reasoning,
-            eligibility: {
-              verified_disability: analysisResult.deterministic_checks.has_disability,
-              full_time_student: analysisResult.deterministic_checks.is_full_time,
-              no_osap_restrictions: !analysisResult.deterministic_checks.has_osap_restrictions,
-            },
-            strengths: analysisResult.ai_analysis.strengths,
             risk_factors: analysisResult.ai_analysis.risk_factors,
             recommended_funding: analysisResult.ai_analysis.funding_recommendation,
           },
