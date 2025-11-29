@@ -5,6 +5,7 @@
  * Manages the multi-step form flow and overall form state.
  *
  * Features:
+ * - OSAP Status gate (must confirm OSAP before accessing application)
  * - Multi-step form navigation (6 total steps)
  * - Form data state management
  * - Step validation before allowing progression
@@ -23,6 +24,8 @@ import { DisabilityInfoStep } from "@/components/bswd/steps/DisabilityInfoStep";
 import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
 import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
 import { saveSubmission } from "@/lib/database";
+import { saveSnapshotMerge, saveApplicationsList } from "@/lib/adminStore";
+import { OsapStatus } from "@/components/bswd/OsapStatus";
 
 // Store all form data in a single state object
 // Initial values are set to empty strings, zeros, or false depending on field type
@@ -32,6 +35,12 @@ export default function BSWDApplicationPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
+
+  // OSAP Status state for the pre-application gate
+  const [osapStatus, setOsapStatus] = useState({
+    open: true,
+    approved: false,
+  });
 
   const [formData, setFormData] = useState<FormData>({
     studentId: "",
@@ -120,12 +129,36 @@ export default function BSWDApplicationPage() {
 
   const TOTAL_STEPS = stepsInfo.length;
 
+  /**
+   * updateOsapStatus
+   *
+   * Called when the student confirms they have an approved OSAP application
+   * in the OSAP Status gate. Closes the gate and updates OSAP flags in formData.
+   */
+  const updateOsapStatus = () => {
+    setOsapStatus({
+      open: false,
+      approved: true,
+    });
+    setFormData((prev) => ({
+      ...prev,
+      hasOsapApplication: true,
+      osapOnFileStatus: "APPROVED",
+    }));
+  };
+
+  /**
+   * isStepComplete
+   *
+   * Step-level validation used to control navigation and progression.
+   */
   const isStepComplete = (stepCheck: number): boolean => {
     switch (stepCheck) {
       case 1:
         return Boolean(
           formData.studentId &&
           formData.studentId.length >= 7 &&
+          formData.studentId.length <= 8 &&
           formData.firstName &&
           formData.lastName &&
           formData.email &&
@@ -136,6 +169,7 @@ export default function BSWDApplicationPage() {
           formData.city &&
           formData.province &&
           formData.postalCode &&
+          formData.postalCode.replace(/\s/g, "").length === 6 && 
           formData.country &&
           formData.hasOsapApplication !== null
         );
@@ -208,6 +242,11 @@ export default function BSWDApplicationPage() {
     return isStepComplete(currentStep) && !saving;
   }, [currentStep, formData, isConfirmed, saving]);
 
+  /**
+   * handleNext / handlePrevious
+   *
+   * Step navigation handlers.
+   */
   const handleNext = async () => {
     if (!isStepComplete(currentStep)) return;
 
@@ -227,6 +266,12 @@ export default function BSWDApplicationPage() {
     }
   };
 
+  /**
+   * handleSubmit
+   *
+   * Final submission handler. Persists data to Supabase and local storage,
+   * then redirects to the thank-you/status page.
+   */
   const handleSubmit = async () => {
     if (saving) return;
 
@@ -239,7 +284,7 @@ export default function BSWDApplicationPage() {
       // Capture the exact submission time
       const currentDateTime = new Date();
 
-      // Save form data to localStorage for the status page
+      // Save form data to localStorage for the thank you page
       const applicationData = {
         id: `APP-${currentDateTime.getFullYear()}-${Math.floor(
           Math.random() * 1000000
@@ -259,27 +304,48 @@ export default function BSWDApplicationPage() {
         statusUpdatedDate: currentDateTime.toISOString(),
       };
 
+      await saveSnapshotMerge(applicationData as any, formData);
+      // Load existing applications
+      const existingRaw = localStorage.getItem("applications");
+      const existing = existingRaw ? JSON.parse(existingRaw) : [];
+
+      // Append and save
+      await saveApplicationsList([...existing, applicationData]);
+
       localStorage.setItem(
         "currentApplication",
         JSON.stringify(applicationData)
       );
 
       // Redirect to status page
-      window.location.href = "/application-status";
+      window.location.href = "/thank-you";
     } catch (err) {
       // Handle submission errors
-      const errorMessage = err instanceof Error ? err.message : "Failed to submit application. Please try again.";
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to submit application. Please try again.";
       setError(errorMessage);
       setSaving(false);
       console.error("Submission error:", err);
     }
   };
 
+  /**
+   * handleStepClick
+   *
+   * Handles clicking on a specific step in the StepBar.
+   */
   const handleStepClick = (step: number) => {
     if (step > maxStep) return;
     setCurrentStep(step);
   };
 
+  /**
+   * renderStep
+   *
+   * Renders the component for the current step.
+   */
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -314,6 +380,11 @@ export default function BSWDApplicationPage() {
     }
   };
 
+  /**
+   * StepBar Component
+   *
+   * Horizontal, scrollable step indicator with icons.
+   */
   function StepBar() {
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const stepRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -352,10 +423,12 @@ export default function BSWDApplicationPage() {
               className="flex flex-col items-center"
             >
               <span
-                className={`flex rounded-full  justify-center items-center h-14 w-14 transition-colors font-medium ${currentStep === index + 1
-                  ? "bg-cyan-800 text-white"
-                  : "bg-gray-100 text-black"
-                  } ${index + 1 > maxStep
+                className={`flex rounded-full  justify-center items-center h-14 w-14 transition-colors font-medium ${
+                  currentStep === index + 1
+                    ? "bg-cyan-800 text-white"
+                    : "bg-gray-100 text-black"
+                } ${
+                  index + 1 > maxStep
                     ? "opacity-40 cursor-not-allowed"
                     : "hover:bg-cyan-700 hover:text-white"
                 }`}
@@ -372,6 +445,9 @@ export default function BSWDApplicationPage() {
     );
   }
 
+  /**
+   * Effect to keep maxStep in sync with completion state.
+   */
   useEffect(() => {
     if (!isStepComplete(currentStep)) {
       setMaxStep(currentStep);
@@ -390,6 +466,9 @@ export default function BSWDApplicationPage() {
       title="BSWD/CSG-DSE Application Form"
       description="Complete application for Bursary for Students with Disabilities (BSWD) and Canada Student Grant for Services and Equipment"
     >
+      {/* OSAP Status gate - must be completed before using the form */}
+      <OsapStatus open={osapStatus.open} onApprove={updateOsapStatus} />
+
       {/* admin button */}
       <div className="mb-3 flex items-center justify-end">
         <Link
