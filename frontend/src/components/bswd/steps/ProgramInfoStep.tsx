@@ -319,7 +319,7 @@ export function ProgramInfoStep({
             onValueChange={(value) =>
               setFormData((prev) => ({
                 ...prev,
-                studyType: value as "full-time" | "part-time",
+                studyType: value as "full-time" | "part-time" | "institution-funded-SB",
               }))
             }
           >
@@ -329,9 +329,7 @@ export function ProgramInfoStep({
             <SelectContent>
               <SelectItem value="full-time">Full-Time</SelectItem>
               <SelectItem value="part-time">Part-Time</SelectItem>
-              <SelectItem value="part-time">
-                Institution-funded Special Bursary
-              </SelectItem>
+              <SelectItem value="institution-funded-SB">Institution-funded Special Bursary</SelectItem>
             </SelectContent>
           </Select>
         </div>

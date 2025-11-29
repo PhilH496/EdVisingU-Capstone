@@ -4,13 +4,13 @@
  * - Per-row Status dropdown only visible in Edit Mode (badge always visible)
  * - Institution names rendered in Title Case for consistency
  * - Persists assignee, violations, details, attachments, status per application
+ * - Deterministic scoring bubble using consolidated logic
  */
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { AdminLayout } from "@/components/bswd/AdminLayout";
-import StatusBadge from "@/components/bswd/StatusBadge";
-
+import { AdminLayout } from "@/components/admin/AdminLayout";
+import StatusBadge from "@/components/admin/StatusBadge";
 import {
   AppSummary,
   Row,
@@ -63,16 +63,55 @@ export default function AdminDashboardPage() {
   const [allChecked, setAllChecked] = useState<boolean>(false);
   const [toolbarMsg, setToolbarMsg] = useState<string>("");
   const [editMode, setEditMode] = useState<boolean>(false);
+  const [expandedApps, setExpandedApps] = useState<Set<string>>(new Set());
+  const [detScores, setDetScores] = useState<Record<string, number>>({});
 
-  // storage I/O 
+  // storage I/O
   useEffect(() => {
     (async () => {
       const summaries = await storeLoadSummaries();
+      const scoreMap: Record<string, number> = {};
+
       const hydrated: Row[] = await Promise.all(
         summaries.map(async (s: AppSummary): Promise<Row> => {
           const snap = await storeLoadSnapshot(s.id);
+          let calculatedStatus = s.status;
+          
+          if (snap?.formData) {
+              // Call backend to calculate score
+              const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/analysis/score`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  disability_type: snap.formData.disabilityType,
+                  study_type: snap.formData.studyType,
+                  has_osap_restrictions: snap.formData.hasOSAPRestrictions,
+                  osap_application: snap.formData.osapApplication,
+                  provincial_need: snap.formData.provincialNeed,
+                  federal_need: snap.formData.federalNeed,
+                  requested_items: snap.formData.requestedItems || []
+                })
+              });
+              
+              if (response.ok) {
+                const data = await response.json();
+                const score = data.confidence_score;
+                scoreMap[s.id] = score;
+                
+                // Auto-set status based on score
+                if (score >= 90) {
+                  calculatedStatus = "Approved";
+                } else if (score >= 75) {
+                  calculatedStatus = "In Review";
+                } else {
+                  calculatedStatus = "Rejected";
+                }
+              }
+          }
+          
           return {
             ...s,
+            status: calculatedStatus,
             assignee: snap?.assignee ?? "",
             violationTags: Array.isArray(snap?.violationTags) ? snap!.violationTags : [],
             violationDetails: snap?.violationDetails ?? "",
@@ -81,7 +120,9 @@ export default function AdminDashboardPage() {
           };
         })
       );
+
       setRows(hydrated);
+      setDetScores(scoreMap);
     })();
   }, []);
 
@@ -125,6 +166,14 @@ export default function AdminDashboardPage() {
     );
   };
 
+  const toggleExpanded = (id: string) => {
+    setExpandedApps((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
   // per-row save
   const saveRow = async (r: Row) => {
     const now = new Date().toISOString();
@@ -154,7 +203,7 @@ export default function AdminDashboardPage() {
     setTimeout(() => updateRow(r.id, { _saveMsg: "" }), 1200);
   };
 
-  // bulk selection 
+  // bulk selection
   const selectedCount = rows.filter((r: Row) => r._selected).length;
 
   const toggleSelectAll = (checked: boolean) => {
@@ -176,7 +225,6 @@ export default function AdminDashboardPage() {
     );
     setRows(updated);
 
-    // persist each selected snapshot change
     await Promise.all(
       updated.map(async (r: Row) => {
         if (r._selected) await storeSaveSnapshotMerge(r);
@@ -197,12 +245,14 @@ export default function AdminDashboardPage() {
     await storeSaveApplicationsList(summaries);
 
     setToolbarMsg(
-      `Applied "${bulkStatus}" to ${selectedCount} ${selectedCount === 1 ? "application" : "applications"}.`
+      `Applied "${bulkStatus}" to ${selectedCount} ${
+        selectedCount === 1 ? "application" : "applications"
+      }.`
     );
     setTimeout(() => setToolbarMsg(""), 1400);
   };
 
-  // render 
+  // render
   return (
     <AdminLayout
       title="BSWD Admin Dashboard"
@@ -257,7 +307,9 @@ export default function AdminDashboardPage() {
         </label>
 
         <div className="flex items-center gap-2">
-          <span className={`text-sm ${editMode ? "text-gray-600" : "text-gray-400"}`}>Set status:</span>
+          <span className={`text-sm ${editMode ? "text-gray-600" : "text-gray-400"}`}>
+            Set status:
+          </span>
           <select
             value={bulkStatus}
             onChange={(e) => setBulkStatus(e.target.value)}
@@ -296,288 +348,342 @@ export default function AdminDashboardPage() {
         <div className="px-5 py-10 text-gray-500">No applications found.</div>
       ) : (
         <div className="space-y-6">
-          {rows.map((r: Row) => (
-            <div key={r.id} className="border rounded-xl bg-white shadow-sm p-5 space-y-4">
-              {/* Header */}
-              <div className="flex items-start justify-between flex-wrap gap-3">
-                <div className="flex items-start gap-3">
-                  {editMode && (
-                    <input
-                      type="checkbox"
-                      checked={!!r._selected}
-                      onChange={(e) => updateRow(r.id, { _selected: e.target.checked })}
-                      className="mt-1 h-4 w-4"
-                      title="Select for bulk actions"
-                    />
-                  )}
-                  <div>
-                    <h2 className="font-semibold text-gray-900">
-                      {r.studentName} ({r.studentId})
-                    </h2>
-                    <p className="text-sm text-gray-600">
-                      {titleCase(r.institution)} — {r.program || "—"}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Application ID: <span className="font-mono">{r.id}</span>
-                    </p>
-                  </div>
-                </div>
+          {rows.map((r: Row) => {
+            const isExpanded = expandedApps.has(r.id);
+            const score = detScores[r.id];
 
-                <div className="flex items-center gap-2">
-                  <StatusBadge status={r.status} />
-                  {editMode && (
-                    <select
-                      value={r.status}
-                      onChange={(e) => updateRow(r.id, { status: e.target.value })}
-                      className="px-2 py-1.5 border rounded-md text-xs"
-                      title="Edit status"
-                    >
-                      {STATUS_OPTIONS.map((s: string) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
-                  )}
+            return (
+              <div key={r.id} className="flex gap-4 items-stretch">
+                <div className="flex-1 border rounded-xl bg-white shadow-sm p-5 space-y-4">
+                  {/* Header */}
+                  <div className="flex items-start justify-between flex-wrap gap-3">
+                    <div className="flex items-start gap-3">
+                      {editMode && (
+                        <input
+                          type="checkbox"
+                          checked={!!r._selected}
+                          onChange={(e) => updateRow(r.id, { _selected: e.target.checked })}
+                          className="mt-1 h-4 w-4"
+                          title="Select for bulk actions"
+                        />
+                      )}
+                      <div>
+                        <h2 className="font-semibold text-gray-900">
+                          {r.studentName} ({r.studentId})
+                        </h2>
+                        <p className="text-sm text-gray-600">
+                          {titleCase(r.institution)} — {r.program || "—"}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Application ID: <span className="font-mono">{r.id}</span>
+                        </p>
+                      </div>
+                    </div>
 
-                  <Link
-                    href={`/admin/${encodeURIComponent(r.id)}`}
-                    className="px-3 py-1.5 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
-                  >
-                    View Submission
-                  </Link>
-                </div>
-              </div>
+                    {/* Right side — Status + Score + buttons */}
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <StatusBadge status={r.status} />
+                        {typeof score === "number" && (
+                          <div
+                            className={`px-3 py-1 rounded-full text-xs font-semibold border ${getScoreBadgeClasses(score)}`}
+                            title={`AI Confidence Score: ${score}/100`}
+                          >
+                            {score}
+                          </div>
+                        )}
+                      </div>
 
-              {/* Assigned To */}
-              <div>
-                <label className="block text-sm text-gray-500 mb-1">Assigned To</label>
-                <input
-                  type="text"
-                  value={r.assignee || ""}
-                  onChange={(e) => updateRow(r.id, { assignee: e.target.value })}
-                  placeholder="e.g., Admin"
-                  className="w-full px-3 py-2 border rounded-md text-sm"
-                />
-              </div>
+                      {editMode && (
+                        <select
+                          value={r.status}
+                          onChange={(e) => updateRow(r.id, { status: e.target.value })}
+                          className="px-2 py-1.5 border border-gray-300 rounded-md text-xs"
+                        >
+                          {STATUS_OPTIONS.map((s) => (
+                            <option key={s} value={s}>{s}</option>
+                          ))}
+                        </select>
+                      )}
 
-              {/* Violations (includes 'Other') */}
-              <div>
-                <label className="block text-sm text-gray-500 mb-2">
-                  Violations / Issues (select all that apply)
-                </label>
+                      <div className="flex items-center gap-2 ml-auto">
+                        <Link
+                          href={`/admin/${encodeURIComponent(r.id)}`}
+                          className="px-3 py-1.5 text-xs rounded-lg border border-gray-300 bg-white hover:bg-gray-50 font-medium"
+                        >
+                          View
+                        </Link>
 
-                <div className="flex flex-wrap gap-2">
-                  {VIOLATION_LIBRARY.map((tag: string) => {
-                    const active = (r.violationTags || []).includes(tag);
-                    return (
-                      <button
-                        key={tag}
-                        type="button"
-                        onClick={() => toggleViolation(r.id, tag)}
-                        className={`px-3 py-1.5 rounded-full text-xs border ${
-                          active
-                            ? "bg-red-100 text-red-800 border-red-200"
-                            : "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200"
-                        }`}
-                        title={tag}
-                      >
-                        {tag}
-                      </button>
-                    );
-                  })}
-
-                  {/* Other chip + inline text; stored as "Other: <text>" */}
-                  {(() => {
-                    const customTags = (r.violationTags || []).filter((t: string) =>
-                      t.startsWith("Other: ")
-                    );
-                    const hasOtherActive = customTags.length > 0;
-                    const latest = customTags[customTags.length - 1] || "Other: ";
-                    const latestText = latest.slice(7);
-
-                    return (
-                      <>
                         <button
                           type="button"
-                          onClick={() => {
-                            if (!hasOtherActive) {
-                              updateRow(r.id, { violationTags: [...(r.violationTags || []), "Other: "] });
-                            } else {
-                              const next = (r.violationTags || []).filter(
-                                (t: string) => !t.startsWith("Other: ")
-                              );
-                              updateRow(r.id, { violationTags: next });
-                            }
-                          }}
-                          className={`px-3 py-1.5 rounded-full text-xs border ${
-                            hasOtherActive
-                              ? "bg-red-100 text-red-800 border-red-200"
-                              : "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200"
-                          }`}
-                          title="Add a custom violation"
+                          onClick={() => toggleExpanded(r.id)}
+                          className="px-3 py-1.5 text-xs rounded-lg border border-gray-300 bg-white hover:bg-gray-50 font-medium"
                         >
-                          Other
+                          {isExpanded ? "− Details" : "+ Details"}
                         </button>
+                      </div>
+                    </div>
+                  </div>
 
-                        {hasOtherActive && (
-                          <input
-                            type="text"
-                            autoFocus
-                            placeholder="Describe other issue…"
-                            value={latestText}
-                            onChange={(e) => {
-                              const base = (r.violationTags || []).filter(
-                                (t: string) => !t.startsWith("Other: ")
-                              );
-                              updateRow(r.id, { violationTags: [...base, `Other: ${e.target.value}`] });
-                            }}
-                            onBlur={() => {
-                              const text = (r.violationTags || [])
-                                .find((t: string) => t.startsWith("Other: "))
-                                ?.slice(7)
-                                .trim();
-                              if (!text) {
-                                updateRow(r.id, {
-                                  violationTags: (r.violationTags || []).filter(
-                                    (t: string) => !t.startsWith("Other: ")
-                                  ),
-                                });
-                              } else {
-                                const base = (r.violationTags || []).filter(
-                                  (t: string) => !t.startsWith("Other: ")
-                                );
-                                updateRow(r.id, { violationTags: [...base, `Other: ${text}`] });
-                              }
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-                              if (e.key === "Escape") {
-                                const text = (r.violationTags || [])
-                                  .find((t: string) => t.startsWith("Other: "))
-                                  ?.slice(7)
-                                  .trim();
-                                if (!text) {
-                                  updateRow(r.id, {
-                                    violationTags: (r.violationTags || []).filter(
-                                      (t: string) => !t.startsWith("Other: ")
-                                    ),
-                                  });
-                                } else {
-                                  (e.target as HTMLInputElement).blur();
-                                }
-                              }
-                            }}
-                            className="px-3 py-1.5 rounded-md border text-xs"
-                          />
+                  {/* Collapsible details */}
+                  {isExpanded && (
+                    <>
+                      {/* Assigned To */}
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-1">Assigned To</label>
+                        <input
+                          type="text"
+                          value={r.assignee || ""}
+                          onChange={(e) => updateRow(r.id, { assignee: e.target.value })}
+                          placeholder="e.g., Admin"
+                          className="w-full px-3 py-2 border rounded-md text-sm"
+                        />
+                      </div>
+
+                      {/* Violations (includes 'Other') */}
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-2">
+                          Violations / Issues (select all that apply)
+                        </label>
+
+                        <div className="flex flex-wrap gap-2">
+                          {VIOLATION_LIBRARY.map((tag: string) => {
+                            const active = (r.violationTags || []).includes(tag);
+                            return (
+                              <button
+                                key={tag}
+                                type="button"
+                                onClick={() => toggleViolation(r.id, tag)}
+                                className={`px-3 py-1.5 rounded-full text-xs border ${
+                                  active
+                                    ? "bg-red-100 text-red-800 border-red-200"
+                                    : "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200"
+                                }`}
+                                title={tag}
+                              >
+                                {tag}
+                              </button>
+                            );
+                          })}
+
+                          {/* Other chip + inline text; stored as "Other: <text>" */}
+                          {(() => {
+                            const customTags = (r.violationTags || []).filter((t: string) =>
+                              t.startsWith("Other: ")
+                            );
+                            const hasOtherActive = customTags.length > 0;
+                            const latest = customTags[customTags.length - 1] || "Other: ";
+                            const latestText = latest.slice(7);
+
+                            return (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (!hasOtherActive) {
+                                      updateRow(r.id, {
+                                        violationTags: [...(r.violationTags || []), "Other: "],
+                                      });
+                                    } else {
+                                      const next = (r.violationTags || []).filter(
+                                        (t: string) => !t.startsWith("Other: ")
+                                      );
+                                      updateRow(r.id, { violationTags: next });
+                                    }
+                                  }}
+                                  className={`px-3 py-1.5 rounded-full text-xs border ${
+                                    hasOtherActive
+                                      ? "bg-red-100 text-red-800 border-red-200"
+                                      : "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200"
+                                  }`}
+                                  title="Add a custom violation"
+                                >
+                                  Other
+                                </button>
+
+                                {hasOtherActive && (
+                                  <input
+                                    type="text"
+                                    autoFocus
+                                    placeholder="Describe other issue…"
+                                    value={latestText}
+                                    onChange={(e) => {
+                                      const base = (r.violationTags || []).filter(
+                                        (t: string) => !t.startsWith("Other: ")
+                                      );
+                                      updateRow(r.id, {
+                                        violationTags: [...base, `Other: ${e.target.value}`],
+                                      });
+                                    }}
+                                    onBlur={() => {
+                                      const text = (r.violationTags || [])
+                                        .find((t: string) => t.startsWith("Other: "))
+                                        ?.slice(7)
+                                        .trim();
+                                      if (!text) {
+                                        updateRow(r.id, {
+                                          violationTags: (r.violationTags || []).filter(
+                                            (t: string) => !t.startsWith("Other: ")
+                                          ),
+                                        });
+                                      } else {
+                                        const base = (r.violationTags || []).filter(
+                                          (t: string) => !t.startsWith("Other: ")
+                                        );
+                                        updateRow(r.id, {
+                                          violationTags: [...base, `Other: ${text}`],
+                                        });
+                                      }
+                                    }}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                                      if (e.key === "Escape") {
+                                        const text = (r.violationTags || [])
+                                          .find((t: string) => t.startsWith("Other: "))
+                                          ?.slice(7)
+                                          .trim();
+                                        if (!text) {
+                                          updateRow(r.id, {
+                                            violationTags: (r.violationTags || []).filter(
+                                              (t: string) => !t.startsWith("Other: ")
+                                            ),
+                                          });
+                                        } else {
+                                          (e.target as HTMLInputElement).blur();
+                                        }
+                                      }
+                                    }}
+                                    className="px-3 py-1.5 rounded-md border text-xs"
+                                  />
+                                )}
+
+                                {/* Render existing custom tags as red chips */}
+                                {customTags.map((tag: string) => (
+                                  <button
+                                    key={tag}
+                                    type="button"
+                                    onClick={() => toggleViolation(r.id, tag)}
+                                    className="px-3 py-1.5 rounded-full text-xs border bg-red-100 text-red-800 border-red-200"
+                                    title={tag}
+                                  >
+                                    {tag}
+                                  </button>
+                                ))}
+                              </>
+                            );
+                          })()}
+                        </div>
+
+                        <p className="text-xs text-gray-500 mt-1">
+                          Most Common BSWD form issues (Write in "Other" if issue does not appear).
+                        </p>
+                      </div>
+
+                      {/* Violation details */}
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-1">
+                          Other details (optional)
+                        </label>
+                        <textarea
+                          value={r.violationDetails || ""}
+                          onChange={(e) => updateRow(r.id, { violationDetails: e.target.value })}
+                          rows={3}
+                          placeholder="Add context for the selected violations..."
+                          className="w-full px-3 py-2 border rounded-md text-sm"
+                        />
+                      </div>
+
+                      {/* Attachments */}
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-2">Attachments</label>
+
+                        {r.attachments && r.attachments.length > 0 ? (
+                          <ul className="space-y-2 mb-3">
+                            {r.attachments.map((att: Attachment) => (
+                              <li
+                                key={att.id}
+                                className="flex items-center justify-between border rounded-md px-3 py-2 text-sm"
+                              >
+                                <div className="min-w-0">
+                                  <div className="font-medium truncate">{att.name}</div>
+                                  <div className="text-xs text-gray-500">
+                                    {att.mime || "application/octet-stream"} •{" "}
+                                    {att.size.toLocaleString()} bytes
+                                  </div>
+                                </div>
+                                <div className="shrink-0 flex items-center gap-2">
+                                  <button
+                                    onClick={() => openAttachment(att)}
+                                    className="px-3 py-1 rounded-lg border border-gray-200 bg-white hover:bg-gray-100 text-xs"
+                                  >
+                                    Open
+                                  </button>
+                                  <button
+                                    onClick={() => removeAttachment(r.id, att.id)}
+                                    className="px-3 py-1 rounded-lg text-xs text-red-600 hover:text-red-700"
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-sm text-gray-500 mb-2">No attachments yet.</p>
                         )}
 
-                        {/* Render existing custom tags as red chips */}
-                        {customTags.map((tag: string) => (
-                          <button
-                            key={tag}
-                            type="button"
-                            onClick={() => toggleViolation(r.id, tag)}
-                            className="px-3 py-1.5 rounded-full text-xs border bg-red-100 text-red-800 border-red-200"
-                            title={tag}
-                          >
-                            {tag}
-                          </button>
-                        ))}
-                      </>
-                    );
-                  })()}
-                </div>
-
-                <p className="text-xs text-gray-500 mt-1">
-                  Most Common BSWD form issues (Write in "Other" if issue does not appear).
-                </p>
-              </div>
-
-              {/* Violation details */}
-              <div>
-                <label className="block text-sm text-gray-500 mb-1">Other details (optional)</label>
-                <textarea
-                  value={r.violationDetails || ""}
-                  onChange={(e) => updateRow(r.id, { violationDetails: e.target.value })}
-                  rows={3}
-                  placeholder="Add context for the selected violations..."
-                  className="w-full px-3 py-2 border rounded-md text-sm"
-                />
-              </div>
-
-              {/* Attachments */}
-              <div>
-                <label className="block text-sm text-gray-500 mb-2">Attachments</label>
-
-                {r.attachments && r.attachments.length > 0 ? (
-                  <ul className="space-y-2 mb-3">
-                    {r.attachments.map((att: Attachment) => (
-                      <li
-                        key={att.id}
-                        className="flex items-center justify-between border rounded-md px-3 py-2 text-sm"
-                      >
-                        <div className="min-w-0">
-                          <div className="font-medium truncate">{att.name}</div>
-                          <div className="text-xs text-gray-500">
-                            {att.mime || "application/octet-stream"} • {att.size.toLocaleString()} bytes
-                          </div>
+                        <div>
+                          <input
+                            type="file"
+                            multiple
+                            onChange={async (e) => {
+                              const input = e.currentTarget as HTMLInputElement;
+                              const files = input.files;
+                              await attachFiles(r.id, files);
+                              if (input) input.value = "";
+                            }}
+                            className="block w-full text-sm text-gray-700 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-800 hover:file:bg-gray-200"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Upload supporting documents
+                          </p>
                         </div>
-                        <div className="shrink-0 flex items-center gap-2">
-                          <button
-                            onClick={() => openAttachment(att)}
-                            className="px-3 py-1 rounded-lg border border-gray-200 bg-white hover:bg-gray-100 text-xs"
-                          >
-                            Open
-                          </button>
-                          <button
-                            onClick={() => removeAttachment(r.id, att.id)}
-                            className="px-3 py-1 rounded-lg text-xs text-red-600 hover:text-red-700"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-sm text-gray-500 mb-2">No attachments yet.</p>
-                )}
+                      </div>
 
-                <div>
-                  <input
-                    type="file"
-                    multiple
-                    onChange={async (e) => {
-                      const input = e.currentTarget as HTMLInputElement; // capture before await
-                      const files = input.files; // snapshot files
-                      await attachFiles(r.id, files);
-                      if (input) input.value = ""; // clear safely to allow re-upload same file name
-                    }}
-                    className="block w-full text-sm text-gray-700 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-800 hover:file:bg-gray-200"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Upload supporting documents</p>
+                      {/* Per-application save */}
+                      <div className="flex items-center justify-end gap-3 pt-2">
+                        {r._saveMsg ? (
+                          <span className="text-sm text-green-700 bg-green-50 border border-green-200 px-3 py-1 rounded">
+                            {r._saveMsg}
+                          </span>
+                        ) : null}
+                        <button
+                          onClick={() => saveRow(r)}
+                          className="px-5 py-2 rounded-lg bg-cyan-800 text-white hover:bg-cyan-700 text-sm"
+                        >
+                          Save Changes
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
-
-              {/* Per-application save */}
-              <div className="flex items-center justify-end gap-3 pt-2">
-                {r._saveMsg ? (
-                  <span className="text-sm text-green-700 bg-green-50 border border-green-200 px-3 py-1 rounded">
-                    {r._saveMsg}
-                  </span>
-                ) : null}
-                <button
-                  onClick={() => saveRow(r)}
-                  className="px-5 py-2 rounded-lg bg-cyan-800 text-white hover:bg-cyan-700 text-sm"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </AdminLayout>
   );
+}
+
+// Score bubble UI
+
+function getScoreBadgeClasses(score: number) {
+  if (score >= 90) {
+    return "bg-green-100 text-green-800 border-green-200";
+  }
+  if (score >= 75) {
+    return "bg-blue-100 text-blue-800 border-blue-200";
+  }
+  return "bg-red-100 text-red-800 border-red-200";
 }

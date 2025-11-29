@@ -43,6 +43,7 @@ export function StudentInfoStep({
       : "focus:outline-none focus:ring-2 focus:ring-brand-dark-blue");
 
   const dob = useDateRange();
+  const osapStartDate = useDateRange();
 
   const handleOnFileChange = async (status: "APPROVED" | "NONE") => {
     setFormData((prev) => ({ ...prev, osapOnFileStatus: status }));
@@ -135,13 +136,13 @@ export function StudentInfoStep({
             disabled={isLocked}
             onChange={(e) => {
               const value = e.target.value.replace(/\D/g, "");
-              if (value.length <= 15) {
+              if (value.length <= 8) {
                 setFormData((prev) => ({ ...prev, studentId: value }));
               }
             }}
             className={lockCls("w-full px-3 py-2 border rounded-md")}
             placeholder="Enter student ID"
-            maxLength={15}
+            maxLength={8}
           />
           {formData.studentId && formData.studentId.length < 7 && (
             <p className="text-sm text-brand-light-red mt-1">
@@ -492,6 +493,11 @@ export function StudentInfoStep({
                 placeholder="A1A 1A1"
                 maxLength={7}
               />
+              {formData.postalCode && formData.postalCode.replace(/\s/g, "").length !== 6 && (
+                <p className="text-sm text-brand-light-red mt-1">
+                  Postal code must be 6 characters (e.g., A1A 1A1)
+                </p>
+              )}
             </div>
 
             <div>
