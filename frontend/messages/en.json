@@ -1,0 +1,12 @@
+{
+  "title": "BSWD Application Form",
+  "adminButton": "Admin Portal",
+  "steps": {
+    "studentInfo": "Student Info",
+    "programInfo": "Program Info",
+    "osapInfo": "OSAP Info",
+    "disabilityInfo": "Disability Info",
+    "serviceEquipment": "Service & Equipment",
+    "review": "Review & Submit"
+  }
+}
