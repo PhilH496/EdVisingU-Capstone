@@ -350,7 +350,7 @@ export default function BSWDApplicationPage() {
 
     return (
       <nav
-        className="overflow-x-scroll pb-4"
+        className="overflow-x-scroll pb-4 dark"
         id="scrollable_step_bar"
         ref={scrollRef}
       >
@@ -383,9 +383,7 @@ export default function BSWDApplicationPage() {
                     <i className="fa-solid fa-lock absolute bottom-0 right-0 text-[#757575]"></i>
                   )}
                 </span>
-                <span className={index + 1 > maxStep ? "" : ""}>
-                  {stepInfo.stepName}
-                </span>
+                <span className="dark:text-black">{stepInfo.stepName}</span>
               </button>
               <span id="locked-msg-program" className="sr-only">
                 Locked. Complete previous step(s) to access.
