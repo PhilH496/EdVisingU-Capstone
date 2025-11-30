@@ -126,21 +126,21 @@ export default function BSWDApplicationPage() {
       case 1:
         return Boolean(
           formData.studentId &&
-          formData.studentId.length >= 7 &&
-          formData.studentId.length <= 8 &&
-          formData.firstName &&
-          formData.lastName &&
-          formData.email &&
-          formData.dateOfBirth &&
-          formData.oen.length === 9 &&
-          formData.sin.replace(/\D/g, "").length === 9 &&
-          formData.address &&
-          formData.city &&
-          formData.province &&
-          formData.postalCode &&
-          formData.postalCode.replace(/\s/g, "").length === 6 && 
-          formData.country &&
-          formData.hasOsapApplication !== null
+            formData.studentId.length >= 7 &&
+            formData.studentId.length <= 8 &&
+            formData.firstName &&
+            formData.lastName &&
+            formData.email &&
+            formData.dateOfBirth &&
+            formData.oen.length === 9 &&
+            formData.sin.replace(/\D/g, "").length === 9 &&
+            formData.address &&
+            formData.city &&
+            formData.province &&
+            formData.postalCode &&
+            formData.postalCode.replace(/\s/g, "").length === 6 &&
+            formData.country &&
+            formData.hasOsapApplication !== null
         );
 
       case 2: {
@@ -279,7 +279,10 @@ export default function BSWDApplicationPage() {
       window.location.href = "/thank-you";
     } catch (err) {
       // Handle submission errors
-      const errorMessage = err instanceof Error ? err.message : "Failed to submit application. Please try again.";
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to submit application. Please try again.";
       setError(errorMessage);
       setSaving(false);
       console.error("Submission error:", err);
@@ -346,40 +349,49 @@ export default function BSWDApplicationPage() {
     }, [currentStep]);
 
     return (
-      <div
-        className="overflow-x-scroll pb-4"
+      <nav
+        className="overflow-x-scroll pb-4 dark"
         id="scrollable_step_bar"
         ref={scrollRef}
       >
-        <div className="flex gap-10 w-max">
+        <ul className="flex gap-10 w-max">
           {stepsInfo.map((stepInfo, index) => (
-            <button
-              key={stepInfo.stepName}
-              onClick={() => handleStepClick(index + 1)}
-              disabled={index + 1 > maxStep}
-              ref={(el) => {
-                stepRefs.current[index] = el;
-              }}
-              className="flex flex-col items-center"
-            >
-              <span
-                className={`flex rounded-full  justify-center items-center h-14 w-14 transition-colors font-medium ${currentStep === index + 1
-                  ? "bg-cyan-800 text-white"
-                  : "bg-gray-100 text-black"
-                  } ${index + 1 > maxStep
-                    ? "opacity-40 cursor-not-allowed"
-                    : "hover:bg-cyan-700 hover:text-white"
-                }`}
+            <li key={stepInfo.stepName}>
+              <button
+                onClick={() => handleStepClick(index + 1)}
+                disabled={index + 1 > maxStep}
+                ref={(el) => {
+                  stepRefs.current[index] = el;
+                }}
+                aria-describedby="locked-msg-program"
+                className="flex flex-col items-center"
               >
-                <i className={`${stepInfo.stepIconFaClass} text-[150%]`}></i>
+                <span
+                  className={`flex rounded-full  justify-center items-center h-14 w-14 transition-colors font-medium relative ${
+                    currentStep === index + 1
+                      ? "bg-cyan-800 text-white"
+                      : "bg-gray-100 text-black"
+                  } ${
+                    index + 1 > maxStep
+                      ? "cursor-not-allowed"
+                      : "hover:bg-cyan-700 hover:text-white"
+                  }`}
+                >
+                  <i className={`${stepInfo.stepIconFaClass} text-[150%]`}></i>
+                  {/* display lock icon */}
+                  {index + 1 > maxStep && (
+                    <i className="fa-solid fa-lock absolute bottom-0 right-0 text-[#757575]"></i>
+                  )}
+                </span>
+                <span className="dark:text-black">{stepInfo.stepName}</span>
+              </button>
+              <span id="locked-msg-program" className="sr-only">
+                Locked. Complete previous step(s) to access.
               </span>
-              <span className={index + 1 > maxStep ? "opacity-40" : ""}>
-                {stepInfo.stepName}
-              </span>
-            </button>
+            </li>
           ))}
-        </div>
-      </div>
+        </ul>
+      </nav>
     );
   }
 
