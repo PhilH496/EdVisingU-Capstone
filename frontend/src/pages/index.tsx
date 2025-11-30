@@ -24,10 +24,13 @@ import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
 import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
 import { saveSubmission } from "@/lib/database";
 import { saveSnapshotMerge, saveApplicationsList } from "@/lib/adminStore";
+import { useTranslation } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 // Store all form data in a single state object
 // Initial values are set to empty strings, zeros, or false depending on field type
 export default function BSWDApplicationPage() {
+  const { t, isLoaded } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [maxStep, setMaxStep] = useState(1);
   const [saving, setSaving] = useState(false);
@@ -94,27 +97,27 @@ export default function BSWDApplicationPage() {
 
   const stepsInfo = [
     {
-      stepName: "Student Info",
+      stepName: t('steps.studentInfo'),
       stepIconFaClass: "fa-solid fa-user",
     },
     {
-      stepName: "Program Info",
+      stepName: t('steps.programInfo'),
       stepIconFaClass: "fa-solid fa-user-graduate",
     },
     {
-      stepName: "OSAP Info",
+      stepName: t('steps.osapInfo'),
       stepIconFaClass: "fa-solid fa-money-check-dollar",
     },
     {
-      stepName: "Disability Info",
+      stepName: t('steps.disabilityInfo'),
       stepIconFaClass: "fa-solid fa-wheelchair",
     },
     {
-      stepName: "Service & Equipment",
+      stepName: t('steps.serviceEquipment'),
       stepIconFaClass: "fa-solid fa-wrench",
     },
     {
-      stepName: "Review & Submit",
+      stepName: t('steps.review'),
       stepIconFaClass: "fa-solid fa-receipt",
     },
   ];
@@ -396,18 +399,23 @@ export default function BSWDApplicationPage() {
     }
   }, [currentStep, formData, isConfirmed]);
 
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <FormLayout
-      title="BSWD/CSG-DSE Application Form"
+      title={t('title')}
       description="Complete application for Bursary for Students with Disabilities (BSWD) and Canada Student Grant for Services and Equipment"
     >
+      <LanguageSwitcher />
       {/* admin button */}
       <div className="mb-3 flex items-center justify-end">
         <Link
           href="/admin"
           className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
         >
-          Admin
+          {t('adminButton')}
         </Link>
       </div>
 

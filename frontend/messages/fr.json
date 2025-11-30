@@ -1,0 +1,12 @@
+{
+  "title": "Formulaire de demande BSWD",
+  "adminButton": "Portail d'administration",
+  "steps": {
+    "studentInfo": "Info étudiant",
+    "programInfo": "Info programme",
+    "osapInfo": "Info RAFEO",
+    "disabilityInfo": "Info handicap",
+    "serviceEquipment": "Service et équipement",
+    "review": "Réviser et soumettre"
+  }
+}
