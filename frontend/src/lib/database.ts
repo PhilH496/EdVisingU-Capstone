@@ -31,7 +31,7 @@ const calculateInitialStatus = async (formData: FormData): Promise<string> => {
         osap_application: formData.osapApplication,
         provincial_need: formData.provincialNeed,
         federal_need: formData.federalNeed,
-        requested_items: formData.requestedItems || []
+        requested_items: formData.requestedItems
       })
     });
 
