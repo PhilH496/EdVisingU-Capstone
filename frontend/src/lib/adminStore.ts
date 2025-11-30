@@ -241,7 +241,7 @@ export async function saveSnapshotMerge(r: Row, formData?: any): Promise<void> {
   const now = new Date().toISOString();
 
   if (isSupabaseReady() && supabase) {
-     // — This is where we connect to Supabase to upsert —
+    // — This is where we connect to Supabase to upsert —
     const summaryPayload = {
       id: r.id,
       student_name: r.studentName,
@@ -323,9 +323,9 @@ export async function saveSnapshotMerge(r: Row, formData?: any): Promise<void> {
     violationTags: Array.isArray(r.violationTags) ? r.violationTags : existing.violationTags ?? [],
     violationDetails: r.violationDetails ?? existing.violationDetails ?? "",
     attachments: Array.isArray(r.attachments)
-    ? r.attachments
-    : Array.isArray(existing.attachments)
-    ? existing.attachments
+     ? r.attachments
+     : Array.isArray(existing.attachments)
+     ? existing.attachments
      : [],
   };
   localStorage.setItem(SNAP_KEY(r.id), JSON.stringify(next));
@@ -351,7 +351,7 @@ export async function saveApplicationsList(summaries: AppSummary[]): Promise<voi
     // fall through to local on error
   }
 
-    // — Local fallback —
+  // — Local fallback —
   localStorage.setItem("applications", JSON.stringify(summaries));
   if (summaries[0]) {
     localStorage.setItem("currentApplication", JSON.stringify(summaries[0]));
@@ -463,8 +463,8 @@ export async function downloadAttachmentFromStorage(path: string): Promise<Blob 
   if (!(isSupabaseReady() && supabase)) return null;
   // connect to Supabase Storage to create a signed URL 
   const { data: signed, error } = await supabase.storage
-  .from("attachments")
-  .createSignedUrl(path, 60);
+   .from("attachments")
+   .createSignedUrl(path, 60);
   if (error || !signed?.signedUrl) return null;
   const resp = await fetch(signed.signedUrl);
   if (!resp.ok) return null;
