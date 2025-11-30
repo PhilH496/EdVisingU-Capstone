@@ -1,5 +1,6 @@
 {
   "title": "Formulaire de demande BSWD",
+  "description": "Demande complète pour la Bourse d'études pour étudiants handicapés (BSWD) et la Subvention canadienne pour services et équipement",
   "adminButton": "Portail d'administration",
   "steps": {
     "studentInfo": "Info étudiant",

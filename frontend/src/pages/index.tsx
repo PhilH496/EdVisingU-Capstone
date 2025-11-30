@@ -460,7 +460,7 @@ export default function BSWDApplicationPage() {
   return (
     <FormLayout
       title={t('title')}
-      description="Complete application for Bursary for Students with Disabilities (BSWD) and Canada Student Grant for Services and Equipment"
+      description={t('description')}
     >
       <LanguageSwitcher />
       {/* admin button */}
