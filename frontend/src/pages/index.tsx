@@ -24,6 +24,8 @@ import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
 import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
 import { saveSubmission } from "@/lib/database";
 import { saveSnapshotMerge, saveApplicationsList } from "@/lib/adminStore";
+import { useTranslation } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 // Store all form data in a single state object
 // Initial values are set to empty strings, zeros, or false depending on field type
