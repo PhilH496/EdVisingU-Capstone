@@ -8,8 +8,15 @@
 // - Add validation in index.tsx > isStepComplete() function
 // - Use brand colors located in tailwind.config.js; reference StudentInfoStep.tsx
 
-import { FormData, FunctionalLimitationOption } from "@/types/bswd";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useDateRange } from "@/hooks/UseDateRange";
+import { Calendar } from "@/components/ui/calendar";
+import { ChevronDownIcon } from "lucide-react";
 import React, { useState } from "react";
+import { format } from "date-fns";
+import { FormData, FunctionalLimitationOption } from "@/types/bswd";
 import { sendPsychoEdReferral } from "@/lib/notify";
 
 interface DisabilityInfoStepProps {
@@ -17,10 +24,8 @@ interface DisabilityInfoStepProps {
   setFormData: (data: FormData | ((prev: FormData) => FormData)) => void;
 }
 
-export function DisabilityInfoStep({
-  formData,
-  setFormData,
-}: DisabilityInfoStepProps) {
+export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStepProps) {
+  const verificationDate = useDateRange();
   // Local state for the psycho-educational assessment checkbox
   const [requiresPsychoEducational, setRequiresPsychoEducational] = useState(
     Boolean((formData as any).needsPsychoEdAssessment)
@@ -81,11 +86,7 @@ export function DisabilityInfoStep({
     }
   };
 
-  const functionalLimitations: FunctionalLimitationOption[] = Array.isArray(
-    formData.functionalLimitations
-  )
-    ? (formData.functionalLimitations as FunctionalLimitationOption[])
-    : defaultFunctionalLimitations;
+  const functionalLimitations = formData.functionalLimitations;
 
   const handleLimitationsChange = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -93,14 +94,8 @@ export function DisabilityInfoStep({
     const { name, checked } = e.target;
 
     setFormData((prev) => {
-      const current: FunctionalLimitationOption[] = Array.isArray(
-        prev.functionalLimitations
-      )
-        ? (prev.functionalLimitations as FunctionalLimitationOption[])
-        : defaultFunctionalLimitations;
-
-      const updated = current.map((limit) =>
-        limit.name !== name ? limit : { ...limit, checked }
+      const updated = prev.functionalLimitations.map((limit) =>
+        limit.name === name ? { ...limit, checked } : limit
       );
 
       return {
@@ -109,7 +104,7 @@ export function DisabilityInfoStep({
       };
     });
   };
-
+  // Disable verification date if not verified or not selected
   const isVerificationDisabled =
     !formData.disabilityType || formData.disabilityType === "not-verified";
 
@@ -155,36 +150,40 @@ export function DisabilityInfoStep({
       </div>
 
       {/* Disability Verification Date */}
-      {formData.disabilityType !== "not-verified" && (
-        <div>
-          <label
-            htmlFor="disabilityVerificationDate"
-            className="block text-base font-medium mb-1 text-[#4e4e4e]"
-          >
-            Disability Verification Date
-          </label>
-          <div className="relative">
-            <input
-              type="date"
-              id="disabilityVerificationDate"
-              name="disabilityVerificationDate"
-              value={formData.disabilityVerificationDate || ""}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  disabilityVerificationDate: e.target.value,
-                }))
-              }
-              disabled={isVerificationDisabled}
-              className={`w-full max-w-xs px-3 py-2 border rounded-md text-sm text-[#4e4e4e] focus:outline-none focus:ring-2 ${
-                isVerificationDisabled
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200"
-                  : "focus:ring-[#0071a9]"
-              }`}
+      <div className="flex flex-col gap-3">
+        <Label htmlFor="endDate" className="block text-base font-medium mb-1 text-brand-text-gray">
+          Disability Verification Date <span className="text-sm text-brand-light-red mt-1">*</span>
+        </Label>
+        <Popover open={verificationDate.open} onOpenChange={verificationDate.setOpen}>
+          <PopoverTrigger asChild disabled={isVerificationDisabled}>
+            <Button
+              variant="outline"
+              id="endDate"
+              className="w-full max-w-xs justify-between font-normal"
+            >
+              {verificationDate.date ? verificationDate.date.toLocaleDateString() : "Select date"}
+              <ChevronDownIcon />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={verificationDate.date}
+              captionLayout="dropdown"
+              onSelect={(date) => {
+                verificationDate.setDate(date)
+                verificationDate.setOpen(false)
+                if (date) {
+                  setFormData((prev) => ({
+                    ...prev,
+                    disabilityVerificationDate: format(date, "dd/MM/yyyy")
+                  }))
+                }
+              }}
             />
-          </div>
-        </div>
-      )}
+          </PopoverContent>
+        </Popover>
+      </div>
 
       {/* Disability Type Radio Group */}
       {formData.disabilityType !== "not-verified" && (
@@ -335,15 +334,12 @@ export function DisabilityInfoStep({
                 </h3>
                 <div className="mt-2 text-sm text-[#4e4e4e]">
                   <p>
-                    You will be automatically connected with a qualified
-                    assessment provider in your geographical area who has a
-                    referral contract with us, or with a provider at your
-                    institution at a discounted rate.
+                    You will be automatically connected with a qualified assessment provider in your geographical area
+                    who has a referral contract with us, or with a provider at your institution at a discounted rate.
                   </p>
                   <p className="mt-2">
-                    The assessment fee will be reviewed for approval and
-                    submitted to your institution&apos;s finance office for
-                    direct payment via EFT.
+                    The assessment fee will be reviewed for approval and submitted to your institution&apos;s finance office
+                    for direct payment via EFT.
                   </p>
                 </div>
               </div>
