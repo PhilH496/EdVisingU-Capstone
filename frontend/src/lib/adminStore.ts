@@ -236,18 +236,65 @@ export async function loadSnapshot(id: string): Promise<Snapshot | null> {
   }
 }
 
+
+//Helper Func: Recalculate status based on form data changes for supabase
+async function recalculateStatus(formData: any): Promise<string | null> {
+  if (!formData) { return null; }
+
+  try {
+    const payload = {
+      disability_type: formData.disabilityType,
+      study_type: formData.studyType,
+      has_osap_restrictions: formData.hasOSAPRestrictions,
+      osap_application: formData.osapApplication,
+      provincial_need: formData.provincialNeed,
+      federal_need: formData.federalNeed,
+      requested_items: formData.requestedItems || []
+    };
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/analysis/score`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const score = data.confidence_score;
+
+      // Convert score to status from deterministic func calculations
+      let newStatus;
+      if (score >= 90) newStatus = "Approved";
+      else if (score >= 75) newStatus = "In Review";
+      else newStatus = "Rejected";
+
+      return newStatus;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+
+  return null;  // Return null if calculation fails (for canceled state)
+}
 /** Save/merge snapshot & summary (optionally pass fresh formData) */
 export async function saveSnapshotMerge(r: Row, formData?: any): Promise<void> {
   const now = new Date().toISOString();
 
   if (isSupabaseReady() && supabase) {
     // — This is where we connect to Supabase to upsert —
+    let updatedStatus = r.status;
+    if (formData) {
+      const calculatedStatus = await recalculateStatus(formData);
+      if (calculatedStatus) {
+        updatedStatus = calculatedStatus;
+      }
+    }
     const summaryPayload = {
       id: r.id,
       student_name: r.studentName,
       student_id: r.studentId,
       submitted_date: r.submittedDate,
-      status: r.status,
+      status: updatedStatus,
       program: r.program,
       institution: r.institution,
       study_period: r.studyPeriod,

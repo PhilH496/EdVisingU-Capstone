@@ -30,6 +30,7 @@ import {
   saveSnapshotMerge as storeSaveSnapshotMerge,
   saveApplicationsList as storeSaveApplicationsList,
 } from "@/lib/adminStore";
+import { supabase } from "@/lib/supabase";
 
 // pass through readOnly while keeping step prop types unchanged 
 const StudentInfoStepShim = ({
@@ -306,24 +307,48 @@ export default function AdminApplicationDetailPage() {
     if (!summary) return;
 
     const nowIso = new Date().toISOString();
-    const nextSummary: Summary = {
-      ...summary,
+
+    const updatedRow = {
+      id: summary.id,
       studentName: `${fd.firstName} ${fd.lastName}`.trim(),
+      studentId: summary.studentId,
+      submittedDate: summary.submittedDate,
+      status: summary.status,
       program: fd.program,
       institution: fd.institution,
-      studyPeriod:
-        fd.studyPeriodStart && fd.studyPeriodEnd
-          ? `${fd.studyPeriodStart} - ${fd.studyPeriodEnd}`
-          : "Not specified",
+      studyPeriod: `${fd.studyPeriodStart} - ${fd.studyPeriodEnd}`,
       statusUpdatedDate: nowIso,
+      
+      // Admin workflow fields
+      assignee: data?.assignee ?? "",
+      violationTags: data?.violationTags ?? [],
+      violationDetails: data?.violationDetails ?? "",
+      attachments: data?.attachments ?? [],
     };
 
-    await storeSaveSnapshotMerge(
-      {
-        ...nextSummary,
-      } as any,
-      fd
-    );
+
+    // Triggers status recalculation and saves to Supabase
+    await storeSaveSnapshotMerge(updatedRow as any, fd);
+
+    // Fetch the recalculated status from Supabase
+    const { data: updatedApp, error: fetchError } = await supabase
+      .from("applications")
+      .select("status, status_updated_date")
+      .eq("id", summary.id)
+      .single();
+
+    // Create updated summary
+    const nextSummary: Summary = {
+      id: updatedRow.id,
+      studentName: updatedRow.studentName,
+      studentId: updatedRow.studentId,
+      submittedDate: updatedRow.submittedDate,
+      status: updatedApp?.status || updatedRow.status, 
+      program: updatedRow.program,
+      institution: updatedRow.institution,
+      studyPeriod: updatedRow.studyPeriod,
+      statusUpdatedDate: updatedApp?.status_updated_date || nowIso,
+    };
 
     await storeSaveApplicationsList([nextSummary]);
 
