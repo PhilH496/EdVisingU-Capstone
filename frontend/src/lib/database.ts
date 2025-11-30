@@ -19,7 +19,7 @@ const addIfPresent = (obj: Record<string, any>, key: string, value: any): void =
 /**
  * Saves complete form submission to multiple Supabase tables
  * @param formData - Complete form data object
- * @returns Object containing inserted student_id
+ * @returns Object containing inserted student_id and application_id
  * @throws Error if any insert operation fails
  */
 export const saveSubmission = async (formData: FormData) => {
@@ -129,5 +129,41 @@ export const saveSubmission = async (formData: FormData) => {
     if (itemsError) throw itemsError;
   }
 
-  return { student_id: studentId };
+  // 6. Create application record for admin dashboard
+  const applicationId = `APP-${studentId}`;
+  
+  const applicationPayload = {
+    id: applicationId,
+    student_name: `${formData.firstName} ${formData.lastName}`,
+    student_id: formData.studentId,
+    submitted_date: new Date().toISOString(),
+    status: 'submitted',
+    program: formData.program,
+    institution: formData.institution,
+    study_period: `${formData.studyPeriodStart} - ${formData.studyPeriodEnd}`,
+    status_updated_date: new Date().toISOString()
+  };
+
+  const { error: appError } = await supabase
+    .from("applications")
+    .insert(applicationPayload);
+
+  if (appError) throw appError;
+
+  // 7. Create snapshot record with full form data
+  const snapshotPayload = {
+    id: applicationId,
+    form_data: formData,
+    form_data_history: [],
+    last_modified_at: new Date().toISOString(),
+    last_modified_by: 'student'
+  };
+
+  const { error: snapError } = await supabase
+    .from("snapshots")
+    .insert(snapshotPayload);
+
+  if (snapError) throw snapError;
+
+  return { student_id: studentId, application_id: applicationId };
 };

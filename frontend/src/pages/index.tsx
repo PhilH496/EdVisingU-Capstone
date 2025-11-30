@@ -23,7 +23,6 @@ import { DisabilityInfoStep } from "@/components/bswd/steps/DisabilityInfoStep";
 import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
 import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
 import { saveSubmission } from "@/lib/database";
-import { saveSnapshotMerge, saveApplicationsList } from "@/lib/adminStore";
 
 // Store all form data in a single state object
 // Initial values are set to empty strings, zeros, or false depending on field type
@@ -238,45 +237,8 @@ export default function BSWDApplicationPage() {
 
     try {
       const result = await saveSubmission(formData);
-
-      // Capture the exact submission time
-      const currentDateTime = new Date();
-
-      // Save form data to localStorage for the thank you page
-      const applicationData = {
-        id: `APP-${currentDateTime.getFullYear()}-${Math.floor(
-          Math.random() * 1000000
-        )
-          .toString()
-          .padStart(6, "0")}`,
-        studentName: `${formData.firstName} ${formData.lastName}`,
-        studentId: formData.studentId,
-        submittedDate: currentDateTime.toISOString(),
-        status: "submitted" as const,
-        program: formData.program,
-        institution: formData.institution,
-        studyPeriod:
-          formData.studyPeriodStart && formData.studyPeriodEnd
-            ? `${formData.studyPeriodStart} - ${formData.studyPeriodEnd}`
-            : "Not specified",
-        statusUpdatedDate: currentDateTime.toISOString(),
-      };
-
-      await saveSnapshotMerge(applicationData as any, formData);
-      // Load existing applications
-      const existingRaw = localStorage.getItem("applications");
-      const existing = existingRaw ? JSON.parse(existingRaw) : [];
-
-      // Append and save
-      await saveApplicationsList([...existing, applicationData]);
-
-      localStorage.setItem(
-        "currentApplication",
-        JSON.stringify(applicationData)
-      );
-
       // Redirect to status page
-      window.location.href = "/thank-you";
+      window.location.href = `/thank-you?appId=${result.application_id}`;
     } catch (err) {
       // Handle submission errors
       const errorMessage = err instanceof Error ? err.message : "Failed to submit application. Please try again.";

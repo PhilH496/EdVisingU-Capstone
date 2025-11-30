@@ -23,6 +23,7 @@ import {
   attachFiles as storeAttachFiles,
   downloadAttachmentFromStorage,
   resetLocalApplications,
+  deleteApplication,
 } from "@/lib/adminStore";
 
 const STATUS_OPTIONS = ["Submitted", "In Review", "Approved", "Rejected", "Pending"];
@@ -338,6 +339,46 @@ export default function AdminDashboardPage() {
             title={editMode ? "Clear selection" : "Enable Edit Mode first"}
           >
             Clear Selection
+          </button>
+          <button
+            onClick={async () => {
+              const selectedApps = rows.filter(r => r._selected);
+              if (selectedApps.length === 0) {
+                alert("No applications selected");
+                return;
+              }
+
+              let reason = prompt("Reason for deleting these applications? (required)");
+
+              // If user cancels, abort
+              if (reason === null) {
+                return;
+              }
+              
+              // Keep prompting until they provide a non-empty reason
+              while (!reason.trim()) {
+                reason = prompt("Deletion reason is required. Please provide a reason:");
+                if (reason === null) {
+                  return; // User cancelled
+                }
+              }
+              
+              // Confirm deletion
+              if (confirm(`Delete ${selectedApps.length} application(s)?\n\nReason: ${reason}\n\nNote: This will hide application instead to preserve audit trail.`)) {
+                await Promise.all(
+                  selectedApps.map(app => deleteApplication(app.id, "Admin Name", reason)) //replace 'Admin Name' with real username when admin and student portal login integrated
+                );
+                
+                setRows(rows.filter(r => !r._selected));
+                setToolbarMsg(`Deleted ${selectedApps.length} application(s)`);
+                setTimeout(() => setToolbarMsg(""), 2000);
+              }
+            }}
+            disabled={!editMode || selectedCount === 0}
+            className="px-4 py-2 rounded-lg bg-brand-light-red text-white hover:bg-red-400 text-sm disabled:opacity-50"
+            title={editMode ? "Delete selected applications" : "Enable Edit Mode first"}
+          >
+            Delete ({selectedCount})
           </button>
         </div>
 

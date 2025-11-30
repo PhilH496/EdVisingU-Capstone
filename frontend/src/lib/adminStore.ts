@@ -93,7 +93,7 @@ const b64FromFile = (file: File): Promise<string> =>
 
 /* ==================== Public API ==================== */
 
-/** Load ordered application summaries */
+/** Load ordered application summaries (excludes soft-deleted) */
 export async function loadSummaries(): Promise<AppSummary[]> {
   if (isSupabaseReady() && supabase) {
     // — This is where we connect to Supabase to fetch summaries —
@@ -114,6 +114,7 @@ export async function loadSummaries(): Promise<AppSummary[]> {
       .select(
         "id, student_name, student_id, submitted_date, status, program, institution, study_period, status_updated_date"
       )
+      .is("deleted_at", null)
       .order("submitted_date", { ascending: false });
 
     if (!error && data) {
@@ -185,29 +186,22 @@ export async function loadSnapshot(id: string): Promise<Snapshot | null> {
       study_period: string;
       status_updated_date: string;
     };
-    type SnapRow = {
-      id: string;
-      form_data: any;
-      assignee: string | null;
-      violation_tags: string[] | null;
-      violation_details: string | null;
-      attachments: Attachment[] | null;
-    };
-
     const [{ data: app, error: e1 }, { data: snap, error: e2 }] = await Promise.all([
       supabase
         .from("applications")
-        .select(
-          "id, student_name, student_id, submitted_date, status, program, institution, study_period, status_updated_date"
-        )
+        .select("id, student_name, student_id, submitted_date, status, program, institution, study_period, status_updated_date")
         .eq("id", id)
         .maybeSingle(),
-      supabase.from("snapshots").select("*").eq("id", id).maybeSingle(),
+      supabase
+        .from("snapshots")
+        .select("*")  // Gets form_data, form_data_history, and admin fields
+        .eq("id", id)
+        .maybeSingle(),
     ]);
 
     if (!e1 && app) {
       const a = app as AppRow;
-      const s = (snap || {}) as SnapRow;
+      const s = snap || {};
 
       const summary: AppSummary = {
         id: a.id,
@@ -223,7 +217,7 @@ export async function loadSnapshot(id: string): Promise<Snapshot | null> {
       const snapOut: Snapshot = {
         summary,
         formData: s.form_data ?? null,
-        assignee: s.assignee ?? "",
+        assignee: s.assigned_admin ?? "",
         violationTags: Array.isArray(s.violation_tags) ? s.violation_tags : [],
         violationDetails: s.violation_details ?? "",
         attachments: Array.isArray(s.attachments) ? s.attachments : [],
@@ -247,7 +241,7 @@ export async function saveSnapshotMerge(r: Row, formData?: any): Promise<void> {
   const now = new Date().toISOString();
 
   if (isSupabaseReady() && supabase) {
-    // — This is where we connect to Supabase to upsert —
+     // — This is where we connect to Supabase to upsert —
     const summaryPayload = {
       id: r.id,
       student_name: r.studentName,
@@ -260,22 +254,52 @@ export async function saveSnapshotMerge(r: Row, formData?: any): Promise<void> {
       status_updated_date: now,
     };
 
-    const snapPayload = {
-      id: r.id,
-      form_data: formData ?? null,
-      assignee: r.assignee ?? null,
-      violation_tags: r.violationTags ?? [],
-      violation_details: r.violationDetails ?? "",
-      attachments: r.attachments ?? [],
-    };
+    // Update snapshots (form data + admin workflow)
+    if (formData) {
+      const { data: currentSnap } = await supabase
+        .from("snapshots")
+        .select("form_data, form_data_history")
+        .eq("id", r.id)
+        .single();
 
-    const [{ error: e1 }, { error: e2 }] = await Promise.all([
-      supabase.from("applications").upsert(summaryPayload),
-      supabase.from("snapshots").upsert(snapPayload),
-    ]);
+      if (currentSnap) {
+        const snapPayload = {
+          id: r.id,
+          form_data: formData,
+          form_data_history: [
+            ...(currentSnap.form_data_history || []),
+            {
+              data: currentSnap.form_data,
+              timestamp: now,
+              modified_by: "admin"
+            }
+          ],
+          last_modified_at: now,
+          last_modified_by: "admin",
 
-    if (!e1 && !e2) return;
-    // fall through to local if errors
+          // Admin workflow fields
+          assigned_admin: r.assignee ?? null,
+          violation_tags: r.violationTags ?? [],
+          violation_details: r.violationDetails ?? "",
+          attachments: r.attachments ?? [],
+        };
+
+        await supabase.from("snapshots").upsert(snapPayload);
+      }
+    } else {
+      const snapPayload = {
+        id: r.id,
+        assigned_admin: r.assignee ?? null,
+        violation_tags: r.violationTags ?? [],
+        violation_details: r.violationDetails ?? "",
+        attachments: r.attachments ?? [],
+      };
+
+      await supabase.from("snapshots").update(snapPayload).eq("id", r.id);
+    }
+
+    await supabase.from("applications").upsert(summaryPayload);
+    return;
   }
 
   // — Local fallback —
@@ -299,10 +323,10 @@ export async function saveSnapshotMerge(r: Row, formData?: any): Promise<void> {
     violationTags: Array.isArray(r.violationTags) ? r.violationTags : existing.violationTags ?? [],
     violationDetails: r.violationDetails ?? existing.violationDetails ?? "",
     attachments: Array.isArray(r.attachments)
-      ? r.attachments
-      : Array.isArray(existing.attachments)
-      ? existing.attachments
-      : [],
+    ? r.attachments
+    : Array.isArray(existing.attachments)
+    ? existing.attachments
+     : [],
   };
   localStorage.setItem(SNAP_KEY(r.id), JSON.stringify(next));
 }
@@ -327,10 +351,53 @@ export async function saveApplicationsList(summaries: AppSummary[]): Promise<voi
     // fall through to local on error
   }
 
-  // — Local fallback —
+    // — Local fallback —
   localStorage.setItem("applications", JSON.stringify(summaries));
   if (summaries[0]) {
     localStorage.setItem("currentApplication", JSON.stringify(summaries[0]));
+  }
+}
+
+/** Soft delete (Doesn't actually delete but marks it as 'deleted' for legal issues (must keep records for X years))*/
+export async function deleteApplication(
+  appId: string, 
+  adminName: string = "admin",
+  reason?: string
+): Promise<void> {
+  if (isSupabaseReady() && supabase) {
+    const { error } = await supabase
+      .from("applications")
+      .update({
+        deleted_at: new Date().toISOString(),
+        deleted_by: adminName,
+        deletion_reason: reason,
+        status: 'deleted'
+      })
+      .eq("id", appId);
+
+    if (!error) return;
+  }
+
+  // Local fallback
+  try {
+    const raw = localStorage.getItem("applications");
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) {
+        const filtered = arr.filter((a: any) => a.id !== appId);
+        localStorage.setItem("applications", JSON.stringify(filtered));
+      }
+    }
+    localStorage.removeItem(SNAP_KEY(appId));
+    const currentRaw = localStorage.getItem("currentApplication");
+    if (currentRaw) {
+      const current = JSON.parse(currentRaw);
+      if (current?.id === appId) {
+        localStorage.removeItem("currentApplication");
+      }
+    }
+  } catch (e) {
+    console.error("Error deleting application:", e);
   }
 }
 
@@ -396,8 +463,8 @@ export async function downloadAttachmentFromStorage(path: string): Promise<Blob 
   if (!(isSupabaseReady() && supabase)) return null;
   // connect to Supabase Storage to create a signed URL 
   const { data: signed, error } = await supabase.storage
-    .from("attachments")
-    .createSignedUrl(path, 60);
+  .from("attachments")
+  .createSignedUrl(path, 60);
   if (error || !signed?.signedUrl) return null;
   const resp = await fetch(signed.signedUrl);
   if (!resp.ok) return null;
