@@ -8,8 +8,6 @@
 // - Use brand colors located in tailwind.config.js; reference StudentInfoStep.tsx
 // - Add to Admin Dashboard page (pages/admin/index.tsx)
 
-import * as React from "react";
-
 type AppStatus = "ACCEPTED" | "REJECTED" | "NEEDS MANUAL REVIEW" | "<APP STATUS>";
 interface ApplicationRow { id: string; status: AppStatus; }
 

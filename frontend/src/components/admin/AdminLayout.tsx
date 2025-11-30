@@ -1,6 +1,5 @@
 // src/components/admin/AdminLayout.tsx
 import Head from "next/head";
-import React from "react";
 
 type Props = {
   title: string;

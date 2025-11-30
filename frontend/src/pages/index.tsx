@@ -22,11 +22,11 @@ import { OsapInfoStep } from "@/components/bswd/steps/OsapInfoStep";
 import { DisabilityInfoStep } from "@/components/bswd/steps/DisabilityInfoStep";
 import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
 import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
-import { StudentInfoSchema } from "@/schemas/StudentInfoSchema";
-import { saveStudentInfo } from "@/lib/database";
-import { useTranslation } from "@/lib/i18n";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { saveSubmission } from "@/lib/database";
+import { saveSnapshotMerge, saveApplicationsList } from "@/lib/adminStore";
 
+// Store all form data in a single state object
+// Initial values are set to empty strings, zeros, or false depending on field type
 export default function BSWDApplicationPage() {
   const { t, isLoaded } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
@@ -49,8 +49,7 @@ export default function BSWDApplicationPage() {
     province: "",
     postalCode: "",
     country: "Canada",
-    hasOsapApplication: null,
-
+    hasOsapApplication: false,
     institution: "",
     institutionType: "",
     program: "",
@@ -58,7 +57,7 @@ export default function BSWDApplicationPage() {
     studyPeriodStart: "",
     studyPeriodEnd: "",
     studyType: "",
-    submittedDisabilityElsewhere: "no",
+    submittedDisabilityElsewhere: false,
     previousInstitution: "",
 
     osapApplication: "full-time",
@@ -128,24 +127,26 @@ export default function BSWDApplicationPage() {
       case 1:
         return Boolean(
           formData.studentId &&
-            formData.studentId.length >= 7 &&
-            formData.firstName &&
-            formData.lastName &&
-            formData.email &&
-            formData.dateOfBirth &&
-            formData.oen.length === 9 &&
-            formData.sin.replace(/\D/g, "").length === 9 &&
-            formData.address &&
-            formData.city &&
-            formData.province &&
-            formData.postalCode &&
-            formData.country &&
-            formData.hasOsapApplication !== null &&
-            formData.osapApplicationStartDate
+          formData.studentId.length >= 7 &&
+          formData.studentId.length <= 8 &&
+          formData.firstName &&
+          formData.lastName &&
+          formData.email &&
+          formData.dateOfBirth &&
+          formData.oen.length === 9 &&
+          formData.sin.replace(/\D/g, "").length === 9 &&
+          formData.address &&
+          formData.city &&
+          formData.province &&
+          formData.postalCode &&
+          formData.postalCode.replace(/\s/g, "").length === 6 && 
+          formData.country &&
+          formData.hasOsapApplication !== null
         );
 
       case 2: {
-        if (formData.submittedDisabilityElsewhere === "yes") {
+        if (formData.submittedDisabilityElsewhere === true) {
+          formData.previousInstitution;
           return Boolean(
             formData.institution &&
               formData.institutionType &&
@@ -219,70 +220,14 @@ export default function BSWDApplicationPage() {
       if (currentStep === maxStep) {
         setMaxStep((m) => m + 1);
       }
+    } else {
+      await handleSubmit();
     }
   };
 
   const handlePrevious = () => {
     if (currentStep > 1) {
       setCurrentStep((prev) => prev - 1);
-    }
-  };
-
-  const handleStudentSubmit = async (): Promise<boolean> => {
-    try {
-      const [dayStr, monthStr, yearStr] = (formData.dateOfBirth || "").split(
-        "/"
-      );
-      const day = Number(dayStr);
-      const month = Number(monthStr);
-      const year = Number(yearStr);
-
-      if (!day || !month || !year) {
-        setError("Invalid date of birth format. Use DD/MM/YYYY.");
-        return false;
-      }
-
-      const birthDate = new Date(year, month - 1, day);
-      const sinDigits = formData.sin.replace(/\D/g, "");
-      const phoneDigits = formData.phone.replace(/\D/g, "");
-
-      const studentInfoData = {
-        studentId: formData.studentId.trim(),
-        oen: formData.oen,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        dateOfBirth: birthDate,
-        sin: sinDigits,
-      };
-
-      const parsed = StudentInfoSchema.safeParse(studentInfoData);
-      if (!parsed.success) {
-        console.error("Validation Error:", parsed.error);
-        setError("Please review your Student Info. Some fields are invalid.");
-        return false;
-      }
-
-      await saveStudentInfo({
-        ...parsed.data,
-        email: formData.email,
-        phone: phoneDigits,
-        address: formData.address,
-        city: formData.city,
-        province: formData.province,
-        postalCode: formData.postalCode,
-        country: formData.country,
-        hasOsapApplication: formData.hasOsapApplication,
-      });
-
-      return true;
-    } catch (e: any) {
-      console.error("Save error:", e);
-      setError(
-        e?.message
-          ? String(e.message)
-          : "Unexpected error while saving student info."
-      );
-      return false;
     }
   };
 
@@ -293,17 +238,21 @@ export default function BSWDApplicationPage() {
     setError(null);
 
     try {
-      const ok = await handleStudentSubmit();
-      if (!ok) return;
+      const result = await saveSubmission(formData);
 
-      const now = new Date();
+      // Capture the exact submission time
+      const currentDateTime = new Date();
+
+      // Save form data to localStorage for the thank you page
       const applicationData = {
-        id: `APP-${now.getFullYear()}-${Math.floor(Math.random() * 1000000)
+        id: `APP-${currentDateTime.getFullYear()}-${Math.floor(
+          Math.random() * 1000000
+        )
           .toString()
           .padStart(6, "0")}`,
         studentName: `${formData.firstName} ${formData.lastName}`,
         studentId: formData.studentId,
-        submittedDate: now.toISOString(),
+        submittedDate: currentDateTime.toISOString(),
         status: "submitted" as const,
         program: formData.program,
         institution: formData.institution,
@@ -311,33 +260,30 @@ export default function BSWDApplicationPage() {
           formData.studyPeriodStart && formData.studyPeriodEnd
             ? `${formData.studyPeriodStart} - ${formData.studyPeriodEnd}`
             : "Not specified",
-        statusUpdatedDate: now.toISOString(),
+        statusUpdatedDate: currentDateTime.toISOString(),
       };
 
-      localStorage.setItem(
-        `applicationDetail:${applicationData.id}`,
-        JSON.stringify({ summary: applicationData, formData })
-      );
+      await saveSnapshotMerge(applicationData as any, formData);
+      // Load existing applications
+      const existingRaw = localStorage.getItem("applications");
+      const existing = existingRaw ? JSON.parse(existingRaw) : [];
+
+      // Append and save
+      await saveApplicationsList([...existing, applicationData]);
 
       localStorage.setItem(
         "currentApplication",
         JSON.stringify(applicationData)
       );
 
-      const existingRaw = localStorage.getItem("applications");
-      const parsedExisting =
-        existingRaw && Array.isArray(JSON.parse(existingRaw))
-          ? (JSON.parse(existingRaw) as any[])
-          : [];
-      const next = [applicationData, ...parsedExisting];
-      localStorage.setItem("applications", JSON.stringify(next));
-
+      // Redirect to status page
       window.location.href = "/thank-you";
-    } catch (e) {
-      console.error(e);
-      setError("Submission failed. Please try again.");
-    } finally {
+    } catch (err) {
+      // Handle submission errors
+      const errorMessage = err instanceof Error ? err.message : "Failed to submit application. Please try again.";
+      setError(errorMessage);
       setSaving(false);
+      console.error("Submission error:", err);
     }
   };
 
@@ -418,12 +364,10 @@ export default function BSWDApplicationPage() {
               className="flex flex-col items-center"
             >
               <span
-                className={`flex rounded-full  justify-center items-center h-14 w-14 transition-colors font-medium ${
-                  currentStep === index + 1
-                    ? "bg-cyan-800 text-white"
-                    : "bg-gray-100 text-black"
-                } ${
-                  index + 1 > maxStep
+                className={`flex rounded-full  justify-center items-center h-14 w-14 transition-colors font-medium ${currentStep === index + 1
+                  ? "bg-cyan-800 text-white"
+                  : "bg-gray-100 text-black"
+                  } ${index + 1 > maxStep
                     ? "opacity-40 cursor-not-allowed"
                     : "hover:bg-cyan-700 hover:text-white"
                 }`}
