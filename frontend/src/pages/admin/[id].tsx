@@ -10,7 +10,6 @@ import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ApplicationAnalysisCard } from "@/components/admin/ApplicationAnalysisCard";
 import ApplicationChatbot from "@/components/admin/AdminChatbot";
-import { Play, MessageCircle } from "lucide-react";
 
 // using app's existing types/steps
 import { FormData } from "@/types/bswd";
@@ -480,7 +479,7 @@ export default function AdminApplicationDetailPage() {
                 disabled={analyzing}
                 className="px-4 py-2 text-sm rounded-xl bg-brand-dark-blue text-white hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
               >
-                <Play className="w-4 h-4" />
+                <i className="fa-solid fa-play"></i>
                 {analyzing ? "Analyzing..." : "Run AI Analysis"}
               </button>
             </div>
@@ -701,7 +700,7 @@ export default function AdminApplicationDetailPage() {
               className="fixed bottom-6 right-6 w-16 h-16 bg-red-800 hover:bg-red-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 z-40"
               title="Open Admin Assistant"
             >
-              <MessageCircle className="w-7 h-7" />
+              <i className="fa-solid fa-comment text-white text-3xl"></i>
             </button>
           )}
 
