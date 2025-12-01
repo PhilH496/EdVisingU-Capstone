@@ -30,7 +30,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 // Store all form data in a single state object
 // Initial values are set to empty strings, zeros, or false depending on field type
 export default function BSWDApplicationPage() {
-  const { t, isLoaded } = useTranslation();
+  const { translate, isLoaded } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [maxStep, setMaxStep] = useState(1);
   const [saving, setSaving] = useState(false);
@@ -97,27 +97,27 @@ export default function BSWDApplicationPage() {
 
   const stepsInfo = [
     {
-      stepName: t('steps.studentInfo'),
+      stepName: translate('steps.studentInfo'),
       stepIconFaClass: "fa-solid fa-user",
     },
     {
-      stepName: t('steps.programInfo'),
+      stepName: translate('steps.programInfo'),
       stepIconFaClass: "fa-solid fa-user-graduate",
     },
     {
-      stepName: t('steps.osapInfo'),
+      stepName: translate('steps.osapInfo'),
       stepIconFaClass: "fa-solid fa-money-check-dollar",
     },
     {
-      stepName: t('steps.disabilityInfo'),
+      stepName: translate('steps.disabilityInfo'),
       stepIconFaClass: "fa-solid fa-wheelchair",
     },
     {
-      stepName: t('steps.serviceEquipment'),
+      stepName: translate('steps.serviceEquipment'),
       stepIconFaClass: "fa-solid fa-wrench",
     },
     {
-      stepName: t('steps.review'),
+      stepName: translate('steps.review'),
       stepIconFaClass: "fa-solid fa-receipt",
     },
   ];
@@ -405,8 +405,8 @@ export default function BSWDApplicationPage() {
 
   return (
     <FormLayout
-      title={t('title')}
-      description={t('description')}
+      title={translate('title')}
+      description={translate('description')}
     >
       <LanguageSwitcher />
       {/* admin button */}
@@ -415,7 +415,7 @@ export default function BSWDApplicationPage() {
           href="/admin"
           className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
         >
-          {t('adminButton')}
+          {translate('adminButton')}
         </Link>
       </div>
 
