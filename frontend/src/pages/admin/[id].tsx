@@ -10,7 +10,6 @@ import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ApplicationAnalysisCard } from "@/components/admin/ApplicationAnalysisCard";
 import ApplicationChatbot from "@/components/admin/AdminChatbot";
-import { Play, MessageCircle } from "lucide-react";
 
 // using app's existing types/steps
 import { FormData } from "@/types/bswd";
@@ -30,56 +29,46 @@ import {
   saveSnapshotMerge as storeSaveSnapshotMerge,
   saveApplicationsList as storeSaveApplicationsList,
 } from "@/lib/adminStore";
+import { supabase } from "@/lib/supabase";
 
-// pass through readOnly while keeping step prop types unchanged 
 const StudentInfoStepShim = ({
   formData,
   setFormData,
-  readOnly,
 }: {
   formData: FormData;
   setFormData: any;
-  readOnly?: any;
 }) => <StudentInfoStep formData={formData} setFormData={setFormData} />;
 
 const ProgramInfoStepShim = ({
   formData,
   setFormData,
-  readOnly,
 }: {
   formData: FormData;
   setFormData: any;
-  readOnly?: any;
 }) => <ProgramInfoStep formData={formData} setFormData={setFormData} />;
 
 const OsapInfoStepShim = ({
   formData,
   setFormData,
-  readOnly,
 }: {
   formData: FormData;
   setFormData: any;
-  readOnly?: any;
 }) => <OsapInfoStep formData={formData} setFormData={setFormData} />;
 
 const DisabilityInfoStepShim = ({
   formData,
   setFormData,
-  readOnly,
 }: {
   formData: FormData;
   setFormData: any;
-  readOnly?: any;
 }) => <DisabilityInfoStep formData={formData} setFormData={setFormData} />;
 
 const ServiceAndEquipShim = ({
   formData,
   setFormData,
-  readOnly,
 }: {
   formData: FormData;
   setFormData: any;
-  readOnly?: any;
 }) => <ServiceAndEquip formData={formData} setFormData={setFormData} />;
 
 const ReviewAndSubmitShim = ({
@@ -87,13 +76,11 @@ const ReviewAndSubmitShim = ({
   setFormData,
   isConfirmed,
   setIsConfirmed,
-  readOnly,
 }: {
   formData: FormData;
   setFormData: any;
   isConfirmed: boolean;
   setIsConfirmed: React.Dispatch<React.SetStateAction<boolean>>;
-  readOnly?: any;
 }) => (
   <ReviewAndSubmit
     formData={formData}
@@ -306,24 +293,48 @@ export default function AdminApplicationDetailPage() {
     if (!summary) return;
 
     const nowIso = new Date().toISOString();
-    const nextSummary: Summary = {
-      ...summary,
+
+    const updatedRow = {
+      id: summary.id,
       studentName: `${fd.firstName} ${fd.lastName}`.trim(),
+      studentId: summary.studentId,
+      submittedDate: summary.submittedDate,
+      status: summary.status,
       program: fd.program,
       institution: fd.institution,
-      studyPeriod:
-        fd.studyPeriodStart && fd.studyPeriodEnd
-          ? `${fd.studyPeriodStart} - ${fd.studyPeriodEnd}`
-          : "Not specified",
+      studyPeriod: `${fd.studyPeriodStart} - ${fd.studyPeriodEnd}`,
       statusUpdatedDate: nowIso,
+      
+      // Admin workflow fields
+      assignee: data?.assignee ?? "",
+      violationTags: data?.violationTags ?? [],
+      violationDetails: data?.violationDetails ?? "",
+      attachments: data?.attachments ?? [],
     };
 
-    await storeSaveSnapshotMerge(
-      {
-        ...nextSummary,
-      } as any,
-      fd
-    );
+
+    // Triggers status recalculation and saves to Supabase
+    await storeSaveSnapshotMerge(updatedRow as any, fd);
+
+    // Fetch the recalculated status from Supabase
+    const { data: updatedApp} = await supabase
+      .from("applications")
+      .select("status, status_updated_date")
+      .eq("id", summary.id)
+      .single();
+
+    // Create updated summary
+    const nextSummary: Summary = {
+      id: updatedRow.id,
+      studentName: updatedRow.studentName,
+      studentId: updatedRow.studentId,
+      submittedDate: updatedRow.submittedDate,
+      status: updatedApp?.status || updatedRow.status, 
+      program: updatedRow.program,
+      institution: updatedRow.institution,
+      studyPeriod: updatedRow.studyPeriod,
+      statusUpdatedDate: updatedApp?.status_updated_date || nowIso,
+    };
 
     await storeSaveApplicationsList([nextSummary]);
 
@@ -455,7 +466,7 @@ export default function AdminApplicationDetailPage() {
                 disabled={analyzing}
                 className="px-4 py-2 text-sm rounded-xl bg-brand-dark-blue text-white hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
               >
-                <Play className="w-4 h-4" />
+                <i className="fa-solid fa-play"></i>
                 {analyzing ? "Analyzing..." : "Run AI Analysis"}
               </button>
             </div>
@@ -617,34 +628,28 @@ export default function AdminApplicationDetailPage() {
                             <StudentInfoStepShim
                               formData={editForm}
                               setFormData={setEditForm as any}
-                              readOnly={false as any}
                             />
                             <ProgramInfoStepShim
                               formData={editForm}
                               setFormData={setEditForm as any}
-                              readOnly={false as any}
                             />
                             <OsapInfoStepShim
                               formData={editForm}
                               setFormData={setEditForm as any}
-                              readOnly={false as any}
                             />
                             <DisabilityInfoStepShim
                               formData={editForm}
                               setFormData={setEditForm as any}
-                              readOnly={false as any}
                             />
                             <ServiceAndEquipShim
                               formData={editForm}
                               setFormData={setEditForm as any}
-                              readOnly={false as any}
                             />
                             <ReviewAndSubmitShim
                               formData={editForm}
                               setFormData={setEditForm as any}
                               isConfirmed={isConfirmed}
                               setIsConfirmed={setIsConfirmed}
-                              readOnly={false as any}
                             />
                           </>
                         ) : (
@@ -676,7 +681,7 @@ export default function AdminApplicationDetailPage() {
               className="fixed bottom-6 right-6 w-16 h-16 bg-red-800 hover:bg-red-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 z-40"
               title="Open Admin Assistant"
             >
-              <MessageCircle className="w-7 h-7" />
+              <i className="fa-solid fa-comment text-white text-3xl"></i>
             </button>
           )}
 

@@ -4,7 +4,6 @@
  */
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, Loader2, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 interface Message {
@@ -163,7 +162,7 @@ export function ApplicationChatbot({
           <div className="flex items-center gap-3">
             {mode === "embedded" && (
               <div className="w-10 h-10 rounded-full bg-cyan-800 flex items-center justify-center">
-                <Bot className="w-6 h-6 text-white" />
+                <i className="fa-solid fa-robot text-white text-xl"></i>
               </div>
             )}
             <div>
@@ -178,7 +177,7 @@ export function ApplicationChatbot({
 
           {isFloating && onClose && (
             <button onClick={onClose} className="p-1 text-white hover:text-gray-200 rounded-full">
-              <X className="w-6 h-6" />
+              <i className="fa-solid fa-xmark text-xl"></i>
             </button>
           )}
         </div>
@@ -219,7 +218,7 @@ export function ApplicationChatbot({
         {loading && (
           <div className="flex justify-start">
             <div className="bg-white rounded-lg px-4 py-3 shadow-sm">
-              <Loader2 className={`w-5 h-5 animate-spin ${isFloating ? "text-red-800" : "text-cyan-800"}`} />
+              <i className={`fa-solid fa-spinner fa-spin ${isFloating ? "text-red-800" : "text-cyan-800"}`}></i>
             </div>
           </div>
         )}
@@ -247,7 +246,11 @@ export function ApplicationChatbot({
               input.trim() && !loading ? `${cls.sendBtn} text-white` : "bg-gray-200 text-gray-400"
             }`}
           >
-            {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Send className="w-6 h-6" />}
+            {loading ? (
+              <i className="fa-solid fa-spinner fa-spin text-xl"></i>
+            ) : (
+              <i className="fa-solid fa-paper-plane text-xl"></i>
+            )}
           </button>
         </div>
       </div>
