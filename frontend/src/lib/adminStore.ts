@@ -186,7 +186,7 @@ export async function loadSnapshot(id: string): Promise<Snapshot | null> {
       study_period: string;
       status_updated_date: string;
     };
-    const [{ data: app, error: e1 }, { data: snap, error: e2 }] = await Promise.all([
+    const [{ data: app, error: e1 }, { data: snap}] = await Promise.all([
       supabase
         .from("applications")
         .select("id, student_name, student_id, submitted_date, status, program, institution, study_period, status_updated_date")
@@ -252,7 +252,7 @@ async function recalculateStatus(formData: any): Promise<string | null> {
       requested_items: formData.requestedItems || []
     };
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/analysis/score`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/analysis/score`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
@@ -263,10 +263,14 @@ async function recalculateStatus(formData: any): Promise<string | null> {
       const score = data.confidence_score;
 
       // Convert score to status from deterministic func calculations
-      let newStatus;
-      if (score >= 90) newStatus = "Approved";
-      else if (score >= 75) newStatus = "In Review";
-      else newStatus = "Rejected";
+      let newStatus: string;
+      if (score >= 90) {
+        newStatus = "Approved";
+      } else if (score >= 75) {
+        newStatus = "In Review";
+      } else {
+        newStatus = "Rejected";
+      }
 
       return newStatus;
     }

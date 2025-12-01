@@ -31,55 +31,44 @@ import {
 } from "@/lib/adminStore";
 import { supabase } from "@/lib/supabase";
 
-// pass through readOnly while keeping step prop types unchanged 
 const StudentInfoStepShim = ({
   formData,
   setFormData,
-  readOnly,
 }: {
   formData: FormData;
   setFormData: any;
-  readOnly?: any;
 }) => <StudentInfoStep formData={formData} setFormData={setFormData} />;
 
 const ProgramInfoStepShim = ({
   formData,
   setFormData,
-  readOnly,
 }: {
   formData: FormData;
   setFormData: any;
-  readOnly?: any;
 }) => <ProgramInfoStep formData={formData} setFormData={setFormData} />;
 
 const OsapInfoStepShim = ({
   formData,
   setFormData,
-  readOnly,
 }: {
   formData: FormData;
   setFormData: any;
-  readOnly?: any;
 }) => <OsapInfoStep formData={formData} setFormData={setFormData} />;
 
 const DisabilityInfoStepShim = ({
   formData,
   setFormData,
-  readOnly,
 }: {
   formData: FormData;
   setFormData: any;
-  readOnly?: any;
 }) => <DisabilityInfoStep formData={formData} setFormData={setFormData} />;
 
 const ServiceAndEquipShim = ({
   formData,
   setFormData,
-  readOnly,
 }: {
   formData: FormData;
   setFormData: any;
-  readOnly?: any;
 }) => <ServiceAndEquip formData={formData} setFormData={setFormData} />;
 
 const ReviewAndSubmitShim = ({
@@ -87,13 +76,11 @@ const ReviewAndSubmitShim = ({
   setFormData,
   isConfirmed,
   setIsConfirmed,
-  readOnly,
 }: {
   formData: FormData;
   setFormData: any;
   isConfirmed: boolean;
   setIsConfirmed: React.Dispatch<React.SetStateAction<boolean>>;
-  readOnly?: any;
 }) => (
   <ReviewAndSubmit
     formData={formData}
@@ -330,7 +317,7 @@ export default function AdminApplicationDetailPage() {
     await storeSaveSnapshotMerge(updatedRow as any, fd);
 
     // Fetch the recalculated status from Supabase
-    const { data: updatedApp, error: fetchError } = await supabase
+    const { data: updatedApp} = await supabase
       .from("applications")
       .select("status, status_updated_date")
       .eq("id", summary.id)
@@ -641,34 +628,28 @@ export default function AdminApplicationDetailPage() {
                             <StudentInfoStepShim
                               formData={editForm}
                               setFormData={setEditForm as any}
-                              readOnly={false as any}
                             />
                             <ProgramInfoStepShim
                               formData={editForm}
                               setFormData={setEditForm as any}
-                              readOnly={false as any}
                             />
                             <OsapInfoStepShim
                               formData={editForm}
                               setFormData={setEditForm as any}
-                              readOnly={false as any}
                             />
                             <DisabilityInfoStepShim
                               formData={editForm}
                               setFormData={setEditForm as any}
-                              readOnly={false as any}
                             />
                             <ServiceAndEquipShim
                               formData={editForm}
                               setFormData={setEditForm as any}
-                              readOnly={false as any}
                             />
                             <ReviewAndSubmitShim
                               formData={editForm}
                               setFormData={setEditForm as any}
                               isConfirmed={isConfirmed}
                               setIsConfirmed={setIsConfirmed}
-                              readOnly={false as any}
                             />
                           </>
                         ) : (

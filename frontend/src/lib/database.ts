@@ -48,8 +48,8 @@ const calculateInitialStatus = async (formData: FormData): Promise<string> => {
     console.error(error);
   }
 
-  // Fallback to 'Submitted' if API call fails
-  return "Submitted";
+  // Fallback to 'Failed' if API call fails
+  return "Failed";
 };
 
 /**
