@@ -64,7 +64,7 @@ BSWD Services Team
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'BSWD Services <onboarding@resend.dev>',
+        from: 'BSWD Services <noreply@bswd-application.com>',
         to: [email],
         subject: emailSubject,
         html: `<div style="font-family: Arial, sans-serif; padding: 20px;">

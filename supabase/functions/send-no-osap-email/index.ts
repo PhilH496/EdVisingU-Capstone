@@ -69,6 +69,19 @@ BSWD Services Team
 Issue ID: ${issueId}
     `.trim()
 
+    // Check if API key exists
+    if (!RESEND_API_KEY) {
+      console.error('RESEND_API_KEY is not set')
+      return new Response(
+        JSON.stringify({ error: 'Email service not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    console.log('Sending email via Resend API...')
+    console.log('To:', email)
+    console.log('From: BSWD Services <onboarding@resend.dev>')
+
     // Send email via Resend
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -77,7 +90,7 @@ Issue ID: ${issueId}
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'BSWD Services <onboarding@resend.dev>',
+        from: 'BSWD Services <noreply@bswd-application.com>',
         to: [email],
         subject: emailSubject,
         html: `<div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px;">
@@ -115,6 +128,9 @@ Issue ID: ${issueId}
     })
 
     const resendData = await res.json()
+    
+    console.log('Resend API response status:', res.status)
+    console.log('Resend API response data:', JSON.stringify(resendData, null, 2))
 
     if (res.ok) {
       console.log(`✓ No OSAP email sent successfully to ${email}`, resendData)
@@ -131,11 +147,14 @@ Issue ID: ${issueId}
         }
       )
     } else {
-      console.error('Resend API error:', resendData)
+      console.error('❌ Resend API error:', resendData)
+      console.error('Response status:', res.status)
       return new Response(
         JSON.stringify({
           error: 'Failed to send email via Resend',
           details: resendData,
+          status: res.status,
+          message: resendData.message || resendData.error || 'Unknown error from Resend API'
         }),
         {
           status: res.status,
