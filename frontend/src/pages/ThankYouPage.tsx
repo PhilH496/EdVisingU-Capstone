@@ -7,23 +7,31 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { supabase, isSupabaseReady } from "@/lib/supabaseClient";
 
 export default function ThankYouPage() {
   const [app, setApp] = useState<{ id: string; studentName: string } | null>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const rawData = localStorage.getItem("currentApplication");
-      if (rawData) {
-        try {
-          const data = JSON.parse(rawData);
-          setApp({ id: data.id, studentName: data.studentName });
-        } catch (err){
-          console.error("Error parsing application data: ", err);
-        }
+    const load = async () => {
+      if (!isSupabaseReady() || !supabase) return;
+
+      const params = new URLSearchParams(window.location.search);
+      const appId = params.get("appId");
+
+      const { data, error } = await supabase
+        .from("applications")
+        .select("id, student_name")
+        .eq("id", appId)
+        .single();
+
+      if (!error && data) {
+        setApp({ id: data.id, studentName: data.student_name });
       }
-    }
-  });
+    };
+
+    load();
+}, []);
 
   return (
     <div

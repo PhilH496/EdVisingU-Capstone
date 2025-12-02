@@ -9,7 +9,6 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 interface Message {
@@ -131,7 +130,7 @@ export function ChatbotWidget() {
               className="text-white hover:text-gray-200 transition-colors"
               aria-label="Close chat"
             >
-              <X className="w-6 h-6" />
+              <i className="fa-solid fa-xmark text-xl"></i>
             </button>
           </div>
 
@@ -206,7 +205,7 @@ export function ChatbotWidget() {
                   className="w-10 h-10 object-contain flex-shrink-0"
                 />
                 <div className="bg-white rounded-lg rounded-tl-none px-4 py-3 shadow-sm">
-                  <Loader2 className="w-5 h-5 animate-spin text-[#0066A1]" />
+                  <i className="fa-solid fa-spinner fa-spin text-[#0066A1]"></i>
                 </div>
               </div>
             )}
@@ -247,9 +246,9 @@ export function ChatbotWidget() {
                 aria-label="Send message"
               >
                 {isLoading ? (
-                  <Loader2 className="w-6 h-6 animate-spin" />
+                  <i className="fa-solid fa-spinner fa-spin text-xl"></i>
                 ) : (
-                  <Send className="w-6 h-6" />
+                  <i className="fa-solid fa-paper-plane text-xl"></i>
                 )}
               </button>
             </form>
@@ -263,7 +262,7 @@ export function ChatbotWidget() {
         className="w-16 h-16 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 bg-[#0066A1] hover:bg-[#004f7d] hover:scale-110"
         aria-label="Open chat"
       >
-        <MessageCircle className="w-7 h-7 text-white" />
+        <i className="fa-solid fa-comment text-white text-3xl"></i>
       </button>
 
       {/* Notification Badge */}
