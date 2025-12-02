@@ -31,8 +31,6 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 // Initial values are set to empty strings, zeros, or false depending on field type
 export default function BSWDApplicationPage() {
   const { t, isLoaded } = useTranslation();
-  
-
   const [currentStep, setCurrentStep] = useState(1);
   const [maxStep, setMaxStep] = useState(1);
   const [saving, setSaving] = useState(false);
