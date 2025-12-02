@@ -12,7 +12,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { ChevronDownIcon } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
-import { FormData, FunctionalLimitationOption } from "@/types/bswd";
+import { FormData } from "@/types/bswd";
 import { sendPsychoEdReferral } from "@/lib/notify";
 
 interface DisabilityInfoStepProps {
