@@ -194,7 +194,7 @@ export async function loadSnapshot(id: string): Promise<Snapshot | null> {
       attachments: Attachment[] | null;
     };
 
-    const [{ data: app, error: e1 }, { data: snap, error: e2 }] = await Promise.all([
+    const [{ data: app, error: e1 }, { data: snap }] = await Promise.all([
       supabase
         .from("applications")
         .select(

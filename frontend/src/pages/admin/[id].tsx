@@ -35,7 +35,6 @@ import {
 const StudentInfoStepShim = ({
   formData,
   setFormData,
-  readOnly,
 }: {
   formData: FormData;
   setFormData: any;
@@ -45,7 +44,6 @@ const StudentInfoStepShim = ({
 const ProgramInfoStepShim = ({
   formData,
   setFormData,
-  readOnly,
 }: {
   formData: FormData;
   setFormData: any;
@@ -55,7 +53,6 @@ const ProgramInfoStepShim = ({
 const OsapInfoStepShim = ({
   formData,
   setFormData,
-  readOnly,
 }: {
   formData: FormData;
   setFormData: any;
@@ -65,7 +62,6 @@ const OsapInfoStepShim = ({
 const DisabilityInfoStepShim = ({
   formData,
   setFormData,
-  readOnly,
 }: {
   formData: FormData;
   setFormData: any;
@@ -75,7 +71,6 @@ const DisabilityInfoStepShim = ({
 const ServiceAndEquipShim = ({
   formData,
   setFormData,
-  readOnly,
 }: {
   formData: FormData;
   setFormData: any;
@@ -87,7 +82,6 @@ const ReviewAndSubmitShim = ({
   setFormData,
   isConfirmed,
   setIsConfirmed,
-  readOnly,
 }: {
   formData: FormData;
   setFormData: any;

@@ -1,4 +1,4 @@
-import { FormData, FunctionalLimitationOption } from "@/types/bswd";
+import { FormData } from "@/types/bswd";
 import { FileText, User, GraduationCap, DollarSign, Heart } from "lucide-react";
 
 interface ReviewAndSubmitProps {
