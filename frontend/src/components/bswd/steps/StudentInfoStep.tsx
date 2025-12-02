@@ -69,8 +69,13 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       hasOsapApplication: hasOsap,
     }));
     
-    setShowEmailInput(true);
-    setEmailSent(false);
+    if (hasOsap === false) {
+      setShowEmailInput(true);
+      setEmailSent(false);
+    } else {
+      setShowEmailInput(false);
+      setEmailSent(false);
+    }
   };
 
   const handleSendEmail = () => {

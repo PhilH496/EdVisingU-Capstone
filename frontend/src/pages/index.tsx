@@ -51,7 +51,7 @@ export default function BSWDApplicationPage() {
     province: "",
     postalCode: "",
     country: "Canada",
-    hasOsapApplication: false,
+    hasOsapApplication: undefined,
     institution: "",
     institutionType: "",
     program: "",
@@ -143,7 +143,7 @@ export default function BSWDApplicationPage() {
           formData.postalCode &&
           formData.postalCode.replace(/\s/g, "").length === 6 && 
           formData.country &&
-          formData.hasOsapApplication !== null
+          formData.hasOsapApplication !== undefined
         );
 
       case 2: {
