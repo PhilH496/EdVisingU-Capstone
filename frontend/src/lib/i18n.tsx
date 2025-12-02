@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 type Language = 'en' | 'fr';
 
@@ -9,7 +9,7 @@ interface Messages {
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  translate: (key: string) => string;
   isLoaded: boolean;
 }
 
@@ -25,7 +25,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoaded(false);
       const response = await import(`../../messages/${lang}.json`);
-      setMessages(response.default || response);
+      setMessages(response.default);
       setIsLoaded(true);
     } catch (error) {
       console.error(`Failed to load messages for ${lang}:`, error);
@@ -56,7 +56,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   };
 
   // Translation function with nested key support
-  const t = (key: string): string => {
+  const translate = (key: string): string => {
     const keys = key.split('.');
     let value: any = messages;
     
@@ -72,7 +72,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, isLoaded }}>
+    <LanguageContext.Provider value={{ language, setLanguage, translate, isLoaded }}>
       {children}
     </LanguageContext.Provider>
   );
