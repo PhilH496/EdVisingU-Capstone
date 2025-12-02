@@ -67,15 +67,6 @@ BSWD Services Team
 Issue ID: ${issueId}
     `.trim()
 
-    // Check if API key exists
-    if (!RESEND_API_KEY) {
-      console.error('RESEND_API_KEY is not set')
-      return new Response(
-        JSON.stringify({ error: 'Email service not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
     // Send email via Resend
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -137,14 +128,14 @@ Issue ID: ${issueId}
         }
       )
     } else {
-      console.error('❌ Resend API error:', resendData)
+      console.error('Resend API error:', resendData)
       console.error('Response status:', res.status)
       return new Response(
         JSON.stringify({
           error: 'Failed to send email via Resend',
           details: resendData,
           status: res.status,
-          message: resendData.message || resendData.error || 'Unknown error from Resend API'
+          message: resendData.message || resendData.error
         }),
         {
           status: res.status,
