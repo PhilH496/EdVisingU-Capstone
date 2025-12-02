@@ -1,12 +1,8 @@
-// Step 5: Equipment and services being requested
-// ServiceAndEquip Component Goes Here
-//
-// HELPFUL INFO:
-// - formData: Object containing all form data (see @/types/bswd.ts for available fields)
-// - setFormData: Updates form data using: setFormData(prev => ({ ...prev, fieldName: value }))
-// - Reference StudentInfoStep.tsx for examples
-// - Add validation in index.tsx > isStepComplete() function
-// - Use brand colors located in tailwind.config.js; reference StudentInfoStep.tsx
+/**
+ * Step 5: ServiceAndEquip component
+ *
+ * Fifth step of the BSWD application form that allows student to request services and equipment.
+ */
 
 import { FormData } from "@/types/bswd";
 import { useState } from "react";

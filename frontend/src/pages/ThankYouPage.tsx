@@ -1,7 +1,7 @@
 /**
- * ThankYouPage
- *
- * Displays confirmation after successful submission of the BSWD/CSG-DSE application.
+ * ThankYouPage component
+ * 
+ * Displays confirmation page after successful submission of the BSWD/CSG-DSE application.
  * Shows the generated Application ID and a brief success message.
  */
 
