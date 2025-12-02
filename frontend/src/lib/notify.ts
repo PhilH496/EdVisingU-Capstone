@@ -34,7 +34,7 @@ export async function notifyNoOsap(email: string | undefined | null) {
  * @returns Promise that resolves when email is sent
  */
 export async function sendPsychoEdReferral(
-  email: string | undefined | null,
+  email: string,
   studentName?: string,
   studentId?: string
 ): Promise<{ success: boolean; message: string }> {
@@ -42,7 +42,7 @@ export async function sendPsychoEdReferral(
     // Call Edge Function via Supabase client to send email immediately
     const { data, error } = await supabase.functions.invoke('send-psycho-ed-email', {
       body: {
-        email: email ?? "",
+        email: email,
         studentName: studentName ?? "Student",
         studentId: studentId ?? "",
       },
@@ -52,7 +52,7 @@ export async function sendPsychoEdReferral(
       console.error('Edge Function error:', error);
       return {
         success: false,
-        message: error.message || 'Failed to send referral email',
+        message: error.message,
       };
     }
 
