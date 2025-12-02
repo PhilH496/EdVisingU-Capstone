@@ -67,16 +67,10 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
     setFormData(prev => ({
       ...prev,
       hasOsapApplication: hasOsap,
-      osapApplication: hasOsap ? prev.osapApplication : 'none'
     }));
     
-    if (!hasOsap) {
-      setShowEmailInput(true);
-      setEmailSent(false);
-    } else {
-      setShowEmailInput(false);
-      setNotificationEmail("");
-    }
+    setShowEmailInput(true);
+    setEmailSent(false);
   };
 
   const handleSendEmail = () => {
