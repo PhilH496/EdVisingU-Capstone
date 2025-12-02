@@ -28,7 +28,7 @@ const handler = async (request: Request): Promise<Response> => {
       )
     }
 
-    const { email, studentName, studentId, firstName, lastName } = body
+    const { email, firstName, lastName } = body
 
     if (!email) {
       return new Response(
@@ -38,8 +38,7 @@ const handler = async (request: Request): Promise<Response> => {
     }
 
     console.log(`Sending No OSAP notification email to: ${email}`)
-
-    const fullName = studentName || `${firstName || ''} ${lastName || ''}`.trim() || 'Student'
+    const fullName = `${firstName || ''} ${lastName || ''}`.trim() || 'Student'
     
     // Generate unique Issue ID
     const issueId = `OSAP-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`
@@ -167,7 +166,7 @@ Issue ID: ${issueId}
     return new Response(
       JSON.stringify({
         error: 'Internal server error',
-        message: error instanceof Error ? error.message : String(error),
+        message: String(error)
       }),
       {
         status: 500,
