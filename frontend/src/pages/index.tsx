@@ -382,7 +382,7 @@ export default function BSWDApplicationPage() {
 
   return (
     <FormLayout
-      title={translate('title')}
+      title={t('title')}
       description=""
       headerAction={
         <Link
