@@ -21,7 +21,7 @@ import { ProgramInfoStep } from "@/components/bswd/steps/ProgramInfoStep";
 import { OsapInfoStep } from "@/components/bswd/steps/OsapInfoStep";
 import { DisabilityInfoStep } from "@/components/bswd/steps/DisabilityInfoStep";
 import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
-import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
+import { ReviewAndSubmit } from "@/components/bswd/steps/SubmitStep";
 import { saveSubmission } from "@/lib/database";
 import { saveSnapshotMerge, saveApplicationsList } from "@/lib/adminStore";
 import { useTranslation } from "@/lib/i18n";
@@ -63,7 +63,6 @@ export default function BSWDApplicationPage() {
     previousInstitution: "",
 
     osapApplication: "full-time",
-    osapApplicationStartDate: "",
     restrictionType: "DEFAULT",
     queuedForManualReview: false,
     federalNeed: 0,
@@ -168,6 +167,7 @@ export default function BSWDApplicationPage() {
       }
 
       case 3: {
+        formData.osapOnFileStatus = "APPROVED" // TEMP WILL EVENTUALLY COME BACK AND REMOVE THIS 
         const hasChosenOnFile =
           formData.osapOnFileStatus === "APPROVED" ||
           formData.osapOnFileStatus === "NONE";
@@ -242,7 +242,7 @@ export default function BSWDApplicationPage() {
     try {
       const result = await saveSubmission(formData);
       // Redirect to status page
-      window.location.href = `/thank-you?appId=${result.application_id}`;
+      window.location.href = `/ThankYouPage?appId=${result.application_id}`;
     } catch (err) {
       // Handle submission errors
       const errorMessage =
@@ -381,18 +381,17 @@ export default function BSWDApplicationPage() {
   return (
     <FormLayout
       title={translate('title')}
-      description={translate('description')}
-    >
-      <LanguageSwitcher />
-      {/* admin button */}
-      <div className="mb-3 flex items-center justify-end">
+      description=""
+      headerAction={
         <Link
           href="/admin"
           className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
         >
           {translate('adminButton')}
         </Link>
-      </div>
+      }
+    >
+      <LanguageSwitcher />
 
       <div className="mb-4 p-4 pb-2 py-6 border rounded-md">
         <StepBar />

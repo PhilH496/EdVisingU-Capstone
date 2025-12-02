@@ -44,7 +44,6 @@ export interface FormData {
 
   // OSAP Information
   osapApplication: "full-time" | "part-time" | "none";
-  osapApplicationStartDate: string;
   federalNeed: number;
   provincialNeed: number;
   hasOSAPRestrictions: boolean;

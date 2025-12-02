@@ -15,14 +15,16 @@
  */
 
 import Image from "next/image";
+import { ReactNode } from "react";
 
 interface FormLayoutProps {
-  children: React.ReactNode;
+  children: ReactNode;
   title: string;
   description: string;
+  headerAction: ReactNode;
 }
 
-export function FormLayout({ children, title, description }: FormLayoutProps) {
+export function FormLayout({ children, title, description, headerAction }: FormLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Ontario header bar (black background, left-aligned logo) */}
@@ -43,9 +45,12 @@ export function FormLayout({ children, title, description }: FormLayoutProps) {
       <div className="py-8">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="bg-white rounded-lg shadow p-6">
-            <div className="mb-6 text-left">
-              <h1 className="text-2xl font-bold mb-2">{title}</h1>
-              <p className="text-gray-600">{description}</p>
+            <div className="mb-6 text-left flex justify-between">
+              <div>
+                <h1 className="text-2xl font-bold mb-2">{title}</h1>
+                <p className="text-gray-600">{description}</p>
+              </div>
+              {headerAction && <div className="ml-4">{headerAction}</div>}
             </div>
 
             {/* Form Content */}

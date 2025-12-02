@@ -1,4 +1,3 @@
-// src/components/admin/StatusBadge.tsx
 import React from "react";
 
 type Props = {

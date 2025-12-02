@@ -6,8 +6,6 @@ type StudentInsert = Database["public"]["Tables"]["student"]["Insert"];
 type OsapInfoInsert = Database["public"]["Tables"]["osap_info"]["Insert"];
 type DisabilityInfoInsert = Database["public"]["Tables"]["disability_info"]["Insert"];
 type ProgramInfoInsert = Database["public"]["Tables"]["program_info"]["Insert"];
-type RequestedItemsInsert = Database["public"]["Tables"]["requested_items"]["Insert"]
-
 
 // Helper to conditionally add optional fields
 const addIfPresent = (obj: Record<string, any>, key: string, value: any): void => {

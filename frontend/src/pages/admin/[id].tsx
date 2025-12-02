@@ -18,7 +18,7 @@ import { ProgramInfoStep } from "@/components/bswd/steps/ProgramInfoStep";
 import { OsapInfoStep } from "@/components/bswd/steps/OsapInfoStep";
 import { DisabilityInfoStep } from "@/components/bswd/steps/DisabilityInfoStep";
 import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
-import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
+import { ReviewAndSubmit } from "@/components/bswd/steps/SubmitStep";
 import { StudentInfoSchema } from "@/schemas/StudentInfoSchema";
 
 // central store I/O (Supabase + local) 

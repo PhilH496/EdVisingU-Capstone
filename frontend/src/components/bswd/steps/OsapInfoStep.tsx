@@ -1,23 +1,14 @@
 /**
- * Step 3: OsapInfoStep Component
+ * Step 3: OsapInfoStep component
  *
  * Collects OSAP application details and assessed financial needs for the BSWD application.
  * Includes a confirmation for active OSAP status and automated notifications when none is on file.
- * Restriction details box removed; restriction types linked to OSAP manual.
  *
  * @param formData - Current state of all form data
  * @param setFormData - Function to update form data state
  */
 
-// HELPFUL INFO:
-// - formData: Object containing all form data (see @/types/bswd.ts for available fields)
-// - setFormData: Updates form data using: setFormData(prev => ({ ...prev, fieldName: value }))
-// - Reference StudentInfoStep.tsx for examples
-// - Add validation in index.tsx > isStepComplete() function
-// - Use brand colors located in tailwind.config.js; reference StudentInfoStep.tsx
-
 import { FormData } from "@/types/bswd";
-import { notifyNoOsap } from "@/lib/notify";
 
 const OSAP_MANUAL_URL = "https://osap.gov.on.ca/dc/TCONT003225";
 
@@ -34,7 +25,6 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
   // local state shortcuts
   const onFileStatus: "APPROVED" | "NONE" | "" =
     formData.osapOnFileStatus ?? "";
-  const queuedForManualReview: boolean = formData.queuedForManualReview;
   const applicationType = formData.osapApplication ?? "none";
   const federalNeed = Number(formData.federalNeed ?? 0);
   const provincialNeed = Number(formData.provincialNeed ?? 0);
@@ -59,17 +49,6 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
   const combinedDisplay =
     (federalEligible ? FED_CAP : 0) + (provincialEligible ? PROV_CAP : 0);
 
-  // handler for OSAP on-file status change
-  const handleOnFileChange = async (status: "APPROVED" | "NONE" | "") => {
-    setFormData((prev) => ({ ...prev, osapOnFileStatus: status }));
-    if (status === "NONE" && !queuedForManualReview) {
-      try {
-        await notifyNoOsap(formData.email);
-      } catch {}
-      setFormData((prev) => ({ ...prev, queuedForManualReview: true }));
-    }
-  };
-
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold mb-2">
@@ -79,42 +58,6 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
         Confirm your OSAP status, enter assessed needs, and note any
         restrictions.
       </p>
-      {/* OSAP Application On-File Confirmation */}
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-brand-text-gray">Do you have an active & approved OSAP application on file? <span className="text-brand-light-red">*</span></label>
-        <div className="flex gap-4">
-          <label className="inline-flex items-center gap-2 text-brand-text-gray">
-            <input
-              type="radio"
-              name="osapOnFileStatus"
-              checked={onFileStatus === "APPROVED"}
-              onChange={() => handleOnFileChange("APPROVED")}
-            />
-            Yes — Active & Approved
-          </label>
-          <label className="inline-flex items-center gap-2 text-brand-text-gray">
-            <input
-              type="radio"
-              name="osapOnFileStatus"
-              checked={onFileStatus === "NONE"}
-              onChange={() => handleOnFileChange("NONE")}
-            />
-            No application on file
-          </label>
-        </div>
-        {onFileStatus === "NONE" && (
-          <div className="mt-2 rounded-md border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-900">
-            An email has been sent requesting you to apply for OSAP. Your
-            BSWD/CSG-DSE application has been marked{" "}
-            <span className="font-semibold">Pending Manual Review</span>.{" "}
-            {queuedForManualReview && (
-              <div className="mt-1 text-xs text-yellow-800">
-                Status: queued for manual review.
-              </div>
-            )}
-          </div>
-        )}
-      </div>
 
       {/* OSAP Application Type */}
       <div className="space-y-1">
@@ -157,7 +100,6 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
             onChange={(e) =>
               setField("federalNeed", Number(e.currentTarget.value))
             }
-            disabled={onFileStatus !== "APPROVED"}
           />
         </div>
         <div className="space-y-1">
@@ -173,7 +115,6 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
             onChange={(e) =>
               setField("provincialNeed", Number(e.currentTarget.value))
             }
-            disabled={onFileStatus !== "APPROVED"}
           />
         </div>
       </div>
