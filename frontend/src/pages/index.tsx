@@ -167,6 +167,7 @@ export default function BSWDApplicationPage() {
       }
 
       case 3: {
+        formData.osapOnFileStatus = "APPROVED" // TEMP WILL EVENTUALLY COME BACK AND REMOVE THIS 
         const hasChosenOnFile =
           formData.osapOnFileStatus === "APPROVED" ||
           formData.osapOnFileStatus === "NONE";

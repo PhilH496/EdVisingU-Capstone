@@ -100,7 +100,6 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
             onChange={(e) =>
               setField("federalNeed", Number(e.currentTarget.value))
             }
-            disabled={onFileStatus !== "APPROVED"}
           />
         </div>
         <div className="space-y-1">
@@ -116,7 +115,6 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
             onChange={(e) =>
               setField("provincialNeed", Number(e.currentTarget.value))
             }
-            disabled={onFileStatus !== "APPROVED"}
           />
         </div>
       </div>
