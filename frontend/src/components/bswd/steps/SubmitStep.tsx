@@ -1,4 +1,4 @@
-import { FormData, FunctionalLimitationOption } from "@/types/bswd";
+import { FormData } from "@/types/bswd";
 import { FileText, User, GraduationCap, DollarSign, Heart } from "lucide-react";
 
 interface ReviewAndSubmitProps {
@@ -8,12 +8,7 @@ interface ReviewAndSubmitProps {
   setIsConfirmed: (confirmed: boolean) => void;
 }
 
-export function ReviewAndSubmit({
-  formData,
-  setFormData,
-  isConfirmed,
-  setIsConfirmed,
-}: ReviewAndSubmitProps) {
+export function ReviewAndSubmit({formData, isConfirmed, setIsConfirmed}: ReviewAndSubmitProps) {
   // Normalize functionalLimitations so filter/map are always safe
 const rawLimits = formData.functionalLimitations;
 
@@ -325,9 +320,6 @@ else if (rawLimits && typeof rawLimits === "object") {
                   <div>
                     <p className="font-medium text-gray-900">{item.item}</p>
                     <p className="text-sm text-gray-500">{item.category}</p>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {item.justification}
-                    </p>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-gray-900">${item.cost}</p>

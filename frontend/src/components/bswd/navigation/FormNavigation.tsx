@@ -1,5 +1,5 @@
 /**
- * FormNavigation Component
+ * FormNavigation component
  *
  * Provides Previous/Next navigation buttons for multi-step forms.
  *

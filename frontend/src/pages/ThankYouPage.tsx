@@ -1,29 +1,37 @@
 /**
- * ThankYouPage
- *
- * Displays confirmation after successful submission of the BSWD/CSG-DSE application.
+ * ThankYouPage component
+ * 
+ * Displays confirmation page after successful submission of the BSWD/CSG-DSE application.
  * Shows the generated Application ID and a brief success message.
  */
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { supabase, isSupabaseReady } from "@/lib/supabaseClient";
 
 export default function ThankYouPage() {
   const [app, setApp] = useState<{ id: string; studentName: string } | null>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const raw = localStorage.getItem("currentApplication");
-      if (raw) {
-        try {
-          const data = JSON.parse(raw);
-          setApp({ id: data.id, studentName: data.studentName });
-        } catch {
-          console.error("Error parsing application data");
-        }
+    const load = async () => {
+      if (!isSupabaseReady() || !supabase) return;
+
+      const params = new URLSearchParams(window.location.search);
+      const appId = params.get("appId");
+
+      const { data, error } = await supabase
+        .from("applications")
+        .select("id, student_name")
+        .eq("id", appId)
+        .single();
+
+      if (!error && data) {
+        setApp({ id: data.id, studentName: data.student_name });
       }
-    }
-  }, []);
+    };
+
+    load();
+}, []);
 
   return (
     <div

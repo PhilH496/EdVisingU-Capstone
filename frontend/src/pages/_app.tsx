@@ -1,7 +1,9 @@
 import "@/styles/globals.css";
+import '@fortawesome/fontawesome-free/css/all.min.css';
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { ChatbotWidget } from "@/components/chatbot/ChatbotWidget";
+import { LanguageProvider } from "@/lib/i18n";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
@@ -10,10 +12,10 @@ export default function App({ Component, pageProps }: AppProps) {
   const isAdminPage = router.pathname.startsWith('/admin');
 
   return (
-    <>
+    <LanguageProvider>
       <Component {...pageProps} />
       {/* Student chatbot on student pages */}
       {!isAdminPage && <ChatbotWidget />}
-    </>
+    </LanguageProvider>
   );
 }
