@@ -31,8 +31,12 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 // Initial values are set to empty strings, zeros, or false depending on field type
 export default function BSWDApplicationPage() {
   const { t, isLoaded } = useTranslation();
+  
+  // DEV MODE: Set to true to unlock all steps for testing
+  const DEV_MODE = true;
+  
   const [currentStep, setCurrentStep] = useState(1);
-  const [maxStep, setMaxStep] = useState(1);
+  const [maxStep, setMaxStep] = useState(DEV_MODE ? 6 : 1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
@@ -51,7 +55,7 @@ export default function BSWDApplicationPage() {
     province: "",
     postalCode: "",
     country: "Canada",
-    hasOsapApplication: false,
+    hasOsapApplication: undefined,
     institution: "",
     institutionType: "",
     program: "",
@@ -387,6 +391,10 @@ export default function BSWDApplicationPage() {
   }
 
   useEffect(() => {
+    if (DEV_MODE) {
+      return; // In dev mode, maxStep is already set to TOTAL_STEPS in initial state
+    }
+    
     if (!isStepComplete(currentStep)) {
       setMaxStep(currentStep);
     } else {
