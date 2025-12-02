@@ -6,7 +6,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useDateRange } from "@/hooks/UseDateRange";
 import { Calendar } from "@/components/ui/calendar";
 import { ChevronDownIcon } from "lucide-react";
@@ -20,13 +24,16 @@ interface DisabilityInfoStepProps {
   setFormData: (data: FormData | ((prev: FormData) => FormData)) => void;
 }
 
-export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStepProps) {
+export function DisabilityInfoStep({
+  formData,
+  setFormData,
+}: DisabilityInfoStepProps) {
   const verificationDate = useDateRange();
   // Local state for the psycho-educational assessment checkbox
   const [requiresPsychoEducational, setRequiresPsychoEducational] = useState(
-    Boolean((formData as any).needsPsychoEdAssessment)
+    Boolean(formData.needsPsychoEdAssessment)
   );
-  
+
   // State for email sending status
   const [emailStatus, setEmailStatus] = useState<{
     sending: boolean;
@@ -39,12 +46,14 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
   });
 
   // Handler for psycho-educational assessment checkbox
-  const handlePsychoEdChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePsychoEdChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const isChecked = e.target.checked;
     setRequiresPsychoEducational(isChecked);
-    
+
     // Update form data
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       needsPsychoEdAssessment: isChecked,
     }));
@@ -52,22 +61,26 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
     // Send referral email when checkbox is checked
     if (isChecked && formData.email) {
       setEmailStatus({ sending: true, sent: false, error: null });
-      
+
       try {
         const result = await sendPsychoEdReferral(
           formData.email,
           `${formData.firstName} ${formData.lastName}`,
           formData.studentId
         );
-        
+
         if (result.success) {
           setEmailStatus({ sending: false, sent: true, error: null });
           // Auto-hide success message after 5 seconds
           setTimeout(() => {
-            setEmailStatus(prev => ({ ...prev, sent: false }));
+            setEmailStatus((prev) => ({ ...prev, sent: false }));
           }, 5000);
         } else {
-          setEmailStatus({ sending: false, sent: false, error: result.message });
+          setEmailStatus({
+            sending: false,
+            sent: false,
+            error: result.message,
+          });
         }
       } catch (error) {
         setEmailStatus({
@@ -84,9 +97,7 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
 
   const functionalLimitations = formData.functionalLimitations;
 
-  const handleLimitationsChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleLimitationsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
 
     setFormData((prev) => {
@@ -147,17 +158,26 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
 
       {/* Disability Verification Date */}
       <div className="flex flex-col gap-3">
-        <Label htmlFor="endDate" className="block text-base font-medium mb-1 text-brand-text-gray">
-          Disability Verification Date <span className="text-sm text-brand-light-red mt-1">*</span>
+        <Label
+          htmlFor="endDate"
+          className="block text-base font-medium mb-1 text-brand-text-gray"
+        >
+          Disability Verification Date{" "}
+          <span className="text-sm text-brand-light-red mt-1">*</span>
         </Label>
-        <Popover open={verificationDate.open} onOpenChange={verificationDate.setOpen}>
+        <Popover
+          open={verificationDate.open}
+          onOpenChange={verificationDate.setOpen}
+        >
           <PopoverTrigger asChild disabled={isVerificationDisabled}>
             <Button
               variant="outline"
               id="endDate"
               className="w-full max-w-xs justify-between font-normal"
             >
-              {verificationDate.date ? verificationDate.date.toLocaleDateString() : "Select date"}
+              {verificationDate.date
+                ? verificationDate.date.toLocaleDateString()
+                : "Select date"}
               <ChevronDownIcon />
             </Button>
           </PopoverTrigger>
@@ -167,13 +187,13 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
               selected={verificationDate.date}
               captionLayout="dropdown"
               onSelect={(date) => {
-                verificationDate.setDate(date)
-                verificationDate.setOpen(false)
+                verificationDate.setDate(date);
+                verificationDate.setOpen(false);
                 if (date) {
                   setFormData((prev) => ({
                     ...prev,
-                    disabilityVerificationDate: format(date, "dd/MM/yyyy")
-                  }))
+                    disabilityVerificationDate: format(date, "dd/MM/yyyy"),
+                  }));
                 }
               }}
             />
@@ -278,16 +298,32 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
         {/* Email validation warning */}
         {!formData.email && (
           <div className="ml-8 mb-4 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md p-3">
-            ⚠️ Please enter your email address in Section A (Student Info) before requesting an assessment.
+            ⚠️ Please enter your email address in Section A (Student Info)
+            before requesting an assessment.
           </div>
         )}
 
         {/* Email sending status */}
         {emailStatus.sending && (
           <div className="ml-8 mb-4 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded-md p-3 flex items-center">
-            <svg className="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <svg
+              className="animate-spin h-4 w-4 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
             </svg>
             Sending referral email...
           </div>
@@ -330,12 +366,15 @@ export function DisabilityInfoStep({ formData, setFormData }: DisabilityInfoStep
                 </h3>
                 <div className="mt-2 text-sm text-[#4e4e4e]">
                   <p>
-                    You will be automatically connected with a qualified assessment provider in your geographical area
-                    who has a referral contract with us, or with a provider at your institution at a discounted rate.
+                    You will be automatically connected with a qualified
+                    assessment provider in your geographical area who has a
+                    referral contract with us, or with a provider at your
+                    institution at a discounted rate.
                   </p>
                   <p className="mt-2">
-                    The assessment fee will be reviewed for approval and submitted to your institution&apos;s finance office
-                    for direct payment via EFT.
+                    The assessment fee will be reviewed for approval and
+                    submitted to your institution&apos;s finance office for
+                    direct payment via EFT.
                   </p>
                 </div>
               </div>
