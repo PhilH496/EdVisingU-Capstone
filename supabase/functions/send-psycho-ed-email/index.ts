@@ -37,8 +37,6 @@ const handler = async (request: Request): Promise<Response> => {
       )
     }
 
-    console.log(`Sending email to: ${email}`)
-
     // Build email content
     const emailSubject = 'Psycho-Educational Assessment Referral'
     const emailBody = `
@@ -64,7 +62,7 @@ BSWD Services Team
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'Acme <onboarding@resend.dev>',
+        from: 'BSWD Services <noreply@bswd-application.com>',
         to: [email],
         subject: emailSubject,
         html: `<div style="font-family: Arial, sans-serif; padding: 20px;">
@@ -92,7 +90,6 @@ BSWD Services Team
     const resendData = await res.json()
 
     if (res.ok) {
-      console.log(`✓ Email sent successfully to ${email}`, resendData)
       return new Response(
         JSON.stringify({
           success: true,

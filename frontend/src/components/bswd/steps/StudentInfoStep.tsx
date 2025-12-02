@@ -17,6 +17,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useDateRange } from "@/hooks/UseDateRange";
+import { useState } from "react";
+import { sendNoOsapEmail } from "@/lib/notify";
 
 interface StudentInfoStepProps {
   formData: FormData;
@@ -29,35 +31,128 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
   const lockCls = (base: string) => base + " " + (isLocked ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200" : "focus:outline-none focus:ring-2 focus:ring-brand-dark-blue");
   const dob = useDateRange();
   const osapStartDate = useDateRange();
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [showEmailInput, setShowEmailInput] = useState(false);
+  const [notificationEmail, setNotificationEmail] = useState("");
+
+  // Function to send No OSAP email using Edge Function
+  const handleSendNoOsapEmail = async (emailToSend: string) => {
+    if (!emailToSend || emailSent) return;
+
+    setEmailSending(true);
+    try {
+      const result = await sendNoOsapEmail(
+        emailToSend,
+        `${formData.firstName} ${formData.lastName}`.trim(),
+        formData.studentId,
+        formData.firstName,
+        formData.lastName
+      );
+
+      if (result.success) {
+        setEmailSent(true);
+      } else {
+        console.error('Failed to send No OSAP email:', result.message);
+      }
+    } catch (error) {
+      console.error('Error sending No OSAP email:', error);
+    } finally {
+      setEmailSending(false);
+    }
+  };
+
+  const handleOsapSelection = (hasOsap: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      hasOsapApplication: hasOsap,
+    }));
+    
+    if (hasOsap === false) {
+      setShowEmailInput(true);
+      setEmailSent(false);
+    } else {
+      setShowEmailInput(false);
+      setEmailSent(false);
+    }
+  };
+
+  const handleSendEmail = () => {
+    if (notificationEmail) {
+      handleSendNoOsapEmail(notificationEmail);
+    }
+  };
 
   return (
     <div className="space-y-4">
-      {/* OSAP application question + start date */}
+      {/* OSAP application question with buttons */}
       <div>
-        <label
-          htmlFor="hasOsapApplication"
-          className="block text-sm font-medium mb-1 text-brand-text-gray"
-        >
+        <label className="block text-sm font-medium mb-3 text-brand-text-gray">
           Do you have an OSAP application?{" "}
           <span className="text-sm text-brand-light-red mt-1">*</span>
         </label>
-        <select
-          id="hasOsapApplication"
-          value={formData.hasOsapApplication === null ? '' : (formData.hasOsapApplication ? 'yes' : 'no')}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-            setFormData(prev => ({
-              ...prev,
-              hasOsapApplication: e.target.value === 'yes',
-              osapApplication: e.target.value === 'yes' ? prev.osapApplication : 'none'
-            }))
-          }
-          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
-        >
-          <option value="">Select an option</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
+        <div className="flex gap-4">
+          <label className="inline-flex items-center gap-2 text-brand-text-gray">
+            <input
+              type="radio"
+              name="hasOsapApplication"
+              checked={formData.hasOsapApplication === true}
+              onChange={() => handleOsapSelection(true)}
+            />
+            Yes
+          </label>
+          <label className="inline-flex items-center gap-2 text-brand-text-gray">
+            <input
+              type="radio"
+              name="hasOsapApplication"
+              checked={formData.hasOsapApplication === false}
+              onChange={() => handleOsapSelection(false)}
+            />
+            No
+          </label>
+        </div>
       </div>
+
+      {/* Email input box when "No" is selected */}
+      {showEmailInput && formData.hasOsapApplication === false && (
+        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-sm font-medium text-green-800 mb-3">
+            <i className="fa-solid fa-exclamation-triangle mr-2"></i>
+            OSAP application is required for BSWD funding
+          </p>
+          <p className="text-sm text-gray-700 mb-3">
+            Please enter your email address to receive information about OSAP application requirements:
+          </p>
+          <div className="flex gap-2">
+            <Input
+              type="email"
+              placeholder="your.email@example.com"
+              value={notificationEmail}
+              onChange={(e) => setNotificationEmail(e.target.value)}
+              className="flex-1"
+              disabled={emailSending || emailSent}
+            />
+            <Button
+              onClick={handleSendEmail}
+              disabled={!notificationEmail || emailSending || emailSent}
+              className="bg-brand-dark-blue hover:bg-blue-700 text-white"
+            >
+              {emailSending ? (
+                <span><i className="fa-solid fa-spinner fa-spin mr-2"></i>Sending...</span>
+              ) : emailSent ? (
+                <span><i className="fa-solid fa-check mr-2"></i>Sent</span>
+              ) : (
+                <span><i className="fa-solid fa-paper-plane mr-2"></i>Send</span>
+              )}
+            </Button>
+          </div>
+          {emailSent && (
+            <p className="text-sm text-green-600 mt-2">
+              ✓ Notification email sent to {notificationEmail}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* OSAP Application Start Date */}
       {formData.hasOsapApplication === true && (

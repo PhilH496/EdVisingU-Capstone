@@ -11,26 +11,29 @@ import { supabase } from './supabase';
  * @param studentId - Student's ID number
  * @returns Promise that resolves when email is sent
  */
-export async function sendPsychoEdReferral(email: string, studentName: string, studentId: string): Promise<{ success: boolean; message: string }> {
+export async function sendPsychoEdReferral(
+  email: string,
+  studentName?: string,
+  studentId?: string
+): Promise<{ success: boolean; message: string }> {
   try {
     // Call Edge Function via Supabase client to send email immediately
     const { data, error } = await supabase.functions.invoke('send-psycho-ed-email', {
       body: {
         email: email,
-        studentName: studentName,
-        studentId: studentId,
-      }
+        studentName: studentName ?? "Student",
+        studentId: studentId ?? "",
+      },
     });
 
     if (error) {
       console.error('Error sending email via Edge Function:', error);
       return {
         success: false,
-        message: error.message || 'Failed to send referral email',
+        message: error.message,
       };
     }
 
-    console.log('Success sending email via Edge Function:', data);
     return {
       success: true,
       message: 'Referral email sent successfully!',
@@ -43,3 +46,54 @@ export async function sendPsychoEdReferral(email: string, studentName: string, s
     };
   }
 }
+
+/**
+ * sendNoOsapEmail
+ * 
+ * Sends a No OSAP notification email to the student immediately.
+ * Calls Edge Function directly via Supabase client.
+ * 
+ * @param email - Student's email address
+ * @param studentName - Student's full name
+ * @param studentId - Student's ID number
+ * @param firstName - Student's first name
+ * @param lastName - Student's last name
+ * @returns Promise that resolves when email is sent
+ */
+export async function sendNoOsapEmail(
+  email: string | undefined | null,
+  studentName?: string,
+  studentId?: string,
+  firstName?: string,
+  lastName?: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    // Call Edge Function via Supabase client to send email immediately
+    const { data, error } = await supabase.functions.invoke('send-no-osap-email', {
+      body: {
+        email: email ?? "",
+        studentName: studentName ?? "Student",
+        studentId: studentId ?? "",
+        firstName: firstName ?? "",
+        lastName: lastName ?? "",
+      },
+    });
+
+    if (error) {
+      console.error('Edge Function error:', error);
+      return {
+        success: false,
+        message: error.message || 'Failed to send No OSAP notification',
+      };
+    }
+
+    return {
+      success: true,
+      message: 'No OSAP notification sent successfully!',
+    };
+  } catch (e) {
+    console.error("sendNoOsapEmail failed", e);
+    return { success: false, message: "Failed to send notification. Please try again." };
+  }
+}
+  
