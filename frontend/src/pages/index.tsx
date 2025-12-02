@@ -5,7 +5,6 @@
  * Manages the multi-step form flow and overall form state.
  *
  * Features:
- * - OSAP Status gate (must confirm OSAP before accessing application)
  * - Multi-step form navigation (6 total steps)
  * - Form data state management
  * - Step validation before allowing progression
@@ -22,25 +21,21 @@ import { ProgramInfoStep } from "@/components/bswd/steps/ProgramInfoStep";
 import { OsapInfoStep } from "@/components/bswd/steps/OsapInfoStep";
 import { DisabilityInfoStep } from "@/components/bswd/steps/DisabilityInfoStep";
 import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
-import { ReviewAndSubmit } from "@/components/bswd/steps/Submit";
+import { ReviewAndSubmit } from "@/components/bswd/steps/SubmitStep";
 import { saveSubmission } from "@/lib/database";
 import { saveSnapshotMerge, saveApplicationsList } from "@/lib/adminStore";
-import { OsapStatus } from "@/components/bswd/OsapStatus";
+import { useTranslation } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 // Store all form data in a single state object
 // Initial values are set to empty strings, zeros, or false depending on field type
 export default function BSWDApplicationPage() {
+  const { t, isLoaded } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [maxStep, setMaxStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
-
-  // OSAP Status state for the pre-application gate
-  const [osapStatus, setOsapStatus] = useState({
-    open: true,
-    approved: false,
-  });
 
   const [formData, setFormData] = useState<FormData>({
     studentId: "",
@@ -56,7 +51,7 @@ export default function BSWDApplicationPage() {
     province: "",
     postalCode: "",
     country: "Canada",
-    hasOsapApplication: false,
+    hasOsapApplication: undefined,
     institution: "",
     institutionType: "",
     program: "",
@@ -68,7 +63,6 @@ export default function BSWDApplicationPage() {
     previousInstitution: "",
 
     osapApplication: "full-time",
-    osapApplicationStartDate: "",
     restrictionType: "DEFAULT",
     queuedForManualReview: false,
     federalNeed: 0,
@@ -102,56 +96,33 @@ export default function BSWDApplicationPage() {
 
   const stepsInfo = [
     {
-      stepName: "Student Info",
+      stepName: t('steps.studentInfo'),
       stepIconFaClass: "fa-solid fa-user",
     },
     {
-      stepName: "Program Info",
+      stepName: t('steps.programInfo'),
       stepIconFaClass: "fa-solid fa-user-graduate",
     },
     {
-      stepName: "OSAP Info",
+      stepName: t('steps.osapInfo'),
       stepIconFaClass: "fa-solid fa-money-check-dollar",
     },
     {
-      stepName: "Disability Info",
+      stepName: t('steps.disabilityInfo'),
       stepIconFaClass: "fa-solid fa-wheelchair",
     },
     {
-      stepName: "Service & Equipment",
+      stepName: t('steps.serviceEquipment'),
       stepIconFaClass: "fa-solid fa-wrench",
     },
     {
-      stepName: "Review & Submit",
+      stepName: t('steps.review'),
       stepIconFaClass: "fa-solid fa-receipt",
     },
   ];
 
   const TOTAL_STEPS = stepsInfo.length;
 
-  /**
-   * updateOsapStatus
-   *
-   * Called when the student confirms they have an approved OSAP application
-   * in the OSAP Status gate. Closes the gate and updates OSAP flags in formData.
-   */
-  const updateOsapStatus = () => {
-    setOsapStatus({
-      open: false,
-      approved: true,
-    });
-    setFormData((prev) => ({
-      ...prev,
-      hasOsapApplication: true,
-      osapOnFileStatus: "APPROVED",
-    }));
-  };
-
-  /**
-   * isStepComplete
-   *
-   * Step-level validation used to control navigation and progression.
-   */
   const isStepComplete = (stepCheck: number): boolean => {
     switch (stepCheck) {
       case 1:
@@ -171,7 +142,7 @@ export default function BSWDApplicationPage() {
           formData.postalCode &&
           formData.postalCode.replace(/\s/g, "").length === 6 && 
           formData.country &&
-          formData.hasOsapApplication !== null
+          formData.hasOsapApplication !== undefined
         );
 
       case 2: {
@@ -196,6 +167,7 @@ export default function BSWDApplicationPage() {
       }
 
       case 3: {
+        formData.osapOnFileStatus = "APPROVED" // TEMP WILL EVENTUALLY COME BACK AND REMOVE THIS 
         const hasChosenOnFile =
           formData.osapOnFileStatus === "APPROVED" ||
           formData.osapOnFileStatus === "NONE";
@@ -242,11 +214,6 @@ export default function BSWDApplicationPage() {
     return isStepComplete(currentStep) && !saving;
   }, [currentStep, formData, isConfirmed, saving]);
 
-  /**
-   * handleNext / handlePrevious
-   *
-   * Step navigation handlers.
-   */
   const handleNext = async () => {
     if (!isStepComplete(currentStep)) return;
 
@@ -266,12 +233,6 @@ export default function BSWDApplicationPage() {
     }
   };
 
-  /**
-   * handleSubmit
-   *
-   * Final submission handler. Persists data to Supabase and local storage,
-   * then redirects to the thank-you/status page.
-   */
   const handleSubmit = async () => {
     if (saving) return;
 
@@ -280,45 +241,8 @@ export default function BSWDApplicationPage() {
 
     try {
       const result = await saveSubmission(formData);
-
-      // Capture the exact submission time
-      const currentDateTime = new Date();
-
-      // Save form data to localStorage for the thank you page
-      const applicationData = {
-        id: `APP-${currentDateTime.getFullYear()}-${Math.floor(
-          Math.random() * 1000000
-        )
-          .toString()
-          .padStart(6, "0")}`,
-        studentName: `${formData.firstName} ${formData.lastName}`,
-        studentId: formData.studentId,
-        submittedDate: currentDateTime.toISOString(),
-        status: "submitted" as const,
-        program: formData.program,
-        institution: formData.institution,
-        studyPeriod:
-          formData.studyPeriodStart && formData.studyPeriodEnd
-            ? `${formData.studyPeriodStart} - ${formData.studyPeriodEnd}`
-            : "Not specified",
-        statusUpdatedDate: currentDateTime.toISOString(),
-      };
-
-      await saveSnapshotMerge(applicationData as any, formData);
-      // Load existing applications
-      const existingRaw = localStorage.getItem("applications");
-      const existing = existingRaw ? JSON.parse(existingRaw) : [];
-
-      // Append and save
-      await saveApplicationsList([...existing, applicationData]);
-
-      localStorage.setItem(
-        "currentApplication",
-        JSON.stringify(applicationData)
-      );
-
       // Redirect to status page
-      window.location.href = "/thank-you";
+      window.location.href = `/ThankYouPage?appId=${result.application_id}`;
     } catch (err) {
       // Handle submission errors
       const errorMessage =
@@ -331,21 +255,11 @@ export default function BSWDApplicationPage() {
     }
   };
 
-  /**
-   * handleStepClick
-   *
-   * Handles clicking on a specific step in the StepBar.
-   */
   const handleStepClick = (step: number) => {
     if (step > maxStep) return;
     setCurrentStep(step);
   };
 
-  /**
-   * renderStep
-   *
-   * Renders the component for the current step.
-   */
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -380,11 +294,6 @@ export default function BSWDApplicationPage() {
     }
   };
 
-  /**
-   * StepBar Component
-   *
-   * Horizontal, scrollable step indicator with icons.
-   */
   function StepBar() {
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const stepRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -406,49 +315,55 @@ export default function BSWDApplicationPage() {
     }, [currentStep]);
 
     return (
-      <div
-        className="overflow-x-scroll pb-4"
+      <nav
+        className="overflow-x-scroll pb-4 dark"
         id="scrollable_step_bar"
         ref={scrollRef}
       >
-        <div className="flex gap-10 w-max">
+        <ul className="flex gap-10 w-max">
           {stepsInfo.map((stepInfo, index) => (
-            <button
-              key={stepInfo.stepName}
-              onClick={() => handleStepClick(index + 1)}
-              disabled={index + 1 > maxStep}
-              ref={(el) => {
-                stepRefs.current[index] = el;
-              }}
-              className="flex flex-col items-center"
-            >
-              <span
-                className={`flex rounded-full  justify-center items-center h-14 w-14 transition-colors font-medium ${
-                  currentStep === index + 1
-                    ? "bg-cyan-800 text-white"
-                    : "bg-gray-100 text-black"
-                } ${
-                  index + 1 > maxStep
-                    ? "opacity-40 cursor-not-allowed"
-                    : "hover:bg-cyan-700 hover:text-white"
-                }`}
+            <li key={stepInfo.stepName}>
+              <button
+                onClick={() => handleStepClick(index + 1)}
+                disabled={index + 1 > maxStep}
+                ref={(el) => {
+                  stepRefs.current[index] = el;
+                }}
+                aria-describedby="locked-msg-program"
+                className="flex flex-col items-center"
               >
-                <i className={`${stepInfo.stepIconFaClass} text-[150%]`}></i>
+                <span
+                  className={`flex rounded-full  justify-center items-center h-14 w-14 transition-colors font-medium relative ${
+                    currentStep === index + 1
+                      ? "bg-cyan-800 text-white"
+                      : "bg-gray-100 text-black"
+                  } ${
+                    index + 1 > maxStep
+                      ? "cursor-not-allowed"
+                      : "hover:bg-cyan-700 hover:text-white"
+                  }`}
+                >
+                  <i className={`${stepInfo.stepIconFaClass} text-[150%]`}></i>
+                  {/* display lock icon */}
+                  {index + 1 > maxStep && (
+                    <i className="fa-solid fa-lock absolute bottom-0 right-0 text-[#757575]"></i>
+                  )}
+                </span>
+                <span className="dark:text-black">{stepInfo.stepName}</span>
+              </button>
+              <span id="locked-msg-program" className="sr-only">
+                Locked. Complete previous step(s) to access.
               </span>
-              <span className={index + 1 > maxStep ? "opacity-40" : ""}>
-                {stepInfo.stepName}
-              </span>
-            </button>
+            </li>
           ))}
-        </div>
-      </div>
+        </ul>
+      </nav>
     );
   }
 
-  /**
-   * Effect to keep maxStep in sync with completion state.
-   */
   useEffect(() => {
+
+    
     if (!isStepComplete(currentStep)) {
       setMaxStep(currentStep);
     } else {
@@ -461,23 +376,24 @@ export default function BSWDApplicationPage() {
     }
   }, [currentStep, formData, isConfirmed]);
 
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <FormLayout
-      title="BSWD/CSG-DSE Application Form"
-      description="Complete application for Bursary for Students with Disabilities (BSWD) and Canada Student Grant for Services and Equipment"
-    >
-      {/* OSAP Status gate - must be completed before using the form */}
-      <OsapStatus open={osapStatus.open} onApprove={updateOsapStatus} />
-
-      {/* admin button */}
-      <div className="mb-3 flex items-center justify-end">
+      title={t('title')}
+      description=""
+      headerAction={
         <Link
           href="/admin"
           className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
         >
-          Admin
+          {t('adminButton')}
         </Link>
-      </div>
+      }
+    >
+      <LanguageSwitcher />
 
       <div className="mb-4 p-4 pb-2 py-6 border rounded-md">
         <StepBar />
