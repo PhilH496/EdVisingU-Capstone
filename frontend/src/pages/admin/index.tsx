@@ -5,6 +5,7 @@
  * - Institution names rendered in Title Case for consistency
  * - Persists assignee, violations, details, attachments, status per application
  * - Deterministic scoring bubble using consolidated logic
+ * - Bi-directional Sorting (Asc/Desc)
  */
 
 import { useEffect, useMemo, useState } from "react";
@@ -23,9 +24,21 @@ import {
   attachFiles as storeAttachFiles,
   downloadAttachmentFromStorage,
   resetLocalApplications,
+  deleteApplication,
 } from "@/lib/adminStore";
 
 const STATUS_OPTIONS = ["Submitted", "In Review", "Approved", "Rejected", "Pending"];
+
+// Sort Options Definition
+type SortKey = "Recent" | "Score" | "Status" | "Name";
+type SortDirection = "asc" | "desc";
+
+const SORT_MENU: { label: string; value: SortKey }[] = [
+  { label: "Most Recent", value: "Recent" },
+  { label: "Confidence Score", value: "Score" },
+  { label: "Application Status", value: "Status" },
+  { label: "Alphabetical (Name)", value: "Name" },
+];
 
 const titleCase = (s: string | undefined) => {
   if (!s) return "—";
@@ -65,6 +78,13 @@ export default function AdminDashboardPage() {
   const [editMode, setEditMode] = useState<boolean>(false);
   const [expandedApps, setExpandedApps] = useState<Set<string>>(new Set());
   const [detScores, setDetScores] = useState<Record<string, number>>({});
+
+  //Sorting State
+  const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection }>({
+    key: "Recent",
+    direction: "desc",
+  });
+  const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
 
   // storage I/O
   useEffect(() => {
@@ -126,7 +146,53 @@ export default function AdminDashboardPage() {
     })();
   }, []);
 
-  const hasRows = useMemo(() => rows.length > 0, [rows]);
+  // Sorting logic
+  const handleSortSelect = (key: SortKey) => {
+    if (sortConfig.key === key) {
+      setSortConfig((prev) => ({
+        ...prev,
+        direction: prev.direction === "asc" ? "desc" : "asc",
+      }));
+    } else {
+      const defaultDir = key === "Name" || key === "Status" ? "asc" : "desc"; //if Name or Status, default asc. Otherwise desc
+      setSortConfig({ key, direction: defaultDir });
+    }
+    setIsSortMenuOpen(false);
+  };
+
+  // Multiplcation modifers for = 1 for ascending, -1 for descending
+  const sortedRows = useMemo(() => {
+    const data = [...rows];
+    const { key, direction } = sortConfig;
+    const modifier = direction === "asc" ? 1 : -1;
+    
+    switch (key) {
+      case "Recent":
+        return data.sort((a, b) => {
+          const dateA = new Date(a.statusUpdatedDate).getTime();
+          const dateB = new Date(b.statusUpdatedDate).getTime();
+          return (dateA - dateB) * modifier;
+        });
+      
+      case "Score":
+        return data.sort((a, b) => {
+          const scoreA = detScores[a.id];
+          const scoreB = detScores[b.id];
+          return (scoreA - scoreB) * modifier;
+        });
+
+      case "Status":
+        return data.sort((a, b) => a.status.localeCompare(b.status) * modifier);
+
+      case "Name":
+        return data.sort((a, b) => a.studentName.localeCompare(b.studentName) * modifier);
+
+      default:
+        return data;
+    }
+  }, [rows, sortConfig, detScores]);
+
+  const hasRows = useMemo(() => sortedRows.length > 0, [sortedRows]);
 
   // ---------- state mutations ----------
   const updateRow = (id: string, patch: Partial<Row>) => {
@@ -339,16 +405,114 @@ export default function AdminDashboardPage() {
           >
             Clear Selection
           </button>
+          <button
+            onClick={async () => {
+              const selectedApps = rows.filter(r => r._selected);
+              if (selectedApps.length === 0) {
+                alert("No applications selected");
+                return;
+              }
+
+              let reason = prompt("Reason for deleting these applications? (required)");
+
+              // If user cancels, abort
+              if (reason === null) {
+                return;
+              }
+              
+              // Keep prompting until they provide a non-empty reason
+              while (!reason.trim()) {
+                reason = prompt("Deletion reason is required. Please provide a reason:");
+                if (reason === null) {
+                  return; // User cancelled
+                }
+              }
+
+              if (confirm(`Delete ${selectedApps.length} application(s)?\n\nReason: ${reason}\n\nNote: This will hide application instead to preserve audit trail.`)) {
+                await Promise.all(
+                  selectedApps.map(app => deleteApplication(app.id, "Admin Name", reason)) //replace 'Admin Name' with real username when admin and student portal login integrated
+                );
+                
+                setRows(rows.filter(r => !r._selected));
+                setToolbarMsg(`Deleted ${selectedApps.length} application(s)`);
+                setTimeout(() => setToolbarMsg(""), 2000);
+              }
+            }}
+            disabled={!editMode || selectedCount === 0}
+            className="px-4 py-2 rounded-lg bg-brand-light-red text-white hover:bg-red-400 text-sm disabled:opacity-50"
+            title={editMode ? "Delete selected applications" : "Enable Edit Mode first"}
+          >
+            Delete ({selectedCount})
+          </button>
         </div>
 
-        <div className="ml-auto text-sm text-green-700">{toolbarMsg}</div>
+        {/* Toolbar Msg + Sorting */}
+        <div className="ml-auto flex items-center gap-3">
+            {/* Feedback Message */}
+            {toolbarMsg && (
+                <div className="text-sm text-green-700 font-medium animate-pulse mr-2">
+                    {toolbarMsg}
+                </div>
+            )}
+
+            {/* Custom Sort Control */}
+            <span className="text-sm text-gray-500 font-medium">Sort By</span>
+            
+            <div className="relative">
+                <button
+                    onClick={() => setIsSortMenuOpen(!isSortMenuOpen)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm text-gray-700 font-medium shadow-sm transition-colors min-w-[160px] justify-between"
+                >
+                    <span className="truncate mr-2">
+                        {SORT_MENU.find(x => x.value === sortConfig.key)?.label}
+                    </span>
+                    <span className="text-gray-400 text-xs">
+                        {sortConfig.direction === "asc" ? "▲" : "▼"}
+                    </span>
+                </button>
+
+                {/* Dropdown Menu */}
+                {isSortMenuOpen && (
+                    <>
+                        <div 
+                            className="fixed inset-0 z-10 cursor-default" 
+                            onClick={() => setIsSortMenuOpen(false)} 
+                        />
+                        <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 z-20 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                             <div className="px-4 py-2 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Order By
+                            </div>
+                            {SORT_MENU.map((opt) => {
+                                const isActive = sortConfig.key === opt.value;
+                                return (
+                                    <button
+                                        key={opt.value}
+                                        onClick={() => handleSortSelect(opt.value)}
+                                        className={`w-full text-left px-4 py-2.5 text-sm flex items-center justify-between group ${
+                                            isActive ? "bg-cyan-50 text-cyan-900 font-medium" : "text-gray-700 hover:bg-gray-50"
+                                        }`}
+                                    >
+                                        <span>{opt.label}</span>
+                                        {isActive && (
+                                            <span className="text-brand-light-red text-xs font-bold">
+                                                {sortConfig.direction === "asc" ? "Asc (A-Z)" : "Desc (Z-A)"}
+                                            </span>
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </>
+                )}
+            </div>
+        </div>
       </div>
 
       {!hasRows ? (
         <div className="px-5 py-10 text-gray-500">No applications found.</div>
       ) : (
         <div className="space-y-6">
-          {rows.map((r: Row) => {
+          {sortedRows.map((r: Row) => {
             const isExpanded = expandedApps.has(r.id);
             const score = detScores[r.id];
 

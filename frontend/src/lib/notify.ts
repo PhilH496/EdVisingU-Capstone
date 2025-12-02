@@ -1,28 +1,6 @@
 import { supabase } from './supabase';
 
 /**
- * notifyNoOsap
- * 
- * Sends a templated notification to a student when no OSAP application is on file.
- * Currently logs a message locally (mock API); can later integrate with real email service.
- */
-
-export async function notifyNoOsap(email: string | undefined | null) {
-    try {
-      await fetch("/api/notify/no-osap", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email ?? "",
-          template: "no-osap-on-file",
-        }),
-      });
-    } catch (e) {
-      console.warn("notifyNoOsap failed", e);
-    }
-  }
-
-/**
  * sendPsychoEdReferral
  * 
  * Sends a psycho-educational assessment referral email to the student immediately.
@@ -49,7 +27,7 @@ export async function sendPsychoEdReferral(
     });
 
     if (error) {
-      console.error('Edge Function error:', error);
+      console.error('Error sending email via Edge Function:', error);
       return {
         success: false,
         message: error.message,
@@ -62,7 +40,10 @@ export async function sendPsychoEdReferral(
     };
   } catch (e) {
     console.error("sendPsychoEdReferral failed", e);
-    return { success: false, message: "Failed to send referral email. Please try again." };
+    return {
+      success: false, 
+      message: "Failed to send referral email. Please try again."
+    };
   }
 }
 

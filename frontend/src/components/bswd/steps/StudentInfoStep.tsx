@@ -1,8 +1,7 @@
 /**
  * Step 1: StudentInfoStep Component
  *
- * First step of the BSWD application form that collects basic student information.
- * Includes validation for OEN (Ontario Education Number) format.
+ * First step of the BSWD application form that collects student information.
  */
 
 import { FormData } from "@/types/bswd";
@@ -320,7 +319,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 variant="outline"
                 id="dob"
                 disabled={isLocked}
-                className="w-full justify-between font-normal"
+                className={lockCls("w-full justify-between font-normal")}
               >
                 {dob.date ? dob.date.toLocaleDateString() : "Select date"}
                 <ChevronDownIcon />
