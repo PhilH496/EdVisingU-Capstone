@@ -52,7 +52,6 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       );
 
       if (result.success) {
-        console.log('No OSAP email sent successfully');
         setEmailSent(true);
       } else {
         console.error('Failed to send No OSAP email:', result.message);

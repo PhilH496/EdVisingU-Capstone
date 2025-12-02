@@ -56,7 +56,6 @@ export async function sendPsychoEdReferral(
       };
     }
 
-    console.log('Email sent via Edge Function:', data);
     return {
       success: true,
       message: 'Referral email sent successfully!',
@@ -107,7 +106,6 @@ export async function sendNoOsapEmail(
       };
     }
 
-    console.log('No OSAP email sent via Edge Function:', data);
     return {
       success: true,
       message: 'No OSAP notification sent successfully!',

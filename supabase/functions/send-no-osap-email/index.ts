@@ -37,7 +37,6 @@ const handler = async (request: Request): Promise<Response> => {
       )
     }
 
-    console.log(`Sending No OSAP notification email to: ${email}`)
     const fullName = `${firstName || ''} ${lastName || ''}`.trim() || 'Student'
     
     // Generate unique Issue ID
@@ -76,10 +75,6 @@ Issue ID: ${issueId}
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
-
-    console.log('Sending email via Resend API...')
-    console.log('To:', email)
-    console.log('From: BSWD Services <onboarding@resend.dev>')
 
     // Send email via Resend
     const res = await fetch('https://api.resend.com/emails', {
@@ -127,12 +122,8 @@ Issue ID: ${issueId}
     })
 
     const resendData = await res.json()
-    
-    console.log('Resend API response status:', res.status)
-    console.log('Resend API response data:', JSON.stringify(resendData, null, 2))
 
     if (res.ok) {
-      console.log(`✓ No OSAP email sent successfully to ${email}`, resendData)
       return new Response(
         JSON.stringify({
           success: true,

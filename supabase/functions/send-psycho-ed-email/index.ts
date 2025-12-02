@@ -37,8 +37,6 @@ const handler = async (request: Request): Promise<Response> => {
       )
     }
 
-    console.log(`Sending email to: ${email}`)
-
     // Build email content
     const emailSubject = 'Psycho-Educational Assessment Referral'
     const emailBody = `
@@ -92,7 +90,6 @@ BSWD Services Team
     const resendData = await res.json()
 
     if (res.ok) {
-      console.log(`✓ Email sent successfully to ${email}`, resendData)
       return new Response(
         JSON.stringify({
           success: true,
