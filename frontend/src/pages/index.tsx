@@ -242,7 +242,7 @@ export default function BSWDApplicationPage() {
     try {
       const result = await saveSubmission(formData);
       // Redirect to status page
-      window.location.href = `/thank-you?appId=${result.application_id}`;
+      window.location.href = `/ThankYouPage?appId=${result.application_id}`;
     } catch (err) {
       // Handle submission errors
       const errorMessage =
