@@ -9,7 +9,7 @@ interface Messages {
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  translate: (key: string) => string;
+  t: (key: string) => string;
   isLoaded: boolean;
 }
 
@@ -56,7 +56,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   };
 
   // Translation function with nested key support
-  const translate = (key: string): string => {
+  const t = (key: string): string => {
     const keys = key.split('.');
     let value: any = messages;
     
@@ -72,7 +72,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, translate, isLoaded }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, isLoaded }}>
       {children}
     </LanguageContext.Provider>
   );
