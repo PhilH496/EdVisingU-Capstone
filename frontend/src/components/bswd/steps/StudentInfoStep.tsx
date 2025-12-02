@@ -224,7 +224,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 variant="outline"
                 id="dob"
                 disabled={isLocked}
-                className="w-full justify-between font-normal"
+                className={lockCls("w-full justify-between font-normal")}
               >
                 {dob.date ? dob.date.toLocaleDateString() : "Select date"}
                 <ChevronDownIcon />
