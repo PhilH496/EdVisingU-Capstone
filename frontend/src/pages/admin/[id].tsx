@@ -5,7 +5,8 @@
  */
 
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, Dispatch, SetStateAction } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ApplicationAnalysisCard } from "@/components/admin/ApplicationAnalysisCard";
@@ -22,21 +23,92 @@ import { ReviewAndSubmit } from "@/components/bswd/steps/SubmitStep";
 import { StudentInfoSchema } from "@/schemas/StudentInfoSchema";
 
 // central store I/O (Supabase + local) 
-import {
-  AppSummary as StoreSummary,
-  Snapshot as StoreSnapshot,
-  loadSnapshot as storeLoadSnapshot,
-  saveSnapshotMerge as storeSaveSnapshotMerge,
-  saveApplicationsList as storeSaveApplicationsList,
-} from "@/lib/adminStore";
+import { AppSummary as StoreSummary, Snapshot as StoreSnapshot, loadSnapshot as storeLoadSnapshot, saveSnapshotMerge as storeSaveSnapshotMerge, saveApplicationsList as storeSaveApplicationsList } from "@/lib/adminStore";
 import { supabase } from "@/lib/supabase";
+import { ApplicationStatus } from "@/components/admin/constants";
 
+// Local UI types mirroring store
+type Summary = StoreSummary;
+type Snapshot = StoreSnapshot;
+type FormDataSetter = Dispatch<SetStateAction<FormData>>;
+type RequestedItem = {
+  category?: string;
+  item?: string;
+  cost?: number | string;
+  justification?: string;
+  fundingSource?: string;
+};
+
+interface DeterministicCheckResult {
+  has_disability: boolean;
+  is_full_time: boolean;
+  has_osap_restrictions: boolean;
+  all_checks_passed: boolean;
+  failed_checks: string[];
+}
+
+interface FinancialAnalysis {
+  total_need: number;
+  total_requested: number;
+  within_cap: boolean;
+}
+
+interface AIAnalysisResult {
+  recommended_status: ApplicationStatus;
+  confidence_score: number; // 0–1 from backend
+  funding_recommendation: number | null;
+  risk_factors: string[];
+  requires_human_review: boolean;
+  reasoning: string;
+}
+
+interface ApplicationAnalysis {
+  application_id: string;
+  deterministic_checks: DeterministicCheckResult;
+  ai_analysis: AIAnalysisResult;
+  financial_analysis: FinancialAnalysis;
+  overall_status: ApplicationStatus;
+  analysis_timestamp: string;
+}
+
+interface ApplicationData {
+  application_id: string;
+  student_id: string;
+  first_name: string;
+  last_name: string;
+  disability_type: string;
+  study_type: string;
+  osap_application: string;
+  has_osap_restrictions: boolean;
+  federal_need: number;
+  provincial_need: number;
+  disability_verification_date?: string;
+  functional_limitations: string[];
+  needs_psycho_ed_assessment: boolean;
+  requested_items: Array<{
+    category: string;
+    item: string;
+    cost: number;
+    funding_source: string;
+  }>;
+  institution: string;
+  program?: string;
+  analysis: {
+    decision: string;
+    confidence: number;
+    reasoning: string;
+    risk_factors: string[];
+    recommended_funding: number;
+  };
+}
+
+// Step Shims 
 const StudentInfoStepShim = ({
   formData,
   setFormData,
 }: {
   formData: FormData;
-  setFormData: any;
+  setFormData: FormDataSetter;
 }) => <StudentInfoStep formData={formData} setFormData={setFormData} />;
 
 const ProgramInfoStepShim = ({
@@ -44,7 +116,7 @@ const ProgramInfoStepShim = ({
   setFormData,
 }: {
   formData: FormData;
-  setFormData: any;
+  setFormData: FormDataSetter;
 }) => <ProgramInfoStep formData={formData} setFormData={setFormData} />;
 
 const OsapInfoStepShim = ({
@@ -52,7 +124,7 @@ const OsapInfoStepShim = ({
   setFormData,
 }: {
   formData: FormData;
-  setFormData: any;
+  setFormData: FormDataSetter;
 }) => <OsapInfoStep formData={formData} setFormData={setFormData} />;
 
 const DisabilityInfoStepShim = ({
@@ -60,7 +132,7 @@ const DisabilityInfoStepShim = ({
   setFormData,
 }: {
   formData: FormData;
-  setFormData: any;
+  setFormData: FormDataSetter;
 }) => <DisabilityInfoStep formData={formData} setFormData={setFormData} />;
 
 const ServiceAndEquipShim = ({
@@ -68,7 +140,7 @@ const ServiceAndEquipShim = ({
   setFormData,
 }: {
   formData: FormData;
-  setFormData: any;
+  setFormData: FormDataSetter;
 }) => <ServiceAndEquip formData={formData} setFormData={setFormData} />;
 
 const ReviewAndSubmitShim = ({
@@ -78,9 +150,9 @@ const ReviewAndSubmitShim = ({
   setIsConfirmed,
 }: {
   formData: FormData;
-  setFormData: any;
+  setFormData: FormDataSetter;
   isConfirmed: boolean;
-  setIsConfirmed: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsConfirmed: Dispatch<SetStateAction<boolean>>;
 }) => (
   <ReviewAndSubmit
     formData={formData}
@@ -90,14 +162,10 @@ const ReviewAndSubmitShim = ({
   />
 );
 
-// Local UI types mirroring store
-type Summary = StoreSummary;
-type Snapshot = StoreSnapshot;
-
+// Main Page 
 export default function AdminApplicationDetailPage() {
   const router = useRouter();
   const { id } = router.query as { id?: string };
-
   const [data, setData] = useState<Snapshot | null>(null);
 
   // edit mode state
@@ -107,21 +175,40 @@ export default function AdminApplicationDetailPage() {
   const [editForm, setEditForm] = useState<FormData | null>(null);
   const initialSnapshot = useRef<FormData | null>(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
-  const [analysis, setAnalysis] = useState<any>(null);
+
+  // Analysis
+  const [analysis, setAnalysis] = useState<ApplicationAnalysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   
   // Chatbot
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [activeChatApplication, setActiveChatApplication] = useState<any>(null);
+  const [activeChatApplication, setActiveChatApplication] =
+    useState<ApplicationData | null>(null);
 
+  const setFormDataForSteps: FormDataSetter = (update) => {
+    setEditForm((prev) => {
+      if (!prev) {
+        const base = {} as FormData;
+        return typeof update === "function"
+          ? (update as (f: FormData) => FormData)(base)
+          : update;
+      }
+      return typeof update === "function"
+        ? (update as (f: FormData) => FormData)(prev)
+        : update;
+    });
+  };
+
+  const summary = data?.summary;
+  const form = (data?.formData as FormData) || ({} as FormData);
+  const hasForm = useMemo(() => !!data?.formData, [data]);
+
+  // AI Analysis 
   const analyzeApplication = async () => {
     if (!editForm || !summary) return;
     setAnalyzing(true);
     try {
-
-      // Process functional limitations
       const functionalLimitations = toChips(editForm.functionalLimitations);
-
       const payload = {
         application_id: summary.id,
         student_id: editForm.studentId,
@@ -136,67 +223,76 @@ export default function AdminApplicationDetailPage() {
         disability_verification_date: editForm.disabilityVerificationDate,
         functional_limitations: functionalLimitations,
         needs_psycho_ed_assessment: editForm.needsPsychoEdAssessment,
-        requested_items: requestedItems.map(item => ({ 
+        requested_items: requestedItems.map((item) => ({
           category: item.category,
           item: item.item,
           cost: item.cost,
-          funding_source: item.fundingSource
+          funding_source: item.fundingSource,
         })),
         institution: editForm.institution,
         program: editForm.program,
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/analysis/application`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+        }/api/analysis/application`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (response.ok) {
-        const analysisResult = await response.json();
+        const analysisResult = (await response.json()) as ApplicationAnalysis;
         setAnalysis(analysisResult);
-
-        // Structure properly for chatbot
-        const appDataWithAnalysis = {
+        const ai = analysisResult.ai_analysis;
+        const appDataWithAnalysis: ApplicationData = {
           application_id: summary.id,
-          student_id: editForm.studentId,
-          first_name: editForm.firstName,
-          last_name: editForm.lastName,
-          disability_type: editForm.disabilityType,
-          study_type: editForm.studyType,
-          osap_application: editForm.osapApplication,
-          has_osap_restrictions: editForm.hasOSAPRestrictions,
-          federal_need: editForm.federalNeed,
-          provincial_need: editForm.provincialNeed,
+          student_id: editForm.studentId ?? "",
+          first_name: editForm.firstName ?? "",
+          last_name: editForm.lastName ?? "",
+          disability_type: editForm.disabilityType ?? "",
+          study_type: editForm.studyType ?? "",
+          osap_application: editForm.osapApplication ?? "",
+          has_osap_restrictions: !!editForm.hasOSAPRestrictions,
+          federal_need: editForm.federalNeed ?? 0,
+          provincial_need: editForm.provincialNeed ?? 0,
+          disability_verification_date:
+            editForm.disabilityVerificationDate ?? "",
           functional_limitations: functionalLimitations,
-          needs_psycho_ed_assessment: editForm.needsPsychoEdAssessment,
-          requested_items: requestedItems.map(item => ({
-            category: item.category,
-            item: item.item,
-            cost: item.cost,
-            funding_source: item.fundingSource
+          needs_psycho_ed_assessment: !!editForm.needsPsychoEdAssessment,
+          requested_items: requestedItems.map((item) => ({
+            category: item.category ?? "",
+            item: item.item ?? "",
+            cost:
+              typeof item.cost === "number"
+                ? item.cost
+                : Number(item.cost ?? 0),
+            funding_source: item.fundingSource ?? "",
           })),
-          institution: editForm.institution,
-          program: editForm.program,
+          institution: editForm.institution ?? "",
+          program: editForm.program ?? "",
           analysis: {
-            decision: analysisResult.ai_analysis.recommended_status,
-            confidence: Math.round(analysisResult.ai_analysis.confidence_score * 100),
-            reasoning: analysisResult.ai_analysis.reasoning,
-            risk_factors: analysisResult.ai_analysis.risk_factors,
-            recommended_funding: analysisResult.ai_analysis.funding_recommendation,
+            decision: ai.recommended_status,
+            confidence: Math.round(ai.confidence_score * 100),
+            reasoning: ai.reasoning,
+            risk_factors: ai.risk_factors,
+            recommended_funding: ai.funding_recommendation ?? 0,
           },
         };
         setActiveChatApplication(appDataWithAnalysis);
       }
-    } catch (error) {
-      console.error("Analysis failed:", error);
+    } catch (err) {
+      console.error("Analysis failed:", err);
       alert("Analysis failed. Make sure backend is running.");
     } finally {
       setAnalyzing(false);
     }
   };
 
-  // Load from centralized store (Supabase + local fallback)
+  // Data Load 
   useEffect(() => {
     if (!id) return;
     (async () => {
@@ -214,64 +310,73 @@ export default function AdminApplicationDetailPage() {
     })();
   }, [id]);
 
-  const summary = data?.summary;
-  const form = data?.formData || {};
-  const hasForm = useMemo(() => !!data?.formData, [data]);
+  const prettyDate = (iso?: string) =>
+    iso ? new Date(iso).toLocaleString() : "—";
 
-  const prettyDate = (iso?: string) => (iso ? new Date(iso).toLocaleString() : "—");
-
-  const toChips = (val: any): string[] => {
+  const toChips = (val: unknown): string[] => {
     if (!val) return [];
-    if (Array.isArray(val)) return val.map(String).filter(Boolean);
+    if (Array.isArray(val)) {
+      return val
+        .map((item) => String(item).trim())
+        .filter((s) => s.length > 0);
+    }
     if (typeof val === "object") {
-      return Object.entries(val)
-        .filter(([_, v]) => !!v)
+      return Object.entries(val as Record<string, unknown>)
+        .filter(([, v]) => !!v)
         .map(([k]) => k);
     }
     if (typeof val === "string") {
       return val
         .split(",")
         .map((s) => s.trim())
-        .filter(Boolean);
+        .filter((s) => s.length > 0);
     }
     return [];
   };
 
-  const formatMoney = (n: any) => {
-    const num = Number(n);
+  const formatMoney = (n: unknown): string => {
+    const num =
+      typeof n === "number"
+        ? n
+        : typeof n === "string"
+        ? Number(n)
+        : Number(n as number);
     if (Number.isNaN(num)) return "—";
-    return num.toLocaleString(undefined, { style: "currency", currency: "CAD" });
+    return num.toLocaleString(undefined, {
+      style: "currency",
+      currency: "CAD",
+    });
   };
 
-  const requestedItems: Array<{
-    category?: string;
-    item?: string;
-    cost?: number | string;
-    justification?: string;
-    fundingSource?: string;
-  }> = Array.isArray(form.requestedItems) ? form.requestedItems : [];
+  const requestedItems: RequestedItem[] = Array.isArray(form.requestedItems)
+    ? (form.requestedItems as RequestedItem[])
+    : [];
 
   // Normalize functionalLimitations for Admin View
-  const normalizeFunctionalLimitations = (raw: any): string[] => {
+  const normalizeFunctionalLimitations = (raw: unknown): string[] => {
     if (!raw) return [];
 
     if (Array.isArray(raw)) {
       return raw
         .map((lim) => {
           if (typeof lim === "string") return lim;
-
           if (lim && typeof lim === "object") {
-            if (lim.label && lim.checked) return lim.label;
-            if (lim.name && lim.checked) return lim.name;
+            const obj = lim as {
+              label?: string;
+              checked?: boolean;
+              name?: string;
+            };
+            if (obj.label && obj.checked) return obj.label;
+            if (obj.name && obj.checked) return obj.name;
           }
           return null;
         })
-        .filter(Boolean) as string[];
+        .filter((value): value is string => value !== null);
     }
 
     if (typeof raw === "object") {
-      return Object.entries(raw)
-        .filter(([_, val]) => Boolean(val))
+      return Object.entries(raw as Record<string, unknown>)
+        .filter(([, val]) => Boolean(val))
         .map(([key]) => key);
     }
 
@@ -288,13 +393,13 @@ export default function AdminApplicationDetailPage() {
     !!editForm &&
     JSON.stringify(initialSnapshot.current) !== JSON.stringify(editForm);
 
-  // Persist snapshot and refresh list (centralized store)
+  // Persist 
   const persistEverywhere = async (fd: FormData) => {
     if (!summary) return;
 
     const nowIso = new Date().toISOString();
 
-    const updatedRow = {
+    const updatedRow: Summary = {
       id: summary.id,
       studentName: `${fd.firstName} ${fd.lastName}`.trim(),
       studentId: summary.studentId,
@@ -304,32 +409,24 @@ export default function AdminApplicationDetailPage() {
       institution: fd.institution,
       studyPeriod: `${fd.studyPeriodStart} - ${fd.studyPeriodEnd}`,
       statusUpdatedDate: nowIso,
-      
-      // Admin workflow fields
-      assignee: data?.assignee ?? "",
-      violationTags: data?.violationTags ?? [],
-      violationDetails: data?.violationDetails ?? "",
-      attachments: data?.attachments ?? [],
     };
 
-
     // Triggers status recalculation and saves to Supabase
-    await storeSaveSnapshotMerge(updatedRow as any, fd);
+    await storeSaveSnapshotMerge(updatedRow, fd);
 
     // Fetch the recalculated status from Supabase
-    const { data: updatedApp} = await supabase
+    const { data: updatedApp } = await supabase
       .from("applications")
       .select("status, status_updated_date")
       .eq("id", summary.id)
       .single();
 
-    // Create updated summary
     const nextSummary: Summary = {
       id: updatedRow.id,
       studentName: updatedRow.studentName,
       studentId: updatedRow.studentId,
       submittedDate: updatedRow.submittedDate,
-      status: updatedApp?.status || updatedRow.status, 
+      status: updatedApp?.status || updatedRow.status,
       program: updatedRow.program,
       institution: updatedRow.institution,
       studyPeriod: updatedRow.studyPeriod,
@@ -353,9 +450,9 @@ export default function AdminApplicationDetailPage() {
   const validateAndSaveStudentBlock = async (fd: FormData) => {
     try {
       const [dayStr, monthStr, yearStr] = (fd.dateOfBirth || "").split("/");
-      const day = Number(dayStr),
-        month = Number(monthStr),
-        year = Number(yearStr);
+      const day = Number(dayStr);
+      const month = Number(monthStr);
+      const year = Number(yearStr);
       if (!day || !month || !year) {
         setError("Invalid date of birth format. Use DD/MM/YYYY.");
         return false;
@@ -402,6 +499,7 @@ export default function AdminApplicationDetailPage() {
     }
   };
 
+  // Render 
   return (
     <AdminLayout
       title="Application Details"
@@ -435,10 +533,14 @@ export default function AdminApplicationDetailPage() {
                       ? "bg-yellow-50 border-yellow-200 text-yellow-800"
                       : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
                   }`}
-                  title={isEditMode ? "Editing enabled" : "Enable Edit Mode to modify fields"}
+                  title={
+                    isEditMode
+                      ? "Editing enabled"
+                      : "Enable Edit Mode to modify fields"
+                  }
                 >
                   {isEditMode ? "Editing Enabled" : "Enable Edit Mode"}
-                </button>          
+                </button>
                 <button
                   type="button"
                   onClick={handleSave}
@@ -452,9 +554,11 @@ export default function AdminApplicationDetailPage() {
                   {saving ? "Saving…" : "Save Changes"}
                 </button>
                 {isDirty && (
-                  <span className="text-sm text-yellow-700 font-medium">Unsaved changes</span>
+                  <span className="text-sm text-yellow-700 font-medium">
+                    Unsaved changes
+                  </span>
                 )}
-                
+
                 {error && (
                   <span className="text-sm text-red-700 bg-red-50 border border-red-200 px-3 py-1.5 rounded-lg">
                     {error}
@@ -474,7 +578,8 @@ export default function AdminApplicationDetailPage() {
 
           {!summary ? (
             <div className="border rounded-xl p-6 bg-white shadow-sm">
-              Could not load application <span className="font-mono">{id}</span>.
+              Could not load application{" "}
+              <span className="font-mono">{id}</span>.
             </div>
           ) : (
             <>
@@ -482,16 +587,28 @@ export default function AdminApplicationDetailPage() {
               <div className="border rounded-xl p-6 bg-white shadow-sm mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Field label="Application ID" value={summary.id} mono />
-                  <Field label="Submitted" value={prettyDate(summary.submittedDate)} />
+                  <Field
+                    label="Submitted"
+                    value={prettyDate(summary.submittedDate)}
+                  />
                   <Field
                     label="Student"
                     value={`${summary.studentName} (ID: ${summary.studentId})`}
                   />
-                  <Field label="Status" value={(summary.status || "SUBMITTED").toUpperCase()} />
-                  <Field label="Institution" value={summary.institution || "—"} />
+                  <Field
+                    label="Status"
+                    value={(summary.status || "SUBMITTED").toUpperCase()}
+                  />
+                  <Field
+                    label="Institution"
+                    value={summary.institution || "—"}
+                  />
                   <Field label="Program" value={summary.program || "—"} />
                   <div className="md:col-span-2">
-                    <Field label="Study Period" value={summary.studyPeriod || "—"} />
+                    <Field
+                      label="Study Period"
+                      value={summary.studyPeriod || "—"}
+                    />
                   </div>
                 </div>
               </div>
@@ -501,7 +618,9 @@ export default function AdminApplicationDetailPage() {
                 <h2 className="text-xl font-semibold">Submitted Form</h2>
 
                 {!hasForm ? (
-                  <div className="text-sm text-gray-500">Only a summary is available for this application.</div>
+                  <div className="text-sm text-gray-500">
+                    Only a summary is available for this application.
+                  </div>
                 ) : (
                   <>
                     {/* view mode */}
@@ -512,57 +631,113 @@ export default function AdminApplicationDetailPage() {
                             <Field label="Student ID" value={form.studentId} />
                             <Field label="OEN" value={form.oen} />
                             <Field label="SIN" value={form.sin} />
-                            <Field label="First Name" value={form.firstName} />
+                            <Field
+                              label="First Name"
+                              value={form.firstName}
+                            />
                             <Field label="Last Name" value={form.lastName} />
-                            <Field label="Date of Birth" value={form.dateOfBirth} />
+                            <Field
+                              label="Date of Birth"
+                              value={form.dateOfBirth}
+                            />
                             <Field label="Email" value={form.email} />
                             <Field label="Phone" value={form.phone} />
                             <Field label="Address" value={form.address} />
                             <Field label="City" value={form.city} />
                             <Field label="Province" value={form.province} />
-                            <Field label="Postal Code" value={form.postalCode} />
+                            <Field
+                              label="Postal Code"
+                              value={form.postalCode}
+                            />
                             <Field label="Country" value={form.country} />
                           </Grid>
                         </Section>
 
                         <Section title="Program Info">
                           <Grid>
-                            <Field label="Institution" value={form.institution} />
-                            <Field label="Institution Type" value={form.institutionType} />
+                            <Field
+                              label="Institution"
+                              value={form.institution}
+                            />
+                            <Field
+                              label="Institution Type"
+                              value={form.institutionType}
+                            />
                             <Field label="Program" value={form.program} />
-                            <Field label="Study Period Start" value={form.studyPeriodStart} />
-                            <Field label="Study Period End" value={form.studyPeriodEnd} />
+                            <Field
+                              label="Study Period Start"
+                              value={form.studyPeriodStart}
+                            />
+                            <Field
+                              label="Study Period End"
+                              value={form.studyPeriodEnd}
+                            />
                             <Field label="Study Type" value={form.studyType} />
-                            <Field label="Submitted Elsewhere" value={form.submittedDisabilityElsewhere} />
-                            <Field label="Previous Institution" value={form.previousInstitution} />
+                            <Field
+                              label="Submitted Elsewhere"
+                              value={form.submittedDisabilityElsewhere}
+                            />
+                            <Field
+                              label="Previous Institution"
+                              value={form.previousInstitution}
+                            />
                           </Grid>
                         </Section>
 
                         <Section title="OSAP Info">
                           <Grid>
-                            <Field label="OSAP Application" value={form.osapApplication} />
-                            <Field label="Federal Need" value={String(form.federalNeed)} />
-                            <Field label="Provincial Need" value={String(form.provincialNeed)} />
-                            <Field label="OSAP Restrictions" value={String(form.hasOSAPRestrictions)} />
-                            <Field label="Restriction Details" value={form.restrictionDetails} />
+                            <Field
+                              label="OSAP Application"
+                              value={form.osapApplication}
+                            />
+                            <Field
+                              label="Federal Need"
+                              value={String(form.federalNeed)}
+                            />
+                            <Field
+                              label="Provincial Need"
+                              value={String(form.provincialNeed)}
+                            />
+                            <Field
+                              label="OSAP Restrictions"
+                              value={String(form.hasOSAPRestrictions)}
+                            />
+                            <Field
+                              label="Restriction Details"
+                              value={form.restrictionDetails}
+                            />
                           </Grid>
                         </Section>
 
                         <Section title="Disability Info">
                           <Grid>
-                            <Field label="Verified Disability" value={String(form.hasVerifiedDisability)} />
-                            <Field label="Disability Type" value={form.disabilityType} />
-                            <Field label="Verification Date" value={form.disabilityVerificationDate} />
+                            <Field
+                              label="Verified Disability"
+                              value={String(form.hasVerifiedDisability)}
+                            />
+                            <Field
+                              label="Disability Type"
+                              value={form.disabilityType}
+                            />
+                            <Field
+                              label="Verification Date"
+                              value={form.disabilityVerificationDate}
+                            />
                             <Field
                               label="Needs Psycho-Ed Assessment"
                               value={String(form.needsPsychoEdAssessment)}
                             />
-                            <Field label="Email (for Psycho-Ed)" value={form.email} />
+                            <Field
+                              label="Email (for Psycho-Ed)"
+                              value={form.email}
+                            />
                           </Grid>
 
                           {/* Functional Limitations as chips */}
                           <div className="text-sm">
-                            <div className="text-gray-500 mb-1">Functional Limitations</div>
+                            <div className="text-gray-500 mb-1">
+                              Functional Limitations
+                            </div>
                             {adminFunctionalLimits.length === 0 ? (
                               <div>—</div>
                             ) : (
@@ -582,7 +757,9 @@ export default function AdminApplicationDetailPage() {
 
                         <Section title="Services & Equipment">
                           {requestedItems.length === 0 ? (
-                            <div className="text-sm text-gray-500">No requested items.</div>
+                            <div className="text-sm text-gray-500">
+                              No requested items.
+                            </div>
                           ) : (
                             <div className="overflow-x-auto">
                               <table className="w-full text-sm">
@@ -592,7 +769,9 @@ export default function AdminApplicationDetailPage() {
                                     <th className="py-2 pr-4">Item</th>
                                     <th className="py-2 pr-4">Cost</th>
                                     <th className="py-2 pr-4">Funding</th>
-                                    <th className="py-2 pr-4">Justification</th>
+                                    <th className="py-2 pr-4">
+                                      Justification
+                                    </th>
                                   </tr>
                                 </thead>
                                 <tbody className="align-top">
@@ -603,15 +782,21 @@ export default function AdminApplicationDetailPage() {
                                           {ri.category || "—"}
                                         </span>
                                       </td>
-                                      <td className="py-2 pr-4">{ri.item || "—"}</td>
-                                      <td className="py-2 pr-4 whitespace-nowrap">{formatMoney(ri.cost)}</td>
+                                      <td className="py-2 pr-4">
+                                        {ri.item || "—"}
+                                      </td>
+                                      <td className="py-2 pr-4 whitespace-nowrap">
+                                        {formatMoney(ri.cost)}
+                                      </td>
                                       <td className="py-2 pr-4">
                                         <span className="px-2 py-1 rounded-md bg-gray-100 border border-gray-200">
                                           {(ri.fundingSource || "").toString()}
                                         </span>
                                       </td>
                                       <td className="py-2 pr-4 max-w-[28rem]">
-                                        <div className="text-gray-700">{ri.justification || "—"}</div>
+                                        <div className="text-gray-700">
+                                          {ri.justification || "—"}
+                                        </div>
                                       </td>
                                     </tr>
                                   ))}
@@ -627,33 +812,35 @@ export default function AdminApplicationDetailPage() {
                           <>
                             <StudentInfoStepShim
                               formData={editForm}
-                              setFormData={setEditForm as any}
+                              setFormData={setFormDataForSteps}
                             />
                             <ProgramInfoStepShim
                               formData={editForm}
-                              setFormData={setEditForm as any}
+                              setFormData={setFormDataForSteps}
                             />
                             <OsapInfoStepShim
                               formData={editForm}
-                              setFormData={setEditForm as any}
+                              setFormData={setFormDataForSteps}
                             />
                             <DisabilityInfoStepShim
                               formData={editForm}
-                              setFormData={setEditForm as any}
+                              setFormData={setFormDataForSteps}
                             />
                             <ServiceAndEquipShim
                               formData={editForm}
-                              setFormData={setEditForm as any}
+                              setFormData={setFormDataForSteps}
                             />
                             <ReviewAndSubmitShim
                               formData={editForm}
-                              setFormData={setEditForm as any}
+                              setFormData={setFormDataForSteps}
                               isConfirmed={isConfirmed}
                               setIsConfirmed={setIsConfirmed}
                             />
                           </>
                         ) : (
-                          <div className="text-sm text-gray-500">No form data to edit.</div>
+                          <div className="text-sm text-gray-500">
+                            No form data to edit.
+                          </div>
                         )}
                       </div>
                     )}
@@ -697,7 +884,14 @@ export default function AdminApplicationDetailPage() {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+// UI Helpers
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
   return (
     <section className="space-y-3">
       <h3 className="font-medium">{title}</h3>
@@ -706,15 +900,29 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function Grid({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">{children}</div>;
+function Grid({ children }: { children: ReactNode }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+      {children}
+    </div>
+  );
 }
 
-function Field({ label, value, mono }: { label: string; value: any; mono?: boolean }) {
+function Field({
+  label,
+  value,
+  mono,
+}: {
+  label: string;
+  value?: ReactNode;
+  mono?: boolean;
+}) {
   return (
     <div>
       <div className="text-gray-500">{label}</div>
-      <div className={`${mono ? "font-mono" : "font-medium"} break-words`}>{value ?? "—"}</div>
+      <div className={`${mono ? "font-mono" : "font-medium"} break-words`}>
+        {value ?? "—"}
+      </div>
     </div>
   );
 }
