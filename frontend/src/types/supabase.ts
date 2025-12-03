@@ -185,7 +185,7 @@ export type Database = {
           submitted_disability_elsewhere: boolean;
         };
         Insert: {
-          code?: number | null;
+          code?: string;
           institution_name: string;
           institution_type: string;
           previous_institution?: string | null;

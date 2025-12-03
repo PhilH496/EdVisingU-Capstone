@@ -21,10 +21,13 @@ type ProgramInfoInsert = Database["public"]["Tables"]["program_info"]["Insert"];
 //           submitted_disability_elsewhere: boolean
 //         }
 // Helper to conditionally add optional fields
-const addIfPresent = <K extends keyof ProgramInfoInsert>(
-  obj: ProgramInfoInsert,
+const addIfPresent = <
+  T extends ProgramInfoInsert | OsapInfoInsert | DisabilityInfoInsert,
+  K extends keyof T
+>(
+  obj: T,
   key: K,
-  value: ProgramInfoInsert[K]
+  value: T[K]
 ): void => {
   if (value != null && value !== "") {
     obj[key] = value;
@@ -81,7 +84,7 @@ const calculateInitialStatus = async (formData: FormData): Promise<string> => {
 export const saveSubmission = async (formData: FormData) => {
   // 1. Insert into student table
   const studentPayload: StudentInsert = {
-    has_osap_application: formData.hasOsapApplication,
+    has_osap_application: formData.hasOsapApplication ?? false,
     student_id: +formData.studentId,
     oen: parseInt(formData.oen),
     first_name: formData.firstName,
