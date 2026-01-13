@@ -13,8 +13,8 @@ import {
 } from "@/components/ui/popover";
 import { useDateRange } from "@/hooks/UseDateRange";
 import { Calendar } from "@/components/ui/calendar";
-import { ChevronDownIcon } from "lucide-react";
-import { useState } from "react";
+import { ChevronDownIcon, TriangleAlertIcon } from "lucide-react";
+import { ChangeEvent, useState } from "react";
 import { format } from "date-fns";
 import { FormData } from "@/types/bswd";
 import { sendPsychoEdReferral } from "@/lib/notify";
@@ -47,7 +47,7 @@ export function DisabilityInfoStep({
 
   // Handler for psycho-educational assessment checkbox
   const handlePsychoEdChange = async (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: ChangeEvent<HTMLInputElement>
   ) => {
     const isChecked = e.target.checked;
     setRequiresPsychoEducational(isChecked);
@@ -97,7 +97,7 @@ export function DisabilityInfoStep({
 
   const functionalLimitations = formData.functionalLimitations;
 
-  const handleLimitationsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLimitationsChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
 
     setFormData((prev) => {
@@ -298,7 +298,7 @@ export function DisabilityInfoStep({
         {/* Email validation warning */}
         {!formData.email && (
           <div className="ml-8 mb-4 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md p-3">
-            ⚠️ Please enter your email address in Section A (Student Info)
+            <TriangleAlertIcon /> Please enter your email address in Section A (Student Info)
             before requesting an assessment.
           </div>
         )}

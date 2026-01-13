@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useDateRange } from "@/hooks/UseDateRange";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { sendNoOsapEmail } from "@/lib/notify";
 
 interface StudentInfoStepProps {
@@ -210,7 +210,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             type="text"
             value={formData.studentId}
             disabled={isLocked}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const value = e.target.value.replace(/\D/g, "");
               if (value.length <= 8) {
                 setFormData((prev) => ({ ...prev, studentId: value }));
@@ -240,7 +240,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             type="text"
             value={formData.oen}
             disabled={isLocked}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const value = e.target.value.replace(/\D/g, "");
               if (value.length <= 9) {
                 setFormData((prev) => ({ ...prev, oen: value }));
@@ -272,7 +272,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             type="text"
             value={formData.firstName}
             disabled={isLocked}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const value = e.target.value;
               if (/^[A-Za-z\s'-]*$/.test(value)) {
                 setFormData((prev) => ({ ...prev, firstName: value }));
@@ -296,7 +296,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             type="text"
             value={formData.lastName}
             disabled={isLocked}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const value = e.target.value;
               if (/^[A-Za-z\s'-]*$/.test(value)) {
                 setFormData((prev) => ({ ...prev, lastName: value }));
@@ -358,7 +358,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             type="text"
             value={formData.sin}
             disabled={isLocked}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               let value = e.target.value.replace(/\D/g, "");
               if (value.length <= 9) {
                 if (value.length > 6) {
@@ -399,7 +399,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             type="email"
             value={formData.email}
             disabled={isLocked}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
               setFormData((prev) => ({ ...prev, email: e.target.value }))
             }
             className={lockCls("w-full px-3 py-2 border rounded-md")}
@@ -419,7 +419,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             type="tel"
             value={formData.phone}
             disabled={isLocked}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               let value = e.target.value.replace(/\D/g, "");
               if (value.length <= 10) {
                 if (value.length > 6) {
@@ -462,7 +462,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               type="text"
               value={formData.address || ""}
               disabled={isLocked}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 setFormData((prev) => ({ ...prev, address: e.target.value }))
               }
               className={lockCls("w-full px-3 py-2 border rounded-md")}
@@ -484,7 +484,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 type="text"
                 value={formData.city || ""}
                 disabled={isLocked}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   setFormData((prev) => ({ ...prev, city: e.target.value }))
                 }
                 className={lockCls("w-full px-3 py-2 border rounded-md")}
@@ -504,7 +504,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 id="province"
                 value={formData.province || ""}
                 disabled={isLocked}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                   setFormData((prev) => ({ ...prev, province: e.target.value }))
                 }
                 className={lockCls("w-full px-3 py-2 border rounded-md")}
@@ -538,7 +538,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 type="text"
                 value={formData.postalCode || ""}
                 disabled={isLocked}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
                   const value = e.target.value
                     .toUpperCase()
                     .replace(/[^A-Z0-9]/g, "");
@@ -577,7 +577,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 type="text"
                 value={formData.country || "Canada"}
                 disabled={isLocked}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   setFormData((prev) => ({ ...prev, country: e.target.value }))
                 }
                 className={lockCls("w-full px-3 py-2 border rounded-md")}

@@ -165,7 +165,7 @@ const ReviewAndSubmitShim = ({
   formData: FormData;
   setFormData: FormDataSetter;
   isConfirmed: boolean;
-  setIsConfirmed: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsConfirmed: Dispatch<SetStateAction<boolean>>;
 }) => (
   <ReviewAndSubmit
     formData={formData}
@@ -895,7 +895,7 @@ function Section({
   children,
 }: {
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <section className="space-y-3">
@@ -905,7 +905,7 @@ function Section({
   );
 }
 
-function Grid({ children }: { children: React.ReactNode }) {
+function Grid({ children }: { children: ReactNode }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
       {children}
