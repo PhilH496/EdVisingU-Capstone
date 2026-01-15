@@ -8,5 +8,96 @@
     "disabilityInfo": "Info handicap",
     "serviceEquipment": "Service et équipement",
     "review": "Réviser et soumettre"
+  },
+  "common": {
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "studentInfo": {
+    "sectionHeader": "Section A : Informations sur l’étudiant",
+    "osapQuestion": "Avez-vous une demande d’OSAP ?",
+    "mailingAddressHeader": "Adresse postale",
+    "labels": {
+      "osapApplicationStartDate": "Date de début de la demande d’OSAP",
+      "studentId": "Numéro d’étudiant",
+      "oen": "Numéro d’éducation de l’Ontario (OEN)",
+      "firstName": "Prénom",
+      "lastName": "Nom de famille",
+      "dob": "Date de naissance",
+      "sin": "Numéro d’assurance sociale",
+      "email": "Adresse courriel",
+      "phone": "Numéro de téléphone",
+      "streetAddress": "Adresse",
+      "city": "Ville",
+      "province": "Province/Territoire",
+      "postalCode": "Code postal",
+      "country": "Pays"
+    },
+    "placeholders": {
+      "osapStartDate": "Sélectionnez la date de début d’OSAP",
+      "selectDate": "Sélectionnez une date",
+      "studentId": "Entrez le numéro d’étudiant",
+      "oen": "OEN à 9 chiffres",
+      "firstName": "Entrez le prénom",
+      "lastName": "Entrez le nom de famille",
+      "sin": "XXX-XXX-XXX",
+      "email": "VotreCourriel@exemple.com",
+      "phone": "(XXX) XXX-XXXX",
+      "streetAddress": "123 rue Principale",
+      "city": "Toronto",
+      "province": "Sélectionnez une province/un territoire",
+      "postalCode": "A1A 1A1",
+      "country": "Canada"
+    },
+    "noOsapPanel": {
+      "title": "Une demande d’OSAP est requise pour le financement BSWD",
+      "description": "Veuillez entrer votre adresse courriel pour recevoir des informations sur les exigences de demande d’OSAP :",
+      "emailPlaceholder": "votre.courriel@exemple.com",
+      "sentMessage": "Courriel de notification envoyé à",
+      "button": {
+        "send": "Envoyer",
+        "sending": "Envoi...",
+        "sent": "Envoyé"
+      }
+    }
+  },
+  "programInfo": {
+    "sectionHeader": "Section B : Informations sur votre établissement et votre programme",
+    "labels": {
+      "institutionName": "Nom de l’établissement",
+      "institutionType": "Type d’établissement",
+      "programCostCode": "Code du coût du programme",
+      "programOfStudy": "Programme d’études",
+      "studyType": "Type d’études",
+      "studyStartDate": "Date de début des études",
+      "studyEndDate": "Date de fin des études"
+    },
+    "placeholders": {
+      "institutionSearch": "Rechercher des établissements approuvés par l’OSAP",
+      "institutionInput": "Rechercher un établissement...",
+      "previousInstitutionSearch": "Rechercher un établissement précédent...",
+      "select": "Sélectionnez...",
+      "programCostCode": "Entrez le code de coût",
+      "programOfStudy": "Entrez le nom du programme",
+      "date": "Sélectionnez une date"
+    },
+    "messages": {
+      "noInstitutionFound": "Aucun établissement trouvé."
+    },
+    "options": {
+      "institutionType": {
+        "public": "Public",
+        "private": "Privé"
+      },
+      "studyType": {
+        "fullTime": "Temps plein",
+        "partTime": "Temps partiel",
+        "institutionFunded": "Bourse spéciale financée par l’établissement"
+      }
+    },
+    "submittedElsewhere": {
+      "question": "L’étudiant a-t-il soumis un formulaire de vérification du handicap de l’OSAP rempli ou d’autres documents liés au handicap lors de sa fréquentation d’un autre établissement ?",
+      "previousInstitutionLabel": "Établissement précédent"
+    }
   }
 }
