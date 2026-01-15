@@ -61,7 +61,7 @@ export default function BSWDApplicationPage() {
     studyType: "",
     submittedDisabilityElsewhere: false,
     previousInstitution: "",
-
+    osapApplicationStartDate: "Not provided",
     osapApplication: "full-time",
     restrictionType: "DEFAULT",
     queuedForManualReview: false,
@@ -96,27 +96,27 @@ export default function BSWDApplicationPage() {
 
   const stepsInfo = [
     {
-      stepName: t('steps.studentInfo'),
+      stepName: t("steps.studentInfo"),
       stepIconFaClass: "fa-solid fa-user",
     },
     {
-      stepName: t('steps.programInfo'),
+      stepName: t("steps.programInfo"),
       stepIconFaClass: "fa-solid fa-user-graduate",
     },
     {
-      stepName: t('steps.osapInfo'),
+      stepName: t("steps.osapInfo"),
       stepIconFaClass: "fa-solid fa-money-check-dollar",
     },
     {
-      stepName: t('steps.disabilityInfo'),
+      stepName: t("steps.disabilityInfo"),
       stepIconFaClass: "fa-solid fa-wheelchair",
     },
     {
-      stepName: t('steps.serviceEquipment'),
+      stepName: t("steps.serviceEquipment"),
       stepIconFaClass: "fa-solid fa-wrench",
     },
     {
-      stepName: t('steps.review'),
+      stepName: t("steps.review"),
       stepIconFaClass: "fa-solid fa-receipt",
     },
   ];
@@ -128,21 +128,21 @@ export default function BSWDApplicationPage() {
       case 1:
         return Boolean(
           formData.studentId &&
-          formData.studentId.length >= 7 &&
-          formData.studentId.length <= 8 &&
-          formData.firstName &&
-          formData.lastName &&
-          formData.email &&
-          formData.dateOfBirth &&
-          formData.oen.length === 9 &&
-          formData.sin.replace(/\D/g, "").length === 9 &&
-          formData.address &&
-          formData.city &&
-          formData.province &&
-          formData.postalCode &&
-          formData.postalCode.replace(/\s/g, "").length === 6 && 
-          formData.country &&
-          formData.hasOsapApplication !== undefined
+            formData.studentId.length >= 7 &&
+            formData.studentId.length <= 8 &&
+            formData.firstName &&
+            formData.lastName &&
+            formData.email &&
+            formData.dateOfBirth &&
+            formData.oen.length === 9 &&
+            formData.sin.replace(/\D/g, "").length === 9 &&
+            formData.address &&
+            formData.city &&
+            formData.province &&
+            formData.postalCode &&
+            formData.postalCode.replace(/\s/g, "").length === 6 &&
+            formData.country &&
+            formData.hasOsapApplication !== undefined
         );
 
       case 2: {
@@ -167,7 +167,7 @@ export default function BSWDApplicationPage() {
       }
 
       case 3: {
-        formData.osapOnFileStatus = "APPROVED" // TEMP WILL EVENTUALLY COME BACK AND REMOVE THIS 
+        formData.osapOnFileStatus = "APPROVED"; // TEMP WILL EVENTUALLY COME BACK AND REMOVE THIS
         const hasChosenOnFile =
           formData.osapOnFileStatus === "APPROVED" ||
           formData.osapOnFileStatus === "NONE";
@@ -362,8 +362,6 @@ export default function BSWDApplicationPage() {
   }
 
   useEffect(() => {
-
-    
     if (!isStepComplete(currentStep)) {
       setMaxStep(currentStep);
     } else {
@@ -382,14 +380,14 @@ export default function BSWDApplicationPage() {
 
   return (
     <FormLayout
-      title={t('title')}
+      title={t("title")}
       description=""
       headerAction={
         <Link
           href="/admin"
           className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
         >
-          {t('adminButton')}
+          {t("adminButton")}
         </Link>
       }
     >
