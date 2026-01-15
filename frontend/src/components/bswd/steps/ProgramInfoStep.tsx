@@ -39,6 +39,8 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { FormData } from "@/types/bswd";
 import { useDateRange } from "@/hooks/UseDateRange";
+import { useTranslation } from "@/lib/i18n"; // translation
+
 const institutions = [
   {
     value: "algoma",
@@ -147,11 +149,13 @@ export function ProgramInfoStep({
   const [institutionOpen, setInstitutionOpen] = useState(false);
   const start = useDateRange();
   const end = useDateRange();
+  const { t, isLoaded } = useTranslation(); // translation start
+  if (!isLoaded) return null; // ensures proper loading
 
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold mb-4">
-        Section B: Information about your school and program
+        {t("programInfo.sectionHeader")}
       </h2>
       <div className="grid md:grid-cols-2 gap-4 text-brand-text-gray">
         {/* Institution Name div */}
@@ -160,7 +164,8 @@ export function ProgramInfoStep({
             htmlFor="institutionName"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Institution Name <span className="text-sm text-brand-light-red mt-1">*</span>
+            {t("programInfo.labels.institutionName")} 
+            <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Popover open={institutionOpen} onOpenChange={setInstitutionOpen}>
             <PopoverTrigger asChild>
@@ -171,22 +176,19 @@ export function ProgramInfoStep({
                 className="w-full justify-start text-left"
               >
                 {formData.institution
-                  ? institutions.find(
-                    (institution) =>
-                      institution.value === formData.institution
-                  )?.label
-                  : "Search for OSAP-approved institutions"}
+                  ? institutions.find((i) => i.value === formData.institution)?.label
+                  : t("programInfo.placeholders.institutionSearch")}
                 <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="mx-auto p-0">
               <Command>
                 <CommandInput
-                  placeholder="Search institution..."
+                  placeholder={t("programInfo.placeholders.institutionInput")} // translation
                   className="h-9"
                 />
                 <CommandList>
-                  <CommandEmpty>No institution found.</CommandEmpty>
+                  <CommandEmpty>{t("programInfo.messages.noInstitutionFound")}</CommandEmpty>
                   <CommandGroup>
                     {institutions.map((institution) => (
                       <CommandItem
@@ -227,7 +229,8 @@ export function ProgramInfoStep({
             htmlFor="institutionType"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Institution Type <span className="text-sm text-brand-light-red mt-1">*</span>
+            {t("programInfo.labels.institutionType")}
+            <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Select
             value={formData.institutionType}
@@ -239,11 +242,11 @@ export function ProgramInfoStep({
             }
           >
             <SelectTrigger id="institutionType" className="w-full">
-              <SelectValue placeholder="Select..." />
+              <SelectValue placeholder={t("programInfo.placeholders.select")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="public-ontario">Public</SelectItem>
-              <SelectItem value="private-ontario">Private</SelectItem>
+              <SelectItem value="public-ontario">{t("programInfo.options.institutionType.public")}</SelectItem>
+              <SelectItem value="private-ontario">{t("programInfo.options.institutionType.private")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -256,12 +259,12 @@ export function ProgramInfoStep({
             htmlFor="code"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Program Cost Code
+            {t("programInfo.labels.programCostCode")}
           </label>
           <Input
             id="code"
             type="text"
-            placeholder="Enter cost code"
+            placeholder={t("programInfo.placeholders.programCostCode")}
             required
             value={formData.code}
             onChange={(e) => {
@@ -280,12 +283,12 @@ export function ProgramInfoStep({
             htmlFor="program"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Program of Study
+            {t("programInfo.labels.programOfStudy")}
           </label>
           <Input
             id="program"
             type="text"
-            placeholder="Enter program name"
+            placeholder={t("programInfo.placeholders.programOfStudy")}
             required
             value={formData.program}
             onChange={(e) => {
@@ -306,7 +309,8 @@ export function ProgramInfoStep({
             htmlFor="studyType"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Study Type <span className="text-sm text-brand-light-red mt-1">*</span>
+            {t("programInfo.labels.studyType")}
+            <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Select
             value={formData.studyType}
@@ -318,12 +322,12 @@ export function ProgramInfoStep({
             }
           >
             <SelectTrigger id="studyType" className="w-full">
-              <SelectValue placeholder="Select..." />
+              <SelectValue placeholder={t("programInfo.placeholders.select")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="full-time">Full-Time</SelectItem>
-              <SelectItem value="part-time">Part-Time</SelectItem>
-              <SelectItem value="institution-funded-SB">Institution-funded Special Bursary</SelectItem>
+              <SelectItem value="full-time">{t("programInfo.options.studyType.fullTime")}</SelectItem>
+              <SelectItem value="part-time">{t("programInfo.options.studyType.partTime")}</SelectItem>
+              <SelectItem value="institution-funded-SB">{t("programInfo.options.studyType.institutionFunded")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -335,7 +339,8 @@ export function ProgramInfoStep({
           <Label
             htmlFor="startDate"
             className="block text-base font-medium mb-1 text-brand-text-gray">
-            Study Start Date <span className="text-sm text-brand-light-red mt-1">*</span>
+            {t("programInfo.labels.studyStartDate")} {" "}
+            <span className="text-sm text-brand-light-red mt-1">*</span>
           </Label>
           <Popover open={start.open} onOpenChange={start.setOpen}>
             <PopoverTrigger asChild>
@@ -344,7 +349,7 @@ export function ProgramInfoStep({
                 id="startDate"
                 className="w-full justify-between font-normal"
               >
-                {start.date ? start.date.toLocaleDateString() : "Select date"}
+                {start.date ? start.date.toLocaleDateString() : t("programInfo.placeholders.date")}
                 <ChevronDownIcon />
               </Button>
             </PopoverTrigger>
@@ -381,7 +386,8 @@ export function ProgramInfoStep({
         {/* Study End Date div */}
         <div className="flex flex-col gap-3">
           <Label htmlFor="endDate" className="block text-base font-medium mb-1 text-brand-text-gray">
-            Study End Date <span className="text-sm text-brand-light-red mt-1">*</span>
+            {t("programInfo.labels.studyEndDate")}{" "}
+            <span className="text-sm text-brand-light-red mt-1">*</span>
           </Label>
           <Popover open={end.open} onOpenChange={end.setOpen}>
             <PopoverTrigger asChild>
@@ -390,7 +396,7 @@ export function ProgramInfoStep({
                 id="endDate"
                 className="w-full justify-between font-normal"
               >
-                {end.date ? end.date.toLocaleDateString() : "Select date"}
+                {end.date ? end.date.toLocaleDateString() : t("programInfo.placeholders.date")}
                 <ChevronDownIcon />
               </Button>
             </PopoverTrigger>
@@ -427,10 +433,10 @@ export function ProgramInfoStep({
       <div className="mt-4">
         {/* Previous institution disability documentation div */}
         <label className="block text-base font-medium mb-2 text-left text-brand-text-gray">
-          Has the student submitted a completed OSAP Disability Verification
-          Form or other disability documentation while attending another
-          institution? <span className="text-sm text-brand-light-red mt-1">*</span>
+          {t("programInfo.submittedElsewhere.question")}{" "}
+          <span className="text-sm text-brand-light-red mt-1">*</span>
         </label>
+
         <RadioGroup
           value={formData.submittedDisabilityElsewhere ? "yes" : "no"}
           onValueChange={(value) =>
@@ -455,7 +461,8 @@ export function ProgramInfoStep({
         {formData.submittedDisabilityElsewhere === true && (
           <div className="mb-3 text-left">
             <label className="block text-sm font-medium mb-1 text-brand-text-gray">
-              Previous institution <span className="text-sm text-brand-light-red mt-1">*</span>
+              {t("programInfo.submittedElsewhere.previousInstitutionLabel")}{" "}
+              <span className="text-sm text-brand-light-red mt-1">*</span>
             </label>
 
             <Popover>
@@ -467,10 +474,8 @@ export function ProgramInfoStep({
                   className="md:w-1/2 justify-start text-left"
                 >
                   {formData.previousInstitution
-                    ? institutions.find(
-                      (inst) => inst.value === formData.previousInstitution
-                    )?.label
-                    : "Search previous institution..."}
+                    ? institutions.find((inst) => inst.value === formData.previousInstitution)?.label
+                    : t("programInfo.placeholders.previousInstitutionSearch")}
                   <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
@@ -478,11 +483,11 @@ export function ProgramInfoStep({
               <PopoverContent className="mx-auto p-0">
                 <Command>
                   <CommandInput
-                    placeholder="Search institution..."
+                    placeholder={t("programInfo.placeholders.institutionInput")}
                     className="h-9"
                   />
                   <CommandList>
-                    <CommandEmpty>No institution found.</CommandEmpty>
+                  <CommandEmpty>{t("programInfo.messages.noInstitutionFound")}</CommandEmpty>
                     <CommandGroup>
                       {institutions.map((inst) => (
                         <CommandItem
