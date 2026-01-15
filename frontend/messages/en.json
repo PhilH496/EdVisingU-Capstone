@@ -8,5 +8,96 @@
     "disabilityInfo": "Disability Info",
     "serviceEquipment": "Service & Equipment",
     "review": "Review & Submit"
+  },
+  "common": {
+    "yes": "Yes",
+    "no": "No"
+  },
+  "studentInfo": {
+    "sectionHeader": "Section A: Student Information",
+    "osapQuestion": "Do you have an OSAP application?",
+    "mailingAddressHeader": "Mailing Address",
+    "labels": {
+      "osapApplicationStartDate": "OSAP Application Start Date",
+      "studentId": "Student ID",
+      "oen": "Ontario Education Number (OEN)",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "dob": "Date of Birth",
+      "sin": "Social Insurance Number",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "streetAddress": "Street Address",
+      "city": "City",
+      "province": "Province/Territory",
+      "postalCode": "Postal Code",
+      "country": "Country"
+    },
+    "placeholders": {
+      "osapStartDate": "Select OSAP start date",
+      "selectDate": "Select date",
+      "studentId": "Enter student ID",
+      "oen": "9-digit OEN",
+      "firstName": "Enter first name",
+      "lastName": "Enter last name",
+      "sin": "XXX-XXX-XXX",
+      "email": "YourEmail@example.com",
+      "phone": "(XXX) XXX-XXXX",
+      "streetAddress": "123 Main Street",
+      "city": "Toronto",
+      "province": "Select Province/Territory",
+      "postalCode": "A1A 1A1",
+      "country": "Canada"
+    },
+    "noOsapPanel": {
+      "title": "OSAP application is required for BSWD funding",
+      "description": "Please enter your email address to receive information about OSAP application requirements:",
+      "emailPlaceholder": "your.email@example.com",
+      "sentMessage": "Notification email sent to",
+      "button": {
+        "send": "Send",
+        "sending": "Sending...",
+        "sent": "Sent"
+      }
+    }
+  },
+  "programInfo": {
+    "sectionHeader": "Section B: Information about your school and program",
+    "labels": {
+      "institutionName": "Institution Name",
+      "institutionType": "Institution Type",
+      "programCostCode": "Program Cost Code",
+      "programOfStudy": "Program of Study",
+      "studyType": "Study Type",
+      "studyStartDate": "Study Start Date",
+      "studyEndDate": "Study End Date"
+    },
+    "placeholders": {
+      "institutionSearch": "Search for OSAP-approved institutions",
+      "institutionInput": "Search institution...",
+      "previousInstitutionSearch": "Search previous institution...",
+      "select": "Select...",
+      "programCostCode": "Enter cost code",
+      "programOfStudy": "Enter program name",
+      "date": "Select date"
+    },
+    "messages": {
+      "noInstitutionFound": "No institution found."
+    },
+    "options": {
+      "institutionType": {
+        "public": "Public",
+        "private": "Private"
+      },
+      "studyType": {
+        "fullTime": "Full-Time",
+        "partTime": "Part-Time",
+        "institutionFunded": "Institution-funded Special Bursary"
+      }
+    },
+    "submittedElsewhere": {
+      "question": "Has the student submitted a completed OSAP Disability Verification Form or other disability documentation while attending another institution?",
+      "previousInstitutionLabel": "Previous institution"
+    }
   }
 }
