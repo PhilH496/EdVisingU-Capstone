@@ -1,11 +1,19 @@
 /**
- * Application Detail 
+ * Application Detail
  *
  * Focused, readable view of the submitted student application.
  */
 
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useRef, useState, Dispatch, SetStateAction } from "react";
+
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -22,8 +30,14 @@ import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
 import { ReviewAndSubmit } from "@/components/bswd/steps/SubmitStep";
 import { StudentInfoSchema } from "@/schemas/StudentInfoSchema";
 
-// central store I/O (Supabase + local) 
-import { AppSummary as StoreSummary, Snapshot as StoreSnapshot, loadSnapshot as storeLoadSnapshot, saveSnapshotMerge as storeSaveSnapshotMerge, saveApplicationsList as storeSaveApplicationsList } from "@/lib/adminStore";
+// central store I/O (Supabase + local)
+import {
+  AppSummary as StoreSummary,
+  Snapshot as StoreSnapshot,
+  loadSnapshot as storeLoadSnapshot,
+  saveSnapshotMerge as storeSaveSnapshotMerge,
+  saveApplicationsList as storeSaveApplicationsList,
+} from "@/lib/adminStore";
 import { supabase } from "@/lib/supabase";
 import { ApplicationStatus } from "@/components/admin/constants";
 
@@ -102,7 +116,6 @@ interface ApplicationData {
   };
 }
 
-// Step Shims 
 const StudentInfoStepShim = ({
   formData,
   setFormData,
@@ -162,10 +175,10 @@ const ReviewAndSubmitShim = ({
   />
 );
 
-// Main Page 
 export default function AdminApplicationDetailPage() {
   const router = useRouter();
   const { id } = router.query as { id?: string };
+
   const [data, setData] = useState<Snapshot | null>(null);
 
   // edit mode state
@@ -179,7 +192,7 @@ export default function AdminApplicationDetailPage() {
   // Analysis
   const [analysis, setAnalysis] = useState<ApplicationAnalysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
-  
+
   // Chatbot
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [activeChatApplication, setActiveChatApplication] =
@@ -199,16 +212,13 @@ export default function AdminApplicationDetailPage() {
     });
   };
 
-  const summary = data?.summary;
-  const form = (data?.formData as FormData) || ({} as FormData);
-  const hasForm = useMemo(() => !!data?.formData, [data]);
-
-  // AI Analysis 
   const analyzeApplication = async () => {
     if (!editForm || !summary) return;
     setAnalyzing(true);
     try {
+      // Process functional limitations
       const functionalLimitations = toChips(editForm.functionalLimitations);
+
       const payload = {
         application_id: summary.id,
         student_id: editForm.studentId,
@@ -245,24 +255,25 @@ export default function AdminApplicationDetailPage() {
       );
 
       if (response.ok) {
-        const analysisResult = (await response.json()) as ApplicationAnalysis;
+        const analysisResult = await response.json();
         setAnalysis(analysisResult);
-        const ai = analysisResult.ai_analysis;
+
+        // Structure properly for chatbot
         const appDataWithAnalysis: ApplicationData = {
           application_id: summary.id,
-          student_id: editForm.studentId ?? "",
-          first_name: editForm.firstName ?? "",
-          last_name: editForm.lastName ?? "",
-          disability_type: editForm.disabilityType ?? "",
-          study_type: editForm.studyType ?? "",
-          osap_application: editForm.osapApplication ?? "",
-          has_osap_restrictions: !!editForm.hasOSAPRestrictions,
-          federal_need: editForm.federalNeed ?? 0,
-          provincial_need: editForm.provincialNeed ?? 0,
+          student_id: editForm.studentId,
+          first_name: editForm.firstName,
+          last_name: editForm.lastName,
+          disability_type: editForm.disabilityType,
+          study_type: editForm.studyType,
+          osap_application: editForm.osapApplication,
+          has_osap_restrictions: editForm.hasOSAPRestrictions,
+          federal_need: editForm.federalNeed,
+          provincial_need: editForm.provincialNeed,
           disability_verification_date:
             editForm.disabilityVerificationDate ?? "",
           functional_limitations: functionalLimitations,
-          needs_psycho_ed_assessment: !!editForm.needsPsychoEdAssessment,
+          needs_psycho_ed_assessment: editForm.needsPsychoEdAssessment,
           requested_items: requestedItems.map((item) => ({
             category: item.category ?? "",
             item: item.item ?? "",
@@ -272,27 +283,30 @@ export default function AdminApplicationDetailPage() {
                 : Number(item.cost ?? 0),
             funding_source: item.fundingSource ?? "",
           })),
-          institution: editForm.institution ?? "",
-          program: editForm.program ?? "",
+          institution: editForm.institution,
+          program: editForm.program,
           analysis: {
-            decision: ai.recommended_status,
-            confidence: Math.round(ai.confidence_score * 100),
-            reasoning: ai.reasoning,
-            risk_factors: ai.risk_factors,
-            recommended_funding: ai.funding_recommendation ?? 0,
+            decision: analysisResult.ai_analysis.recommended_status,
+            confidence: Math.round(
+              analysisResult.ai_analysis.confidence_score * 100
+            ),
+            reasoning: analysisResult.ai_analysis.reasoning,
+            risk_factors: analysisResult.ai_analysis.risk_factors,
+            recommended_funding:
+              analysisResult.ai_analysis.funding_recommendation,
           },
         };
         setActiveChatApplication(appDataWithAnalysis);
       }
-    } catch (err) {
-      console.error("Analysis failed:", err);
+    } catch (error) {
+      console.error("Analysis failed:", error);
       alert("Analysis failed. Make sure backend is running.");
     } finally {
       setAnalyzing(false);
     }
   };
 
-  // Data Load 
+  // Load from centralized store (Supabase + local fallback)
   useEffect(() => {
     if (!id) return;
     (async () => {
@@ -310,37 +324,32 @@ export default function AdminApplicationDetailPage() {
     })();
   }, [id]);
 
+  const summary = data?.summary;
+  const form = (data?.formData as FormData) || ({} as FormData);
+  const hasForm = useMemo(() => !!data?.formData, [data]);
+
   const prettyDate = (iso?: string) =>
     iso ? new Date(iso).toLocaleString() : "—";
 
   const toChips = (val: unknown): string[] => {
     if (!val) return [];
-    if (Array.isArray(val)) {
-      return val
-        .map((item) => String(item).trim())
-        .filter((s) => s.length > 0);
-    }
+    if (Array.isArray(val)) return val.map(String).filter(Boolean);
     if (typeof val === "object") {
-      return Object.entries(val as Record<string, unknown>)
-        .filter(([, v]) => !!v)
+      return Object.entries(val)
+        .filter(([_, v]) => !!v)
         .map(([k]) => k);
     }
     if (typeof val === "string") {
       return val
         .split(",")
         .map((s) => s.trim())
-        .filter((s) => s.length > 0);
+        .filter(Boolean);
     }
     return [];
   };
 
-  const formatMoney = (n: unknown): string => {
-    const num =
-      typeof n === "number"
-        ? n
-        : typeof n === "string"
-        ? Number(n)
-        : Number(n as number);
+  const formatMoney = (n: unknown) => {
+    const num = Number(n);
     if (Number.isNaN(num)) return "—";
     return num.toLocaleString(undefined, {
       style: "currency",
@@ -360,23 +369,19 @@ export default function AdminApplicationDetailPage() {
       return raw
         .map((lim) => {
           if (typeof lim === "string") return lim;
+
           if (lim && typeof lim === "object") {
-            const obj = lim as {
-              label?: string;
-              checked?: boolean;
-              name?: string;
-            };
-            if (obj.label && obj.checked) return obj.label;
-            if (obj.name && obj.checked) return obj.name;
+            if (lim.label && lim.checked) return lim.label;
+            if (lim.name && lim.checked) return lim.name;
           }
           return null;
         })
-        .filter((value): value is string => value !== null);
+        .filter(Boolean) as string[];
     }
 
     if (typeof raw === "object") {
-      return Object.entries(raw as Record<string, unknown>)
-        .filter(([, val]) => Boolean(val))
+      return Object.entries(raw)
+        .filter(([_, val]) => Boolean(val))
         .map(([key]) => key);
     }
 
@@ -393,13 +398,13 @@ export default function AdminApplicationDetailPage() {
     !!editForm &&
     JSON.stringify(initialSnapshot.current) !== JSON.stringify(editForm);
 
-  // Persist 
+  // Persist snapshot and refresh list (centralized store)
   const persistEverywhere = async (fd: FormData) => {
     if (!summary) return;
 
     const nowIso = new Date().toISOString();
 
-    const updatedRow: Summary = {
+    const updatedRow = {
       id: summary.id,
       studentName: `${fd.firstName} ${fd.lastName}`.trim(),
       studentId: summary.studentId,
@@ -409,6 +414,12 @@ export default function AdminApplicationDetailPage() {
       institution: fd.institution,
       studyPeriod: `${fd.studyPeriodStart} - ${fd.studyPeriodEnd}`,
       statusUpdatedDate: nowIso,
+
+      // Admin workflow fields
+      assignee: data?.assignee ?? "",
+      violationTags: data?.violationTags ?? [],
+      violationDetails: data?.violationDetails ?? "",
+      attachments: data?.attachments ?? [],
     };
 
     // Triggers status recalculation and saves to Supabase
@@ -421,6 +432,7 @@ export default function AdminApplicationDetailPage() {
       .eq("id", summary.id)
       .single();
 
+    // Create updated summary
     const nextSummary: Summary = {
       id: updatedRow.id,
       studentName: updatedRow.studentName,
@@ -450,9 +462,9 @@ export default function AdminApplicationDetailPage() {
   const validateAndSaveStudentBlock = async (fd: FormData) => {
     try {
       const [dayStr, monthStr, yearStr] = (fd.dateOfBirth || "").split("/");
-      const day = Number(dayStr);
-      const month = Number(monthStr);
-      const year = Number(yearStr);
+      const day = Number(dayStr),
+        month = Number(monthStr),
+        year = Number(yearStr);
       if (!day || !month || !year) {
         setError("Invalid date of birth format. Use DD/MM/YYYY.");
         return false;
@@ -499,7 +511,6 @@ export default function AdminApplicationDetailPage() {
     }
   };
 
-  // Render 
   return (
     <AdminLayout
       title="Application Details"
@@ -578,8 +589,8 @@ export default function AdminApplicationDetailPage() {
 
           {!summary ? (
             <div className="border rounded-xl p-6 bg-white shadow-sm">
-              Could not load application{" "}
-              <span className="font-mono">{id}</span>.
+              Could not load application <span className="font-mono">{id}</span>
+              .
             </div>
           ) : (
             <>
@@ -631,10 +642,7 @@ export default function AdminApplicationDetailPage() {
                             <Field label="Student ID" value={form.studentId} />
                             <Field label="OEN" value={form.oen} />
                             <Field label="SIN" value={form.sin} />
-                            <Field
-                              label="First Name"
-                              value={form.firstName}
-                            />
+                            <Field label="First Name" value={form.firstName} />
                             <Field label="Last Name" value={form.lastName} />
                             <Field
                               label="Date of Birth"
@@ -769,9 +777,7 @@ export default function AdminApplicationDetailPage() {
                                     <th className="py-2 pr-4">Item</th>
                                     <th className="py-2 pr-4">Cost</th>
                                     <th className="py-2 pr-4">Funding</th>
-                                    <th className="py-2 pr-4">
-                                      Justification
-                                    </th>
+                                    <th className="py-2 pr-4">Justification</th>
                                   </tr>
                                 </thead>
                                 <tbody className="align-top">
@@ -884,7 +890,6 @@ export default function AdminApplicationDetailPage() {
   );
 }
 
-// UI Helpers
 function Section({
   title,
   children,
@@ -914,7 +919,7 @@ function Field({
   mono,
 }: {
   label: string;
-  value?: ReactNode;
+  value: ReactNode;
   mono?: boolean;
 }) {
   return (
