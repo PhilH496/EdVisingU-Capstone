@@ -18,7 +18,7 @@ export async function sendPsychoEdReferral(
 ): Promise<{ success: boolean; message: string }> {
   try {
     // Call Edge Function via Supabase client to send email immediately
-    const { data, error } = await supabase.functions.invoke('send-psycho-ed-email', {
+    const { error } = await supabase.functions.invoke('send-psycho-ed-email', {
       body: {
         email: email,
         studentName: studentName ?? "Student",
@@ -69,7 +69,7 @@ export async function sendNoOsapEmail(
 ): Promise<{ success: boolean; message: string }> {
   try {
     // Call Edge Function via Supabase client to send email immediately
-    const { data, error } = await supabase.functions.invoke('send-no-osap-email', {
+    const { error } = await supabase.functions.invoke('send-no-osap-email', {
       body: {
         email: email ?? "",
         studentName: studentName ?? "Student",

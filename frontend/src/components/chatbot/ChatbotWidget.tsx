@@ -8,7 +8,7 @@
  * - Conversation history display
  */
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, FormEvent } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 interface Message {
@@ -43,7 +43,7 @@ export function ChatbotWidget() {
     }
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const handleSendMessage = async (e: FormEvent) => {
     e.preventDefault();
     if (!message.trim() || isLoading) return;
 
