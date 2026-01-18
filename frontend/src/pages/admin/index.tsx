@@ -101,53 +101,13 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     (async () => {
       const summaries = await storeLoadSummaries();
-      const scoreMap: Record<string, number> = {};
 
       const hydrated: Row[] = await Promise.all(
         summaries.map(async (s: AppSummary): Promise<Row> => {
           const snap = await storeLoadSnapshot(s.id);
-          let calculatedStatus = s.status;
-
-          if (snap?.formData) {
-            // Call backend to calculate score
-            const response = await fetch(
-              `${
-                process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
-              }/api/analysis/score`,
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  disability_type: snap.formData.disabilityType,
-                  study_type: snap.formData.studyType,
-                  has_osap_restrictions: snap.formData.hasOSAPRestrictions,
-                  osap_application: snap.formData.osapApplication,
-                  provincial_need: snap.formData.provincialNeed,
-                  federal_need: snap.formData.federalNeed,
-                  requested_items: snap.formData.requestedItems || [],
-                }),
-              }
-            );
-
-            if (response.ok) {
-              const data = await response.json();
-              const score = data.confidence_score;
-              scoreMap[s.id] = score;
-
-              // Auto-set status based on score
-              if (score >= 90) {
-                calculatedStatus = "Approved";
-              } else if (score >= 75) {
-                calculatedStatus = "In Review";
-              } else {
-                calculatedStatus = "Rejected";
-              }
-            }
-          }
 
           return {
             ...s,
-            status: calculatedStatus,
             assignee: snap?.assignee ?? "",
             violationTags: Array.isArray(snap?.violationTags)
               ? snap!.violationTags
@@ -162,6 +122,12 @@ export default function AdminDashboardPage() {
       );
 
       setRows(hydrated);
+
+      // Build score map from single database query
+      const scoreMap: Record<string, number> = {};
+      summaries.forEach((s) => {
+        scoreMap[s.id] = s.confidenceScore ?? 0;
+      });
       setDetScores(scoreMap);
     })();
   }, []);
