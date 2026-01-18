@@ -350,6 +350,9 @@ export function ProgramInfoStep({
             </PopoverTrigger>
             <PopoverContent className="w-auto overflow-hidden p-0" align="start">
               <Calendar
+                labels={{
+                  labelMonthDropdown: () => "startDateLabel",
+                }}
                 defaultMonth={start.date || new Date(2025, 0)}
                 startMonth={new Date(2025, 0)}
                 endMonth={new Date(2026, 11)}
@@ -396,6 +399,9 @@ export function ProgramInfoStep({
             </PopoverTrigger>
             <PopoverContent className="w-auto overflow-hidden p-0" align="start">
               <Calendar
+                labels={{
+                  labelMonthDropdown: () => "endDateLabel", // needed otherwise playwright cant differentiate between the two date pickers
+                }}
                 defaultMonth={end.date || new Date(2026, 11)}
                 startMonth={new Date(2025, 0)}
                 endMonth={new Date(2026, 11)}
