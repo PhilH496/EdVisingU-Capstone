@@ -26,7 +26,8 @@ test.afterEach(async () => {
   await resetTestData();
 });
 
-test('test student submission process', async ({ page }) => {
+// end-to-end test for student submission process
+test('submission', async ({ page }) => {
   // student info step
   await page.goto('http://localhost:3000/');
   await page.getByRole('radio', { name: 'Yes' }).check();
@@ -185,4 +186,23 @@ test('test student submission process', async ({ page }) => {
   await page.waitForSelector('#applicationId');
   await expect(page.locator('#applicationId')).toHaveText('APP-1234567');
   await expect(page.locator('#submittedByName')).toHaveText('Submitted by: Phillip Hernandez');
+});
+
+// i18n functionality test
+test('localization', async ({ page }) => {
+  await page.goto('http://localhost:3000/');
+  await page.getByRole('combobox').first().selectOption('fr');
+  await expect(page.locator('#studentFormHeader')).toContainText('Formulaire de demande BSWD');
+  await expect(page.getByRole('list')).toContainText('Info étudiant');
+});
+
+// student chatbot functionality test
+test('chatbot', async ({ page }) => {
+  await page.goto('http://localhost:3000/');
+  await page.getByRole('button', { name: 'Open chat' }).click();
+  await page.getByRole('textbox', { name: 'Type your message...' }).click();
+  await page.getByRole('textbox', { name: 'Type your message...' }).fill('Can you verify that this chat is functional by responding to this chat with "Yes"');
+  await page.getByRole('button', { name: 'Send message' }).click();
+  await page.waitForSelector('#chatbotResponse');
+  await expect(page.locator('#chatbotResponse')).toContainText('Yes');
 });

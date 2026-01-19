@@ -46,9 +46,8 @@ export function FormLayout({ children, title, description, headerAction }: FormL
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="bg-white rounded-lg shadow p-6">
             <div className="mb-6 text-left flex justify-between">
-              <div>
+              <div id="studentFormHeader">
                 <h1 className="text-2xl font-bold mb-2">{title}</h1>
-                <p className="text-gray-600">{description}</p>
               </div>
               {headerAction && <div className="ml-4">{headerAction}</div>}
             </div>
