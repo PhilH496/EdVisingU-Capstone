@@ -182,6 +182,7 @@ test('test student submission process', async ({ page }) => {
   await page.getByRole('checkbox', { name: 'I confirm that all the' }).check();
   await page.getByRole('button', { name: 'Submit Application' }).click();
   // thank you page
+  await page.waitForSelector('#applicationId');
   await expect(page.locator('#applicationId')).toHaveText('APP-1234567');
   await expect(page.locator('#submittedByName')).toHaveText('Submitted by: Phillip Hernandez');
 });
