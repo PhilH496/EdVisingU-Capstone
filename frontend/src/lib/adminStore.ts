@@ -20,6 +20,7 @@ export type AppSummary = {
   institution: string;
   studyPeriod: string;
   statusUpdatedDate: string;
+  confidenceScore?: number;
 };
 
 export type Attachment = {
@@ -107,12 +108,13 @@ export async function loadSummaries(): Promise<AppSummary[]> {
       institution: string;
       study_period: string;
       status_updated_date: string;
+      confidence_score?: number;
     };
 
     const { data, error } = await supabase
       .from("applications")
       .select(
-        "id, student_name, student_id, submitted_date, status, program, institution, study_period, status_updated_date"
+        "id, student_name, student_id, submitted_date, status, program, institution, study_period, status_updated_date, confidence_score"
       )
       .is("deleted_at", null)
       .order("submitted_date", { ascending: false });
@@ -128,6 +130,7 @@ export async function loadSummaries(): Promise<AppSummary[]> {
         institution: r.institution,
         studyPeriod: r.study_period,
         statusUpdatedDate: r.status_updated_date,
+        confidenceScore: r.confidence_score,
       }));
     }
     // fall through on error to local below
@@ -186,6 +189,7 @@ export async function loadSnapshot(id: string): Promise<Snapshot | null> {
       institution: string;
       study_period: string;
       status_updated_date: string;
+      confidence_score: number;
     };
     const [{ data: app, error: e1 }, { data: snap }] = await Promise.all([
       supabase
@@ -240,7 +244,7 @@ export async function loadSnapshot(id: string): Promise<Snapshot | null> {
 }
 
 //Helper Func: Recalculate status based on form data changes for supabase
-async function recalculateStatus(formData: FormData): Promise<string | null> {
+async function recalculateStatus(formData: FormData): Promise<{ status: string; score: number } | null> {
   if (!formData) {
     return null;
   }
@@ -279,7 +283,7 @@ async function recalculateStatus(formData: FormData): Promise<string | null> {
         newStatus = "Rejected";
       }
 
-      return newStatus;
+      return { status: newStatus, score };
     }
   } catch (error) {
     console.error(error);
@@ -297,10 +301,13 @@ export async function saveSnapshotMerge(
   if (isSupabaseReady() && supabase) {
     // — This is where we connect to Supabase to upsert —
     let updatedStatus = r.status;
+    let updatedScore = r.confidenceScore;
+    
     if (formData) {
-      const calculatedStatus = await recalculateStatus(formData);
-      if (calculatedStatus) {
-        updatedStatus = calculatedStatus;
+      const result = await recalculateStatus(formData);
+      if (result) {
+        updatedStatus = result.status;
+        updatedScore = result.score;
       }
     }
     const summaryPayload = {
@@ -309,6 +316,7 @@ export async function saveSnapshotMerge(
       student_id: r.studentId,
       submitted_date: r.submittedDate,
       status: updatedStatus,
+      confidence_score: updatedScore,
       program: r.program,
       institution: r.institution,
       study_period: r.studyPeriod,
