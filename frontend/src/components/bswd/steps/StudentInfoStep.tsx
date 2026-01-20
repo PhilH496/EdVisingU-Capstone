@@ -337,7 +337,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               >
                 {dob.date // translation
                   ? dob.date.toLocaleDateString()
-                  : t("studentInfo.placeholders.dob")}
+                  : t("studentInfo.placeholders.selectDate")}
                 <ChevronDownIcon />
               </Button>
             </PopoverTrigger>
