@@ -36,6 +36,7 @@
     "placeholders": {
       "osapStartDate": "Sélectionnez la date de début d’OSAP",
       "selectDate": "Sélectionnez une date",
+      "dob": "Sélectionnez une date",
       "studentId": "Entrez le numéro d’étudiant",
       "oen": "OEN à 9 chiffres",
       "firstName": "Entrez le prénom",
@@ -49,9 +50,21 @@
       "postalCode": "A1A 1A1",
       "country": "Canada"
     },
+    "provinces": {
+      "ON": "Ontario",
+      "AB": "Alberta",
+      "BC": "Colombie-Britannique",
+      "MB": "Manitoba",
+      "NB": "Nouveau-Brunswick",
+      "NL": "Terre-Neuve-et-Labrador",
+      "NS": "Nouvelle-Écosse",
+      "PE": "Île-du-Prince-Édouard",
+      "QC": "Québec",
+      "SK": "Saskatchewan"
+    },
     "noOsapPanel": {
       "title": "Une demande d’OSAP est requise pour le financement BSWD",
-      "description": "Veuillez entrer votre adresse courriel pour recevoir des informations sur les exigences de demande d’OSAP :",
+      "description": "Veuillez entrer votre adresse courriel pour recevoir des informations sur les exigences de la demande OSAP :",
       "emailPlaceholder": "votre.courriel@exemple.com",
       "sentMessage": "Courriel de notification envoyé à",
       "button": {
@@ -66,17 +79,17 @@
     "labels": {
       "institutionName": "Nom de l’établissement",
       "institutionType": "Type d’établissement",
-      "programCostCode": "Code du coût du programme",
+      "programCostCode": "Code de coût du programme",
       "programOfStudy": "Programme d’études",
       "studyType": "Type d’études",
       "studyStartDate": "Date de début des études",
       "studyEndDate": "Date de fin des études"
     },
     "placeholders": {
-      "institutionSearch": "Rechercher des établissements approuvés par l’OSAP",
+      "institutionSearch": "Rechercher un établissement approuvé par l’OSAP",
       "institutionInput": "Rechercher un établissement...",
       "previousInstitutionSearch": "Rechercher un établissement précédent...",
-      "select": "Sélectionnez...",
+      "select": "Sélectionner...",
       "programCostCode": "Entrez le code de coût",
       "programOfStudy": "Entrez le nom du programme",
       "date": "Sélectionnez une date"
@@ -96,7 +109,7 @@
       }
     },
     "submittedElsewhere": {
-      "question": "L’étudiant a-t-il soumis un formulaire de vérification du handicap de l’OSAP rempli ou d’autres documents liés au handicap lors de sa fréquentation d’un autre établissement ?",
+      "question": "L’étudiant a-t-il soumis un formulaire de vérification du handicap OSAP ou une autre documentation relative au handicap dans un autre établissement ?",
       "previousInstitutionLabel": "Établissement précédent"
     }
   }
