@@ -42,98 +42,29 @@ import { useDateRange } from "@/hooks/UseDateRange";
 import { useTranslation } from "@/lib/i18n"; // translation
 
 const institutions = [
-  {
-    value: "algoma",
-    label: "Algoma University",
-  },
-  {
-    value: "nipissing",
-    label: "Nipissing University",
-  },
-  {
-    value: "metro",
-    label: "Toronto Metropolitan University",
-  },
-  {
-    value: "brock",
-    label: "Brock University",
-  },
-  {
-    value: "ocad",
-    label: "OCAD University",
-  },
-  {
-    value: "trent",
-    label: "Trent University",
-  },
-  {
-    value: "carleton",
-    label: "Carleton University",
-  },
-  {
-    value: "français",
-    label: "Université de l'Ontario français",
-  },
-  {
-    value: "guelph",
-    label: "University of Guelph",
-  },
-  {
-    value: "tech",
-    label: "Ontario Tech University",
-  },
-  {
-    value: "waterloo",
-    label: "University of Waterloo",
-  },
-  {
-    value: "hearst",
-    label: " Université de Hearst",
-  },
-  {
-    value: "ottawa",
-    label: "University of Ottawa",
-  },
-  {
-    value: "western",
-    label: "Western University",
-  },
-  {
-    value: "lakehead",
-    label: "Lakehead University",
-  },
-  {
-    value: "queens",
-    label: "Queen's University",
-  },
-  {
-    value: "willfrid",
-    label: "Willfrid Laurier University",
-  },
-  {
-    value: "military",
-    label: " Royal Military College of Canada",
-  },
-  {
-    value: "laurentian",
-    label: "Laurentian University",
-  },
-  {
-    value: "mcmaster",
-    label: "McMaster University",
-  },
-  {
-    value: "toronto",
-    label: "University of Toronto",
-  },
-  {
-    value: "york",
-    label: "York University",
-  },
-  {
-    value: "windsor",
-    label: "University of Windsor",
-  },
+  { value: "algoma", label: "Algoma University" },
+  { value: "nipissing", label: "Nipissing University" },
+  { value: "metro", label: "Toronto Metropolitan University" },
+  { value: "brock", label: "Brock University" },
+  { value: "ocad", label: "OCAD University" },
+  { value: "trent", label: "Trent University" },
+  { value: "carleton", label: "Carleton University" },
+  { value: "français", label: "Université de l'Ontario français" },
+  { value: "guelph", label: "University of Guelph" },
+  { value: "tech", label: "Ontario Tech University" },
+  { value: "waterloo", label: "University of Waterloo" },
+  { value: "hearst", label: " Université de Hearst" },
+  { value: "ottawa", label: "University of Ottawa" },
+  { value: "western", label: "Western University" },
+  { value: "lakehead", label: "Lakehead University" },
+  { value: "queens", label: "Queen's University" },
+  { value: "willfrid", label: "Willfrid Laurier University" },
+  { value: "military", label: " Royal Military College of Canada" },
+  { value: "laurentian", label: "Laurentian University" },
+  { value: "mcmaster", label: "McMaster University" },
+  { value: "toronto", label: "University of Toronto" },
+  { value: "york", label: "York University" },
+  { value: "windsor", label: "University of Windsor" },
 ];
 
 interface ProgramInfoStepProps {
@@ -152,11 +83,15 @@ export function ProgramInfoStep({
   const { t, isLoaded } = useTranslation(); // translation start
   if (!isLoaded) return null; // ensures proper loading
 
+  const [startMonth, setStartMonth] = useState<Date>(new Date(2025, 0, 1));
+  const [endMonth, setEndMonth] = useState<Date>(new Date(2026, 11, 1));
+
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold mb-4">
         {t("programInfo.sectionHeader")}
       </h2>
+
       <div className="grid md:grid-cols-2 gap-4 text-brand-text-gray">
         {/* Institution Name div */}
         <div>
@@ -164,7 +99,7 @@ export function ProgramInfoStep({
             htmlFor="institutionName"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            {t("programInfo.labels.institutionName")} 
+            {t("programInfo.labels.institutionName")}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Popover open={institutionOpen} onOpenChange={setInstitutionOpen}>
@@ -176,7 +111,8 @@ export function ProgramInfoStep({
                 className="w-full justify-start text-left"
               >
                 {formData.institution
-                  ? institutions.find((i) => i.value === formData.institution)?.label
+                  ? institutions.find((i) => i.value === formData.institution)
+                      ?.label
                   : t("programInfo.placeholders.institutionSearch")}
                 <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
@@ -188,7 +124,9 @@ export function ProgramInfoStep({
                   className="h-9"
                 />
                 <CommandList>
-                  <CommandEmpty>{t("programInfo.messages.noInstitutionFound")}</CommandEmpty>
+                  <CommandEmpty>
+                    {t("programInfo.messages.noInstitutionFound")}
+                  </CommandEmpty>
                   <CommandGroup>
                     {institutions.map((institution) => (
                       <CommandItem
@@ -229,7 +167,7 @@ export function ProgramInfoStep({
             htmlFor="institutionType"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            {t("programInfo.labels.institutionType")}
+            {t("programInfo.labels.institutionType")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Select
@@ -245,8 +183,12 @@ export function ProgramInfoStep({
               <SelectValue placeholder={t("programInfo.placeholders.select")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="public-ontario">{t("programInfo.options.institutionType.public")}</SelectItem>
-              <SelectItem value="private-ontario">{t("programInfo.options.institutionType.private")}</SelectItem>
+              <SelectItem value="public-ontario">
+                {t("programInfo.options.institutionType.public")}
+              </SelectItem>
+              <SelectItem value="private-ontario">
+                {t("programInfo.options.institutionType.private")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -277,6 +219,7 @@ export function ProgramInfoStep({
             className="w-full"
           />
         </div>
+
         {/* Program of Study div*/}
         <div>
           <label
@@ -309,7 +252,7 @@ export function ProgramInfoStep({
             htmlFor="studyType"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            {t("programInfo.labels.studyType")}
+            {t("programInfo.labels.studyType")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Select
@@ -317,7 +260,10 @@ export function ProgramInfoStep({
             onValueChange={(value) =>
               setFormData((prev) => ({
                 ...prev,
-                studyType: value as "full-time" | "part-time" | "institution-funded-SB",
+                studyType: value as
+                  | "full-time"
+                  | "part-time"
+                  | "institution-funded-SB",
               }))
             }
           >
@@ -325,9 +271,15 @@ export function ProgramInfoStep({
               <SelectValue placeholder={t("programInfo.placeholders.select")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="full-time">{t("programInfo.options.studyType.fullTime")}</SelectItem>
-              <SelectItem value="part-time">{t("programInfo.options.studyType.partTime")}</SelectItem>
-              <SelectItem value="institution-funded-SB">{t("programInfo.options.studyType.institutionFunded")}</SelectItem>
+              <SelectItem value="full-time">
+                {t("programInfo.options.studyType.fullTime")}
+              </SelectItem>
+              <SelectItem value="part-time">
+                {t("programInfo.options.studyType.partTime")}
+              </SelectItem>
+              <SelectItem value="institution-funded-SB">
+                {t("programInfo.options.studyType.institutionFunded")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -338,8 +290,9 @@ export function ProgramInfoStep({
         <div className="flex flex-col gap-3">
           <Label
             htmlFor="startDate"
-            className="block text-base font-medium mb-1 text-brand-text-gray">
-            {t("programInfo.labels.studyStartDate")} {" "}
+            className="block text-base font-medium mb-1 text-brand-text-gray"
+          >
+            {t("programInfo.labels.studyStartDate")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </Label>
           <Popover open={start.open} onOpenChange={start.setOpen}>
@@ -349,12 +302,45 @@ export function ProgramInfoStep({
                 id="startDate"
                 className="w-full justify-between font-normal"
               >
-                {start.date ? start.date.toLocaleDateString() : t("programInfo.placeholders.date")}
+                {start.date
+                  ? start.date.toLocaleDateString()
+                  : t("programInfo.placeholders.date")}
                 <ChevronDownIcon />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+              <div className="p-2">
+                <label className="sr-only" htmlFor="startDateMonthSelect">
+                  startDateLabel
+                </label>
+                <select
+                  id="startDateMonthSelect"
+                  aria-label="startDateLabel"
+                  value={startMonth.getMonth().toString()}
+                  onChange={(e) => {
+                    const m = Number(e.target.value);
+                    const y = startMonth.getFullYear();
+                    setStartMonth(new Date(y, m, 1));
+                  }}
+                >
+                  <option value="0">Jan</option>
+                  <option value="1">Feb</option>
+                  <option value="2">Mar</option>
+                  <option value="3">Apr</option>
+                  <option value="4">May</option>
+                  <option value="5">Jun</option>
+                  <option value="6">Jul</option>
+                  <option value="7">Aug</option>
+                  <option value="8">Sep</option>
+                  <option value="9">Oct</option>
+                  <option value="10">Nov</option>
+                  <option value="11">Dec</option>
+                </select>
+              </div>
+
               <Calendar
+                month={startMonth}
+                onMonthChange={(m) => setStartMonth(m)}
                 defaultMonth={start.date || new Date(2025, 0)}
                 startMonth={new Date(2025, 0)}
                 endMonth={new Date(2026, 11)}
@@ -362,20 +348,17 @@ export function ProgramInfoStep({
                 selected={start.date}
                 captionLayout="dropdown"
                 disabled={(date) => {
-                  // Disable dates after the end date if end date is selected
-                  if (end.date) {
-                    return date > end.date
-                  }
-                  return false
+                  if (end.date) return date > end.date;
+                  return false;
                 }}
                 onSelect={(date) => {
-                  start.setDate(date)
-                  start.setOpen(false)
+                  start.setDate(date);
+                  start.setOpen(false);
                   if (date) {
                     setFormData((prev) => ({
                       ...prev,
-                      studyPeriodStart: format(date, "dd/MM/yyyy")
-                    }))
+                      studyPeriodStart: format(date, "dd/MM/yyyy"),
+                    }));
                   }
                 }}
               />
@@ -385,7 +368,10 @@ export function ProgramInfoStep({
 
         {/* Study End Date div */}
         <div className="flex flex-col gap-3">
-          <Label htmlFor="endDate" className="block text-base font-medium mb-1 text-brand-text-gray">
+          <Label
+            htmlFor="endDate"
+            className="block text-base font-medium mb-1 text-brand-text-gray"
+          >
             {t("programInfo.labels.studyEndDate")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </Label>
@@ -396,12 +382,45 @@ export function ProgramInfoStep({
                 id="endDate"
                 className="w-full justify-between font-normal"
               >
-                {end.date ? end.date.toLocaleDateString() : t("programInfo.placeholders.date")}
+                {end.date
+                  ? end.date.toLocaleDateString()
+                  : t("programInfo.placeholders.date")}
                 <ChevronDownIcon />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+              <div className="p-2">
+                <label className="sr-only" htmlFor="endDateMonthSelect">
+                  endDateLabel
+                </label>
+                <select
+                  id="endDateMonthSelect"
+                  aria-label="endDateLabel"
+                  value={endMonth.getMonth().toString()}
+                  onChange={(e) => {
+                    const m = Number(e.target.value);
+                    const y = endMonth.getFullYear();
+                    setEndMonth(new Date(y, m, 1));
+                  }}
+                >
+                  <option value="0">Jan</option>
+                  <option value="1">Feb</option>
+                  <option value="2">Mar</option>
+                  <option value="3">Apr</option>
+                  <option value="4">May</option>
+                  <option value="5">Jun</option>
+                  <option value="6">Jul</option>
+                  <option value="7">Aug</option>
+                  <option value="8">Sep</option>
+                  <option value="9">Oct</option>
+                  <option value="10">Nov</option>
+                  <option value="11">Dec</option>
+                </select>
+              </div>
+
               <Calendar
+                month={endMonth}
+                onMonthChange={(m) => setEndMonth(m)}
                 defaultMonth={end.date || new Date(2026, 11)}
                 startMonth={new Date(2025, 0)}
                 endMonth={new Date(2026, 11)}
@@ -409,19 +428,17 @@ export function ProgramInfoStep({
                 selected={end.date}
                 captionLayout="dropdown"
                 disabled={(date) => {
-                  if (start.date) {
-                    return date < start.date
-                  }
-                  return false
+                  if (start.date) return date < start.date;
+                  return false;
                 }}
                 onSelect={(date) => {
-                  end.setDate(date)
-                  end.setOpen(false)
+                  end.setDate(date);
+                  end.setOpen(false);
                   if (date) {
                     setFormData((prev) => ({
                       ...prev,
-                      studyPeriodEnd: format(date, "dd/MM/yyyy")
-                    }))
+                      studyPeriodEnd: format(date, "dd/MM/yyyy"),
+                    }));
                   }
                 }}
               />
@@ -474,7 +491,9 @@ export function ProgramInfoStep({
                   className="md:w-1/2 justify-start text-left"
                 >
                   {formData.previousInstitution
-                    ? institutions.find((inst) => inst.value === formData.previousInstitution)?.label
+                    ? institutions.find(
+                        (inst) => inst.value === formData.previousInstitution
+                      )?.label
                     : t("programInfo.placeholders.previousInstitutionSearch")}
                   <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -487,7 +506,9 @@ export function ProgramInfoStep({
                     className="h-9"
                   />
                   <CommandList>
-                  <CommandEmpty>{t("programInfo.messages.noInstitutionFound")}</CommandEmpty>
+                    <CommandEmpty>
+                      {t("programInfo.messages.noInstitutionFound")}
+                    </CommandEmpty>
                     <CommandGroup>
                       {institutions.map((inst) => (
                         <CommandItem
@@ -518,6 +539,7 @@ export function ProgramInfoStep({
             </Popover>
           </div>
         )}
+        
       </div>
     </div>
   );
