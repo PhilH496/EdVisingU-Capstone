@@ -183,11 +183,21 @@ function CalendarDayButton({
     if (modifiers.focused) ref.current?.focus()
   }, [modifiers.focused])
 
+  const ariaFromDayPicker =
+    typeof (props as any)["aria-label"] === "string"
+      ? ((props as any)["aria-label"] as string)
+      : undefined
+
+  const ariaWithoutYear = ariaFromDayPicker
+    ? ariaFromDayPicker.replace(/,\s*\d{4}$/, ",")
+    : undefined
+
   return (
     <Button
       ref={ref}
       variant="ghost"
       size="icon"
+      aria-label={ariaWithoutYear}
       data-day={day.date.toLocaleDateString()}
       data-selected-single={
         modifiers.selected &&
