@@ -1,5 +1,6 @@
 """
 FastAPI Backend for BSWD Chatbot
+Integrates with LangChain RAG system and Pinecone
 """
 
 from fastapi import FastAPI, HTTPException
@@ -14,8 +15,6 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from chain import get_or_create_chain, chat_with_memory
-from .analysis_routes import router as analysis_router
-from .admin_routes import router as admin_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -50,18 +49,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Request/Response Models
 class ChatMessage(BaseModel):
     role: str
     content: str
 
+
 class ChatRequest(BaseModel):
     message: str
     history: Optional[List[ChatMessage]] = []
 
+
 class ChatResponse(BaseModel):
     answer: str
     source_documents: Optional[List[dict]] = []
+
 
 @app.get("/")
 async def root():
@@ -71,6 +74,7 @@ async def root():
         "service": "BSWD Chatbot API",
         "version": "1.0.0"
     }
+
 
 @app.get("/health")
 async def health_check():
@@ -88,15 +92,22 @@ async def health_check():
             "error": str(e)
         }
 
+
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     """
-    Main chat endpoint for STUDENT chatbot
+    Main chat endpoint
+    
+    Processes user messages and returns AI responses using RAG
     """
     try:
+        # Get the conversation chain and memory
         chain, memory = get_or_create_chain()
+        
+        # Get response from chatbot
         response = chat_with_memory(chain, memory, request.message)
         
+        # Format source documents - implement sources most likely on admin side later
         source_docs = []
         if response.get("source_documents"):
             source_docs = [
@@ -133,8 +144,6 @@ async def reset_conversation():
             detail=f"Error resetting conversation: {str(e)}"
         )
 
-app.include_router(analysis_router)
-app.include_router(admin_router)
 
 if __name__ == "__main__":
     import uvicorn
