@@ -10,6 +10,7 @@ import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ApplicationAnalysisCard } from "@/components/admin/ApplicationAnalysisCard";
 import ApplicationChatbot from "@/components/admin/AdminChatbot";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 // using app's existing types/steps
 import { FormData } from "@/types/bswd";
@@ -94,7 +95,7 @@ const ReviewAndSubmitShim = ({
 type Summary = StoreSummary;
 type Snapshot = StoreSnapshot;
 
-export default function AdminApplicationDetailPage() {
+function AdminApplicationDetailPage() {
   const router = useRouter();
   const { id } = router.query as { id?: string };
 
@@ -716,5 +717,13 @@ function Field({ label, value, mono }: { label: string; value: any; mono?: boole
       <div className="text-gray-500">{label}</div>
       <div className={`${mono ? "font-mono" : "font-medium"} break-words`}>{value ?? "—"}</div>
     </div>
+  );
+}
+
+export default function AdminApplicationDetailPageWithAuth() {
+  return (
+    <ProtectedRoute requireRole="admin">
+      <AdminApplicationDetailPage />
+    </ProtectedRoute>
   );
 }

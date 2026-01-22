@@ -1,5 +1,6 @@
 import Head from "next/head";
 import { ReactNode } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Props = {
   title: string;
@@ -9,6 +10,8 @@ type Props = {
 };
 
 export function AdminLayout({ title, description, rightSlot, children }: Props) {
+  const { profile, signOut } = useAuth();
+
   return (
     <>
       <Head>
@@ -23,12 +26,23 @@ export function AdminLayout({ title, description, rightSlot, children }: Props) 
         {/* Ontario Black Header (matches app) */}
         <header className="bg-black">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center py-4">
+            <div className="flex items-center justify-between py-4">
               <img
                 src="/ontario-logo.png"
                 alt="Ontario"
                 className="block h-8 w-auto filter invert contrast-100"
               />
+              <div className="flex items-center gap-4">
+                <span className="text-white text-sm">
+                  {profile?.full_name || profile?.email}
+                </span>
+                <button
+                  onClick={() => signOut()}
+                  className="text-white hover:text-gray-300 text-sm font-medium"
+                >
+                  Sign Out
+                </button>
+              </div>
             </div>
           </div>
         </header>
