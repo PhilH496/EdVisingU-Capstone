@@ -33,7 +33,7 @@ import { useAuth } from "@/contexts/AuthContext";
 // Initial values are set to empty strings, zeros, or false depending on field type
 function BSWDApplicationPage() {
   const { t, isLoaded } = useTranslation();
-  const { signOut, profile } = useAuth();
+  const { signOut, profile, user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [maxStep, setMaxStep] = useState(1);
   const [saving, setSaving] = useState(false);
@@ -402,7 +402,7 @@ function BSWDApplicationPage() {
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100 flex items-center gap-2"
               >
-                <span>{profile?.full_name || profile?.email || 'User'}</span>
+                <span>{profile?.full_name || profile?.email || user?.email || 'User'}</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
@@ -413,7 +413,7 @@ function BSWDApplicationPage() {
                     {profile?.full_name && (
                       <div className="font-medium text-gray-900 mb-1">{profile.full_name}</div>
                     )}
-                    <div className="text-sm text-gray-600">{profile?.email}</div>
+                    <div className="text-sm text-gray-600">{profile?.email || user?.email}</div>
                     <div className="text-xs text-gray-500 mt-1">
                       {profile?.role === 'admin' ? 'Administrator' : 'Student'}
                     </div>
