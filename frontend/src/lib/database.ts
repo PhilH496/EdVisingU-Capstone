@@ -59,7 +59,7 @@ const calculateInitialStatus = async (formData: FormData): Promise<string> => {
 export const saveSubmission = async (formData: FormData) => {
   // 1. Insert into student table
   const studentPayload: StudentInsert = {
-    has_osap_application: formData.hasOsapApplication,
+    has_osap_application: formData.hasOsapApplication ?? false,
     student_id: +formData.studentId,
     oen: parseInt(formData.oen),
     first_name: formData.firstName,

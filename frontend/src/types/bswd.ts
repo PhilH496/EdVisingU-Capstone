@@ -30,6 +30,7 @@ export interface FormData {
   postalCode: string;
   country: string;
   hasOsapApplication: boolean | undefined;
+  osapApplicationStartDate?: string;
 
   // Program Information
   institution: string;
