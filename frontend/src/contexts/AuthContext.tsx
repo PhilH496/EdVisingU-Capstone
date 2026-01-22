@@ -110,6 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data: {
           full_name: fullName || '',
         },
+        emailRedirectTo: `${window.location.origin}/login`,
       },
     });
 
@@ -126,11 +127,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setProfile(null);
-    setSession(null);
-    router.push('/login');
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+      await router.push('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      // Even if there's an error, still redirect to login
+      await router.push('/login');
+    }
   };
 
   const isAdmin = () => profile?.role === 'admin';
