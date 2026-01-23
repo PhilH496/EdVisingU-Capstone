@@ -183,6 +183,7 @@ test('submission', async ({ page }) => {
   await page.getByRole('checkbox', { name: 'I confirm that all the' }).check();
   await page.getByRole('button', { name: 'Submit Application' }).click();
   // thank you page
+  await page.waitForSelector('#applicationId');
   await expect(page.locator('#applicationId')).toHaveText('APP-1234567');
   await expect(page.locator('#submittedByName')).toHaveText('Submitted by: Phillip Hernandez');
 });
@@ -203,5 +204,5 @@ test('chatbot', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Type your message...' }).fill('Can you verify that this chat is functional by responding to this chat with "Yes"');
   await page.getByRole('button', { name: 'Send message' }).click();
   await page.waitForSelector('#chatbotResponse');
-  await expect(page.locator('#chatbotResponse')).toContainText('Yes');
+  await expect(page.locator('#chatbotResponse').last()).toContainText('Yes');
 });
