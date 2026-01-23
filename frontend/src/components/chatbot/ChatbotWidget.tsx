@@ -165,7 +165,7 @@ export function ChatbotWidget() {
                     className="w-10 h-10 object-contain flex-shrink-0"
                   />
                 )}
-                <div
+                <div id='chatbotResponse'
                   className={`rounded-lg px-4 py-3 shadow-sm max-w-[85%] ${
                     msg.role === "user"
                       ? "bg-[#0066A1] text-white rounded-tr-none"
