@@ -34,7 +34,7 @@ function Calendar({
       )}
       captionLayout={captionLayout}
       formatters={{
-        formatMonthDropdown: (date) =>
+        formatMonthDropdown: (date: Date) =>
           date.toLocaleString("default", { month: "short" }),
         ...formatters,
       }}
@@ -170,12 +170,16 @@ function Calendar({
   )
 }
 
+type CalendarDayButtonProps = React.ComponentProps<typeof DayButton> & {
+  "aria-label"?: string
+}
+
 function CalendarDayButton({
   className,
   day,
   modifiers,
   ...props
-}: React.ComponentProps<typeof DayButton>) {
+}: CalendarDayButtonProps) {
   const defaultClassNames = getDefaultClassNames()
 
   const ref = React.useRef<HTMLButtonElement>(null)
@@ -184,9 +188,7 @@ function CalendarDayButton({
   }, [modifiers.focused])
 
   const ariaFromDayPicker =
-    typeof (props as any)["aria-label"] === "string"
-      ? ((props as any)["aria-label"] as string)
-      : undefined
+    typeof props["aria-label"] === "string" ? props["aria-label"] : undefined
 
   const ariaWithoutYear = ariaFromDayPicker
     ? ariaFromDayPicker.replace(/,\s*\d{4}$/, ",")
