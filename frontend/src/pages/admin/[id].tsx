@@ -245,7 +245,7 @@ export default function AdminApplicationDetailPage() {
 
       const response = await fetch(
         `${
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+          process.env.NEXT_PUBLIC_API_URL
         }/api/analysis/application`,
         {
           method: "POST",
