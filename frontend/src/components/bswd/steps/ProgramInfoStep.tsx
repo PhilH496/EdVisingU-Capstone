@@ -5,11 +5,11 @@
  */
 
 // Base React imports
-import { useState } from "react";
+import { useState } from "react"
 // shadcn UI components
-import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input"
+import { Calendar } from "@/components/ui/calendar"
+import { Button } from "@/components/ui/button"
 import {
   Command,
   CommandEmpty,
@@ -17,29 +17,25 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/components/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+} from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 // Icons
-import { CheckIcon, ChevronsUpDownIcon, ChevronDownIcon } from "lucide-react";
+import { CheckIcon, ChevronsUpDownIcon, ChevronDownIcon } from "lucide-react"
 // Utilities, types and hooks
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { FormData } from "@/types/bswd";
-import { useDateRange } from "@/hooks/UseDateRange";
-import { useTranslation } from "@/lib/i18n"; // translation
+import { format } from "date-fns"
+import { cn } from "@/lib/utils"
+import { FormData } from "@/types/bswd"
+import { useDateRange } from "@/hooks/UseDateRange"
+import { useTranslation } from "@/lib/i18n" // translation
 
 const institutions = [
   { value: "algoma", label: "Algoma University" },
@@ -65,26 +61,27 @@ const institutions = [
   { value: "toronto", label: "University of Toronto" },
   { value: "york", label: "York University" },
   { value: "windsor", label: "University of Windsor" },
-];
+]
 
 interface ProgramInfoStepProps {
-  formData: FormData;
-  setFormData: (data: FormData | ((prev: FormData) => FormData)) => void;
+  formData: FormData
+  setFormData: (data: FormData | ((prev: FormData) => FormData)) => void
 }
 
 export function ProgramInfoStep({
   formData,
   setFormData,
 }: ProgramInfoStepProps) {
-  const [value, setValue] = useState("");
-  const [institutionOpen, setInstitutionOpen] = useState(false);
-  const start = useDateRange();
-  const end = useDateRange();
-  const { t, isLoaded } = useTranslation(); // translation start
-  if (!isLoaded) return null; // ensures proper loading
+  const [value, setValue] = useState("")
+  const [institutionOpen, setInstitutionOpen] = useState(false)
+  const start = useDateRange()
+  const end = useDateRange()
+  const { t, isLoaded } = useTranslation()
 
-  const [startMonth, setStartMonth] = useState<Date>(new Date(2025, 0, 1));
-  const [endMonth, setEndMonth] = useState<Date>(new Date(2026, 11, 1));
+  const [startMonth, setStartMonth] = useState<Date>(new Date(2025, 0, 1))
+  const [endMonth, setEndMonth] = useState<Date>(new Date(2026, 11, 1))
+
+  if (!isLoaded) return null
 
   return (
     <div className="space-y-4">
@@ -93,7 +90,6 @@ export function ProgramInfoStep({
       </h2>
 
       <div className="grid md:grid-cols-2 gap-4 text-brand-text-gray">
-        {/* Institution Name div */}
         <div>
           <label
             htmlFor="institutionName"
@@ -120,7 +116,7 @@ export function ProgramInfoStep({
             <PopoverContent className="mx-auto p-0">
               <Command>
                 <CommandInput
-                  placeholder={t("programInfo.placeholders.institutionInput")} // translation
+                  placeholder={t("programInfo.placeholders.institutionInput")}
                   className="h-9"
                 />
                 <CommandList>
@@ -134,13 +130,13 @@ export function ProgramInfoStep({
                         value={institution.value}
                         onSelect={(currentValue) => {
                           const newValue =
-                            currentValue === value ? "" : currentValue;
-                          setValue(currentValue === value ? "" : currentValue);
+                            currentValue === value ? "" : currentValue
+                          setValue(currentValue === value ? "" : currentValue)
                           setFormData((prev) => ({
                             ...prev,
                             institution: newValue,
-                          }));
-                          setInstitutionOpen(false);
+                          }))
+                          setInstitutionOpen(false)
                         }}
                       >
                         {institution.label}
@@ -161,7 +157,6 @@ export function ProgramInfoStep({
           </Popover>
         </div>
 
-        {/* Institution Type div */}
         <div className="flex flex-col justify-end">
           <label
             htmlFor="institutionType"
@@ -195,7 +190,6 @@ export function ProgramInfoStep({
       </div>
 
       <div className="border-t pt-4 grid md:grid-cols-3 gap-4">
-        {/* Program Cost Code div */}
         <div>
           <label
             htmlFor="code"
@@ -210,17 +204,15 @@ export function ProgramInfoStep({
             required
             value={formData.code}
             onChange={(e) => {
-              const value = e.target.value;
+              const value = e.target.value
               if (/^[\d\s]*$/.test(value)) {
-                // user input can be numbers, spaces
-                setFormData((prev) => ({ ...prev, code: value }));
+                setFormData((prev) => ({ ...prev, code: value }))
               }
             }}
             className="w-full"
           />
         </div>
 
-        {/* Program of Study div*/}
         <div>
           <label
             htmlFor="program"
@@ -235,10 +227,9 @@ export function ProgramInfoStep({
             required
             value={formData.program}
             onChange={(e) => {
-              const value = e.target.value;
+              const value = e.target.value
               if (/^[A-Za-z\s]*$/.test(value)) {
-                // user input can be alphabetic, spaces
-                setFormData((prev) => ({ ...prev, program: value }));
+                setFormData((prev) => ({ ...prev, program: value }))
               }
             }}
             pattern="^[A-Za-z\s]+$"
@@ -246,7 +237,6 @@ export function ProgramInfoStep({
           />
         </div>
 
-        {/* Study Type div*/}
         <div>
           <label
             htmlFor="studyType"
@@ -286,7 +276,6 @@ export function ProgramInfoStep({
       </div>
 
       <div className="border-t pt-4 grid md:grid-cols-2 gap-4 ">
-        {/* Study Start Date div */}
         <div className="flex flex-col gap-3">
           <Label
             htmlFor="startDate"
@@ -318,9 +307,9 @@ export function ProgramInfoStep({
                   aria-label="startDateLabel"
                   value={startMonth.getMonth().toString()}
                   onChange={(e) => {
-                    const m = Number(e.target.value);
-                    const y = startMonth.getFullYear();
-                    setStartMonth(new Date(y, m, 1));
+                    const m = Number(e.target.value)
+                    const y = startMonth.getFullYear()
+                    setStartMonth(new Date(y, m, 1))
                   }}
                 >
                   <option value="0">Jan</option>
@@ -348,17 +337,17 @@ export function ProgramInfoStep({
                 selected={start.date}
                 captionLayout="dropdown"
                 disabled={(date) => {
-                  if (end.date) return date > end.date;
-                  return false;
+                  if (end.date) return date > end.date
+                  return false
                 }}
                 onSelect={(date) => {
-                  start.setDate(date);
-                  start.setOpen(false);
+                  start.setDate(date)
+                  start.setOpen(false)
                   if (date) {
                     setFormData((prev) => ({
                       ...prev,
                       studyPeriodStart: format(date, "dd/MM/yyyy"),
-                    }));
+                    }))
                   }
                 }}
               />
@@ -366,7 +355,6 @@ export function ProgramInfoStep({
           </Popover>
         </div>
 
-        {/* Study End Date div */}
         <div className="flex flex-col gap-3">
           <Label
             htmlFor="endDate"
@@ -398,9 +386,9 @@ export function ProgramInfoStep({
                   aria-label="endDateLabel"
                   value={endMonth.getMonth().toString()}
                   onChange={(e) => {
-                    const m = Number(e.target.value);
-                    const y = endMonth.getFullYear();
-                    setEndMonth(new Date(y, m, 1));
+                    const m = Number(e.target.value)
+                    const y = endMonth.getFullYear()
+                    setEndMonth(new Date(y, m, 1))
                   }}
                 >
                   <option value="0">Jan</option>
@@ -428,17 +416,17 @@ export function ProgramInfoStep({
                 selected={end.date}
                 captionLayout="dropdown"
                 disabled={(date) => {
-                  if (start.date) return date < start.date;
-                  return false;
+                  if (start.date) return date < start.date
+                  return false
                 }}
                 onSelect={(date) => {
-                  end.setDate(date);
-                  end.setOpen(false);
+                  end.setDate(date)
+                  end.setOpen(false)
                   if (date) {
                     setFormData((prev) => ({
                       ...prev,
                       studyPeriodEnd: format(date, "dd/MM/yyyy"),
-                    }));
+                    }))
                   }
                 }}
               />
@@ -448,7 +436,6 @@ export function ProgramInfoStep({
       </div>
 
       <div className="mt-4">
-        {/* Previous institution disability documentation div */}
         <label className="block text-base font-medium mb-2 text-left text-brand-text-gray">
           {t("programInfo.submittedElsewhere.question")}{" "}
           <span className="text-sm text-brand-light-red mt-1">*</span>
@@ -474,7 +461,6 @@ export function ProgramInfoStep({
           </div>
         </RadioGroup>
 
-        {/* Previous institution combobox (used when "Yes") */}
         {formData.submittedDisabilityElsewhere === true && (
           <div className="mb-3 text-left">
             <label className="block text-sm font-medium mb-1 text-brand-text-gray">
@@ -539,8 +525,7 @@ export function ProgramInfoStep({
             </Popover>
           </div>
         )}
-        
       </div>
     </div>
-  );
+  )
 }
