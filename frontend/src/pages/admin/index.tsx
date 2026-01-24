@@ -6,6 +6,7 @@
  * - Persists assignee, violations, details, attachments, status per application
  * - Deterministic scoring bubble using consolidated logic
  * - Bi-directional Sorting (Asc/Desc)
+ * - Pagination (50 items per page)
  */
 
 import { useEffect, useMemo, useState } from "react";
@@ -34,6 +35,8 @@ const STATUS_OPTIONS = [
   "Rejected",
   "Pending",
 ];
+
+const ITEMS_PER_PAGE = 50;
 
 // Sort Options Definition
 type SortKey = "Recent" | "Score" | "Status" | "Name";
@@ -78,6 +81,81 @@ const openAttachment = async (att: Attachment) => {
   }
 };
 
+// Pagination Component, capping 50 applications per page
+function PaginationControls({
+  currentPage,
+  totalPages,
+  startIndex,
+  endIndex,
+  totalItems,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  startIndex: number;
+  endIndex: number;
+  totalItems: number;
+  onPageChange: (page: number) => void;
+}) {
+  if (totalPages <= 1) return null;
+
+  const handlePageChange = (newPage: number) => {
+    onPageChange(newPage);
+    
+    // Scroll to top when going to next page
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+      // Fallback for browsers that don't support smooth scrolling
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      handlePageChange(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      handlePageChange(currentPage + 1);
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between">
+      <div className="text-sm text-gray-600">
+        Showing {startIndex + 1}–{endIndex} of {totalItems} applications
+      </div>
+
+      <div className="flex items-center gap-3">
+        <button
+          onClick={handlePrevious}
+          disabled={currentPage === 1}
+          className="px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          type="button"
+        >
+          <i className="fa-solid fa-chevron-left"/>
+        </button>
+
+        <span className="text-sm font-medium text-gray-700">
+          Page {currentPage} of {totalPages}
+        </span>
+
+        <button
+          onClick={handleNext}
+          disabled={currentPage === totalPages}
+          className="px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          type="button"
+        >
+          <i className="fa-solid fa-chevron-right"/>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminDashboardPage() {
   const [rows, setRows] = useState<Row[]>([]);
   const [bulkStatus, setBulkStatus] = useState<string>("Submitted");
@@ -86,6 +164,7 @@ export default function AdminDashboardPage() {
   const [editMode, setEditMode] = useState<boolean>(false);
   const [expandedApps, setExpandedApps] = useState<Set<string>>(new Set());
   const [detScores, setDetScores] = useState<Record<string, number>>({});
+  const [currentPage, setCurrentPage] = useState(1);
 
   //Sorting State
   const [sortConfig, setSortConfig] = useState<{
@@ -101,53 +180,13 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     (async () => {
       const summaries = await storeLoadSummaries();
-      const scoreMap: Record<string, number> = {};
 
       const hydrated: Row[] = await Promise.all(
         summaries.map(async (s: AppSummary): Promise<Row> => {
           const snap = await storeLoadSnapshot(s.id);
-          let calculatedStatus = s.status;
-
-          if (snap?.formData) {
-            // Call backend to calculate score
-            const response = await fetch(
-              `${
-                process.env.NEXT_PUBLIC_API_URL
-              }/api/analysis/score`,
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  disability_type: snap.formData.disabilityType,
-                  study_type: snap.formData.studyType,
-                  has_osap_restrictions: snap.formData.hasOSAPRestrictions,
-                  osap_application: snap.formData.osapApplication,
-                  provincial_need: snap.formData.provincialNeed,
-                  federal_need: snap.formData.federalNeed,
-                  requested_items: snap.formData.requestedItems || [],
-                }),
-              }
-            );
-
-            if (response.ok) {
-              const data = await response.json();
-              const score = data.confidence_score;
-              scoreMap[s.id] = score;
-
-              // Auto-set status based on score
-              if (score >= 90) {
-                calculatedStatus = "Approved";
-              } else if (score >= 75) {
-                calculatedStatus = "In Review";
-              } else {
-                calculatedStatus = "Rejected";
-              }
-            }
-          }
 
           return {
             ...s,
-            status: calculatedStatus,
             assignee: snap?.assignee ?? "",
             violationTags: Array.isArray(snap?.violationTags)
               ? snap!.violationTags
@@ -162,6 +201,12 @@ export default function AdminDashboardPage() {
       );
 
       setRows(hydrated);
+
+      // Build score map from single database query
+      const scoreMap: Record<string, number> = {};
+      summaries.forEach((s) => {
+        scoreMap[s.id] = s.confidenceScore ?? 0;
+      });
       setDetScores(scoreMap);
     })();
   }, []);
@@ -213,6 +258,29 @@ export default function AdminDashboardPage() {
         return data;
     }
   }, [rows, sortConfig, detScores]);
+
+  // Pagination logic
+  const pagination = useMemo(() => {
+    const totalItems = sortedRows.length;
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
+    const paginatedRows = sortedRows.slice(startIndex, endIndex);
+
+    return {
+      totalPages,
+      totalItems,
+      startIndex,
+      endIndex,
+      paginatedRows,
+      hasPagination: totalPages > 1,
+    };
+  }, [sortedRows, currentPage]);
+
+  // Reset to page 1 when sorting changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [sortConfig.key, sortConfig.direction]);
 
   const hasRows = useMemo(() => sortedRows.length > 0, [sortedRows]);
 
@@ -578,11 +646,25 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
+      {/* Top Pagination */}
+      {pagination.hasPagination && (
+        <div className="mb-4">
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={pagination.totalPages}
+            startIndex={pagination.startIndex}
+            endIndex={pagination.endIndex}
+            totalItems={pagination.totalItems}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
+
       {!hasRows ? (
         <div className="px-5 py-10 text-gray-500">No applications found.</div>
       ) : (
         <div className="space-y-6">
-          {sortedRows.map((r: Row) => {
+          {pagination.paginatedRows.map((r: Row) => {
             const isExpanded = expandedApps.has(r.id);
             const score = detScores[r.id];
 
@@ -960,6 +1042,20 @@ export default function AdminDashboardPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Bottom Pagination */}
+      {pagination.hasPagination && (
+        <div className="mt-6">
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={pagination.totalPages}
+            startIndex={pagination.startIndex}
+            endIndex={pagination.endIndex}
+            totalItems={pagination.totalItems}
+            onPageChange={setCurrentPage}
+          />
         </div>
       )}
     </AdminLayout>

@@ -37,7 +37,7 @@ const addIfPresent = <
 /**
  * Calculate initial application status based on confidence score to store into supabase
  */
-const calculateInitialStatus = async (formData: FormData): Promise<string> => {
+const calculateInitialStatus = async (formData: FormData): Promise<{ status: string; score: number }> => {
   try {
     const response = await fetch(
       `${
@@ -62,17 +62,20 @@ const calculateInitialStatus = async (formData: FormData): Promise<string> => {
       const data = await response.json();
       const score = data.confidence_score;
 
-      // Same thresholds as admin dashboard
-      if (score >= 90) return "Approved";
-      if (score >= 75) return "In Review";
-      return "Rejected";
+      // Convert score to status, similar to admin dashboard
+      let status: string;
+      if (score >= 90) {status = "Approved";}
+      else if (score >= 75) { status = "In Review";}
+      else {status = "Rejected";}
+
+      return { status, score };
     }
   } catch (error) {
     console.error(error);
   }
 
   // Fallback to 'Failed' if API call fails
-  return "Failed";
+  return { status: "Failed", score: 0 };
 };
 
 /**
@@ -197,7 +200,7 @@ export const saveSubmission = async (formData: FormData) => {
   }
 
   // 6. Calculate initial status based on deterministic checks
-  const initialStatus = await calculateInitialStatus(formData);
+  const { status: initialStatus, score: initialScore } = await calculateInitialStatus(formData);
 
   // 7. Create application record for admin dashboard
   const applicationId = `APP-${studentId}`;
@@ -208,6 +211,7 @@ export const saveSubmission = async (formData: FormData) => {
     student_id: formData.studentId,
     submitted_date: new Date().toISOString(),
     status: initialStatus,
+    confidence_score: initialScore,
     program: formData.program,
     institution: formData.institution,
     study_period: `${formData.studyPeriodStart} - ${formData.studyPeriodEnd}`,
