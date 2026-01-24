@@ -1,0 +1,33 @@
+services:
+  backend:
+    image: ghcr.io/philh496/edvisingu-backend:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PINECONE_API_KEY=${PINECONE_API_KEY}
+      - PINECONE_INDEX_NAME=${PINECONE_INDEX_NAME}
+    networks:
+      - app-network
+  
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.test
+      args:
+        - NEXT_PUBLIC_API_URL=http://backend:8000
+        - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+        - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+    ports: 
+      - "3000:3000"
+    environment:
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

@@ -204,5 +204,5 @@ test('chatbot', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Type your message...' }).fill('Can you verify that this chat is functional by responding to this chat with "Yes"');
   await page.getByRole('button', { name: 'Send message' }).click();
   await page.waitForSelector('#chatbotResponse');
-  await expect(page.locator('#chatbotResponse')).toContainText('Yes');
+  await expect(page.locator('#chatbotResponse').last()).toContainText('Yes');
 });
