@@ -39,100 +39,32 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { FormData } from "@/types/bswd";
 import { useDateRange } from "@/hooks/UseDateRange";
+import { useTranslation } from "@/lib/i18n";
 
 const institutions = [
-  {
-    value: "algoma",
-    label: "Algoma University",
-  },
-  {
-    value: "nipissing",
-    label: "Nipissing University",
-  },
-  {
-    value: "metro",
-    label: "Toronto Metropolitan University",
-  },
-  {
-    value: "brock",
-    label: "Brock University",
-  },
-  {
-    value: "ocad",
-    label: "OCAD University",
-  },
-  {
-    value: "trent",
-    label: "Trent University",
-  },
-  {
-    value: "carleton",
-    label: "Carleton University",
-  },
-  {
-    value: "français",
-    label: "Université de l'Ontario français",
-  },
-  {
-    value: "guelph",
-    label: "University of Guelph",
-  },
-  {
-    value: "tech",
-    label: "Ontario Tech University",
-  },
-  {
-    value: "waterloo",
-    label: "University of Waterloo",
-  },
-  {
-    value: "hearst",
-    label: " Université de Hearst",
-  },
-  {
-    value: "ottawa",
-    label: "University of Ottawa",
-  },
-  {
-    value: "western",
-    label: "Western University",
-  },
-  {
-    value: "lakehead",
-    label: "Lakehead University",
-  },
-  {
-    value: "queens",
-    label: "Queen's University",
-  },
-  {
-    value: "willfrid",
-    label: "Willfrid Laurier University",
-  },
-  {
-    value: "military",
-    label: " Royal Military College of Canada",
-  },
-  {
-    value: "laurentian",
-    label: "Laurentian University",
-  },
-  {
-    value: "mcmaster",
-    label: "McMaster University",
-  },
-  {
-    value: "toronto",
-    label: "University of Toronto",
-  },
-  {
-    value: "york",
-    label: "York University",
-  },
-  {
-    value: "windsor",
-    label: "University of Windsor",
-  },
+  { value: "algoma", label: "Algoma University" },
+  { value: "nipissing", label: "Nipissing University" },
+  { value: "metro", label: "Toronto Metropolitan University" },
+  { value: "brock", label: "Brock University" },
+  { value: "ocad", label: "OCAD University" },
+  { value: "trent", label: "Trent University" },
+  { value: "carleton", label: "Carleton University" },
+  { value: "français", label: "Université de l'Ontario français" },
+  { value: "guelph", label: "University of Guelph" },
+  { value: "tech", label: "Ontario Tech University" },
+  { value: "waterloo", label: "University of Waterloo" },
+  { value: "hearst", label: " Université de Hearst" },
+  { value: "ottawa", label: "University of Ottawa" },
+  { value: "western", label: "Western University" },
+  { value: "lakehead", label: "Lakehead University" },
+  { value: "queens", label: "Queen's University" },
+  { value: "willfrid", label: "Willfrid Laurier University" },
+  { value: "military", label: " Royal Military College of Canada" },
+  { value: "laurentian", label: "Laurentian University" },
+  { value: "mcmaster", label: "McMaster University" },
+  { value: "toronto", label: "University of Toronto" },
+  { value: "york", label: "York University" },
+  { value: "windsor", label: "University of Windsor" },
 ];
 
 interface ProgramInfoStepProps {
@@ -148,12 +80,16 @@ export function ProgramInfoStep({
   const [institutionOpen, setInstitutionOpen] = useState(false);
   const start = useDateRange();
   const end = useDateRange();
+  const { t, isLoaded } = useTranslation();
+
+  if (!isLoaded) return null;
 
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold mb-4">
-        Section B: Information about your school and program
+        {t("programInfo.sectionHeader")}
       </h2>
+
       <div className="grid md:grid-cols-2 gap-4 text-brand-text-gray">
         {/* Institution Name div */}
         <div>
@@ -161,7 +97,7 @@ export function ProgramInfoStep({
             htmlFor="institutionName"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Institution Name{" "}
+            {t("programInfo.labels.institutionName")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Popover open={institutionOpen} onOpenChange={setInstitutionOpen}>
@@ -174,21 +110,22 @@ export function ProgramInfoStep({
               >
                 {formData.institution
                   ? institutions.find(
-                      (institution) =>
-                        institution.value === formData.institution
+                      (institution) => institution.value === formData.institution
                     )?.label
-                  : "Search for OSAP-approved institutions"}
+                  : t("programInfo.placeholders.institutionSearch")}
                 <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="mx-auto p-0">
               <Command>
                 <CommandInput
-                  placeholder="Search institution..."
+                  placeholder={t("programInfo.placeholders.institutionInput")}
                   className="h-9"
                 />
                 <CommandList>
-                  <CommandEmpty>No institution found.</CommandEmpty>
+                  <CommandEmpty>
+                    {t("programInfo.messages.noInstitutionFound")}
+                  </CommandEmpty>
                   <CommandGroup>
                     {institutions.map((institution) => (
                       <CommandItem
@@ -229,7 +166,7 @@ export function ProgramInfoStep({
             htmlFor="institutionType"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Institution Type{" "}
+            {t("programInfo.labels.institutionType")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Select
@@ -242,11 +179,15 @@ export function ProgramInfoStep({
             }
           >
             <SelectTrigger id="institutionType" className="w-full">
-              <SelectValue placeholder="Select..." />
+              <SelectValue placeholder={t("programInfo.placeholders.select")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="public-ontario">Public</SelectItem>
-              <SelectItem value="private-ontario">Private</SelectItem>
+              <SelectItem value="public-ontario">
+                {t("programInfo.options.institutionType.public")}
+              </SelectItem>
+              <SelectItem value="private-ontario">
+                {t("programInfo.options.institutionType.private")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -259,12 +200,12 @@ export function ProgramInfoStep({
             htmlFor="code"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Program Cost Code
+            {t("programInfo.labels.programCostCode")}
           </label>
           <Input
             id="code"
             type="text"
-            placeholder="Enter cost code"
+            placeholder={t("programInfo.placeholders.programCostCode")}
             required
             value={formData.code}
             onChange={(e) => {
@@ -283,12 +224,12 @@ export function ProgramInfoStep({
             htmlFor="program"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Program of Study
+            {t("programInfo.labels.programOfStudy")}
           </label>
           <Input
             id="program"
             type="text"
-            placeholder="Enter program name"
+            placeholder={t("programInfo.placeholders.programOfStudy")}
             required
             value={formData.program}
             onChange={(e) => {
@@ -308,7 +249,7 @@ export function ProgramInfoStep({
             htmlFor="studyType"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Study Type{" "}
+            {t("programInfo.labels.studyType")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Select
@@ -324,13 +265,17 @@ export function ProgramInfoStep({
             }
           >
             <SelectTrigger id="studyType" className="w-full">
-              <SelectValue placeholder="Select..." />
+              <SelectValue placeholder={t("programInfo.placeholders.select")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="full-time">Full-Time</SelectItem>
-              <SelectItem value="part-time">Part-Time</SelectItem>
+              <SelectItem value="full-time">
+                {t("programInfo.options.studyType.fullTime")}
+              </SelectItem>
+              <SelectItem value="part-time">
+                {t("programInfo.options.studyType.partTime")}
+              </SelectItem>
               <SelectItem value="institution-funded-SB">
-                Institution-funded Special Bursary
+                {t("programInfo.options.studyType.institutionFunded")}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -344,7 +289,7 @@ export function ProgramInfoStep({
             htmlFor="startDate"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Study Start Date{" "}
+            {t("programInfo.labels.studyStartDate")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </Label>
           <Popover open={start.open} onOpenChange={start.setOpen}>
@@ -354,7 +299,9 @@ export function ProgramInfoStep({
                 id="startDate"
                 className="w-full justify-between font-normal"
               >
-                {start.date ? start.date.toLocaleDateString() : "Select date"}
+                {start.date
+                  ? start.date.toLocaleDateString()
+                  : t("programInfo.placeholders.date")}
                 <ChevronDownIcon />
               </Button>
             </PopoverTrigger>
@@ -396,7 +343,7 @@ export function ProgramInfoStep({
             htmlFor="endDate"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Study End Date{" "}
+            {t("programInfo.labels.studyEndDate")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </Label>
           <Popover open={end.open} onOpenChange={end.setOpen}>
@@ -406,7 +353,9 @@ export function ProgramInfoStep({
                 id="endDate"
                 className="w-full justify-between font-normal"
               >
-                {end.date ? end.date.toLocaleDateString() : "Select date"}
+                {end.date
+                  ? end.date.toLocaleDateString()
+                  : t("programInfo.placeholders.date")}
                 <ChevronDownIcon />
               </Button>
             </PopoverTrigger>
@@ -446,9 +395,7 @@ export function ProgramInfoStep({
       <div className="mt-4">
         {/* Previous institution disability documentation div */}
         <label className="block text-base font-medium mb-2 text-left text-brand-text-gray">
-          Has the student submitted a completed OSAP Disability Verification
-          Form or other disability documentation while attending another
-          institution?{" "}
+          {t("programInfo.submittedElsewhere.question")}{" "}
           <span className="text-sm text-brand-light-red mt-1">*</span>
         </label>
         <RadioGroup
@@ -475,7 +422,7 @@ export function ProgramInfoStep({
         {formData.submittedDisabilityElsewhere === true && (
           <div className="mb-3 text-left">
             <label className="block text-sm font-medium mb-1 text-brand-text-gray">
-              Previous institution{" "}
+              {t("programInfo.submittedElsewhere.previousInstitutionLabel")}{" "}
               <span className="text-sm text-brand-light-red mt-1">*</span>
             </label>
 
@@ -491,7 +438,7 @@ export function ProgramInfoStep({
                     ? institutions.find(
                         (inst) => inst.value === formData.previousInstitution
                       )?.label
-                    : "Search previous institution..."}
+                    : t("programInfo.placeholders.previousInstitutionSearch")}
                   <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
@@ -499,11 +446,13 @@ export function ProgramInfoStep({
               <PopoverContent className="mx-auto p-0">
                 <Command>
                   <CommandInput
-                    placeholder="Search institution..."
+                    placeholder={t("programInfo.placeholders.institutionInput")}
                     className="h-9"
                   />
                   <CommandList>
-                    <CommandEmpty>No institution found.</CommandEmpty>
+                    <CommandEmpty>
+                      {t("programInfo.messages.noInstitutionFound")}
+                    </CommandEmpty>
                     <CommandGroup>
                       {institutions.map((inst) => (
                         <CommandItem
