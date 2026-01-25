@@ -39,6 +39,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { FormData } from "@/types/bswd";
 import { useDateRange } from "@/hooks/UseDateRange";
+
 const institutions = [
   {
     value: "algoma",
@@ -160,7 +161,8 @@ export function ProgramInfoStep({
             htmlFor="institutionName"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Institution Name <span className="text-sm text-brand-light-red mt-1">*</span>
+            Institution Name{" "}
+            <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Popover open={institutionOpen} onOpenChange={setInstitutionOpen}>
             <PopoverTrigger asChild>
@@ -172,9 +174,9 @@ export function ProgramInfoStep({
               >
                 {formData.institution
                   ? institutions.find(
-                    (institution) =>
-                      institution.value === formData.institution
-                  )?.label
+                      (institution) =>
+                        institution.value === formData.institution
+                    )?.label
                   : "Search for OSAP-approved institutions"}
                 <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
@@ -227,7 +229,8 @@ export function ProgramInfoStep({
             htmlFor="institutionType"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Institution Type <span className="text-sm text-brand-light-red mt-1">*</span>
+            Institution Type{" "}
+            <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Select
             value={formData.institutionType}
@@ -267,13 +270,13 @@ export function ProgramInfoStep({
             onChange={(e) => {
               const value = e.target.value;
               if (/^[\d\s]*$/.test(value)) {
-                // user input can be numbers, spaces
                 setFormData((prev) => ({ ...prev, code: value }));
               }
             }}
             className="w-full"
           />
         </div>
+
         {/* Program of Study div*/}
         <div>
           <label
@@ -291,7 +294,6 @@ export function ProgramInfoStep({
             onChange={(e) => {
               const value = e.target.value;
               if (/^[A-Za-z\s]*$/.test(value)) {
-                // user input can be alphabetic, spaces
                 setFormData((prev) => ({ ...prev, program: value }));
               }
             }}
@@ -306,14 +308,18 @@ export function ProgramInfoStep({
             htmlFor="studyType"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
-            Study Type <span className="text-sm text-brand-light-red mt-1">*</span>
+            Study Type{" "}
+            <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Select
             value={formData.studyType}
             onValueChange={(value) =>
               setFormData((prev) => ({
                 ...prev,
-                studyType: value as "full-time" | "part-time" | "institution-funded-SB",
+                studyType: value as
+                  | "full-time"
+                  | "part-time"
+                  | "institution-funded-SB",
               }))
             }
           >
@@ -323,7 +329,9 @@ export function ProgramInfoStep({
             <SelectContent>
               <SelectItem value="full-time">Full-Time</SelectItem>
               <SelectItem value="part-time">Part-Time</SelectItem>
-              <SelectItem value="institution-funded-SB">Institution-funded Special Bursary</SelectItem>
+              <SelectItem value="institution-funded-SB">
+                Institution-funded Special Bursary
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -334,8 +342,10 @@ export function ProgramInfoStep({
         <div className="flex flex-col gap-3">
           <Label
             htmlFor="startDate"
-            className="block text-base font-medium mb-1 text-brand-text-gray">
-            Study Start Date <span className="text-sm text-brand-light-red mt-1">*</span>
+            className="block text-base font-medium mb-1 text-brand-text-gray"
+          >
+            Study Start Date{" "}
+            <span className="text-sm text-brand-light-red mt-1">*</span>
           </Label>
           <Popover open={start.open} onOpenChange={start.setOpen}>
             <PopoverTrigger asChild>
@@ -360,20 +370,19 @@ export function ProgramInfoStep({
                 selected={start.date}
                 captionLayout="dropdown"
                 disabled={(date) => {
-                  // Disable dates after the end date if end date is selected
                   if (end.date) {
-                    return date > end.date
+                    return date > end.date;
                   }
-                  return false
+                  return false;
                 }}
                 onSelect={(date) => {
-                  start.setDate(date)
-                  start.setOpen(false)
+                  start.setDate(date);
+                  start.setOpen(false);
                   if (date) {
                     setFormData((prev) => ({
                       ...prev,
-                      studyPeriodStart: format(date, "dd/MM/yyyy")
-                    }))
+                      studyPeriodStart: format(date, "dd/MM/yyyy"),
+                    }));
                   }
                 }}
               />
@@ -383,8 +392,12 @@ export function ProgramInfoStep({
 
         {/* Study End Date div */}
         <div className="flex flex-col gap-3">
-          <Label htmlFor="endDate" className="block text-base font-medium mb-1 text-brand-text-gray">
-            Study End Date <span className="text-sm text-brand-light-red mt-1">*</span>
+          <Label
+            htmlFor="endDate"
+            className="block text-base font-medium mb-1 text-brand-text-gray"
+          >
+            Study End Date{" "}
+            <span className="text-sm text-brand-light-red mt-1">*</span>
           </Label>
           <Popover open={end.open} onOpenChange={end.setOpen}>
             <PopoverTrigger asChild>
@@ -400,7 +413,7 @@ export function ProgramInfoStep({
             <PopoverContent className="w-auto overflow-hidden p-0" align="start">
               <Calendar
                 labels={{
-                  labelMonthDropdown: () => "endDateLabel", // needed otherwise playwright cant differentiate between the two date pickers
+                  labelMonthDropdown: () => "endDateLabel",
                 }}
                 defaultMonth={end.date || new Date(2026, 11)}
                 startMonth={new Date(2025, 0)}
@@ -410,18 +423,18 @@ export function ProgramInfoStep({
                 captionLayout="dropdown"
                 disabled={(date) => {
                   if (start.date) {
-                    return date < start.date
+                    return date < start.date;
                   }
-                  return false
+                  return false;
                 }}
                 onSelect={(date) => {
-                  end.setDate(date)
-                  end.setOpen(false)
+                  end.setDate(date);
+                  end.setOpen(false);
                   if (date) {
                     setFormData((prev) => ({
                       ...prev,
-                      studyPeriodEnd: format(date, "dd/MM/yyyy")
-                    }))
+                      studyPeriodEnd: format(date, "dd/MM/yyyy"),
+                    }));
                   }
                 }}
               />
@@ -435,7 +448,8 @@ export function ProgramInfoStep({
         <label className="block text-base font-medium mb-2 text-left text-brand-text-gray">
           Has the student submitted a completed OSAP Disability Verification
           Form or other disability documentation while attending another
-          institution? <span className="text-sm text-brand-light-red mt-1">*</span>
+          institution?{" "}
+          <span className="text-sm text-brand-light-red mt-1">*</span>
         </label>
         <RadioGroup
           value={formData.submittedDisabilityElsewhere ? "yes" : "no"}
@@ -461,7 +475,8 @@ export function ProgramInfoStep({
         {formData.submittedDisabilityElsewhere === true && (
           <div className="mb-3 text-left">
             <label className="block text-sm font-medium mb-1 text-brand-text-gray">
-              Previous institution <span className="text-sm text-brand-light-red mt-1">*</span>
+              Previous institution{" "}
+              <span className="text-sm text-brand-light-red mt-1">*</span>
             </label>
 
             <Popover>
@@ -474,8 +489,8 @@ export function ProgramInfoStep({
                 >
                   {formData.previousInstitution
                     ? institutions.find(
-                      (inst) => inst.value === formData.previousInstitution
-                    )?.label
+                        (inst) => inst.value === formData.previousInstitution
+                      )?.label
                     : "Search previous institution..."}
                   <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
