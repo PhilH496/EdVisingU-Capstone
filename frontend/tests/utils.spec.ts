@@ -4,6 +4,20 @@ import { supabase as supabaseClient} from '@/lib/supabase';
 const testApplicationId = 'APP-1234567';
 const testStudentId = '1234567';
 
+// Test user credentials
+const TEST_USER_EMAIL = 'test@playwright.test';
+const TEST_USER_PASSWORD = 'testpassword123';
+
+async function login(page: any) {
+  await page.goto('http://localhost:3000/login');
+  await page.getByRole('textbox', { name: 'Email' }).fill(TEST_USER_EMAIL);
+  await page.getByRole('textbox', { name: 'Password' }).fill(TEST_USER_PASSWORD);
+  await page.getByRole('button', { name: 'Sign In' }).click();
+  
+  // Wait for navigation to complete (redirects to main form page)
+  await page.waitForURL('http://localhost:3000/', { timeout: 10000 });
+}
+
 async function resetTestData() {
   if (supabaseClient) {
     const appResult = await supabaseClient
@@ -28,8 +42,10 @@ test.afterEach(async () => {
 
 // end-to-end test for student submission process
 test('submission', async ({ page }) => {
+  // Login first
+  await login(page);
+  
   // student info step
-  await page.goto('http://localhost:3000/');
   await page.getByRole('radio', { name: 'Yes' }).check();
   await page.getByRole('button', { name: 'OSAP Application Start Date *' }).click();
   await page.getByRole('button', { name: 'Go to the Previous Month' }).click();
@@ -190,7 +206,9 @@ test('submission', async ({ page }) => {
 
 // i18n functionality test
 test('localization', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
+  // Login first
+  await login(page);
+  
   await page.getByRole('combobox').first().selectOption('fr');
   await expect(page.locator('#studentFormHeader')).toContainText('Formulaire de demande BSWD');
   await expect(page.getByRole('list')).toContainText('Info étudiant');
@@ -198,7 +216,9 @@ test('localization', async ({ page }) => {
 
 // student chatbot functionality test
 test('chatbot', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
+  // Login first
+  await login(page);
+  
   await page.getByRole('button', { name: 'Open chat' }).click();
   await page.getByRole('textbox', { name: 'Type your message...' }).click();
   await page.getByRole('textbox', { name: 'Type your message...' }).fill('Can you verify that this chat is functional by responding to this chat with "Yes"');

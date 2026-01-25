@@ -12,6 +12,7 @@
  */
 
 import { useState, useMemo, useEffect, useRef } from "react";
+import { useRouter } from "next/router";
 import Link from "next/link";
 import { FormData } from "@/types/bswd";
 import { FormLayout } from "@/components/bswd/FormLayout";
@@ -33,13 +34,21 @@ import { useAuth } from "@/contexts/AuthContext";
 // Initial values are set to empty strings, zeros, or false depending on field type
 function BSWDApplicationPage() {
   const { t, isLoaded } = useTranslation();
-  const { signOut, profile, user } = useAuth();
+  const { signOut, profile, user, loading } = useAuth();
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [maxStep, setMaxStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
 
   const [formData, setFormData] = useState<FormData>({
     studentId: "",
@@ -377,6 +386,11 @@ function BSWDApplicationPage() {
       }
     }
   }, [currentStep, formData, isConfirmed]);
+
+  // Show loading while checking authentication
+  if (loading || !user) {
+    return <div>Loading...</div>;
+  }
 
   if (!isLoaded) {
     return <div>Loading...</div>;
