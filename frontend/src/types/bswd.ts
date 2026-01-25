@@ -39,12 +39,13 @@ export interface FormData {
   code: string;
   studyPeriodStart: string;
   studyPeriodEnd: string;
-  studyType: '' | 'full-time' | 'part-time' | 'institution-funded-SB';
+  studyType: "" | "full-time" | "part-time" | "institution-funded-SB";
   submittedDisabilityElsewhere: boolean;
   previousInstitution: string;
 
   // OSAP Information
   osapApplication: "full-time" | "part-time" | "none";
+  osapApplicationStartDate: string;
   federalNeed: number;
   provincialNeed: number;
   hasOSAPRestrictions: boolean;
@@ -75,7 +76,7 @@ export interface RequestedItem {
   item: string;
   cost: number;
   justification: string;
-  fundingSource: 'bswd' | 'csg-dse' | 'both';
+  fundingSource: "bswd" | "csg-dse" | "both";
 }
 
 export interface Application {

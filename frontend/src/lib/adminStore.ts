@@ -7,7 +7,7 @@
  */
 
 import { supabase, isSupabaseReady } from "@/lib/supabaseClient";
-
+import { FormData } from "@/types/bswd";
 /* ==================== Types ==================== */
 
 export type AppSummary = {
@@ -20,6 +20,7 @@ export type AppSummary = {
   institution: string;
   studyPeriod: string;
   statusUpdatedDate: string;
+  confidenceScore?: number;
 };
 
 export type Attachment = {
@@ -33,7 +34,7 @@ export type Attachment = {
 
 export type Snapshot = {
   summary: AppSummary;
-  formData: any;
+  formData: FormData;
   assignee?: string;
   violationTags?: string[];
   violationDetails?: string;
@@ -107,12 +108,13 @@ export async function loadSummaries(): Promise<AppSummary[]> {
       institution: string;
       study_period: string;
       status_updated_date: string;
+      confidence_score?: number;
     };
 
     const { data, error } = await supabase
       .from("applications")
       .select(
-        "id, student_name, student_id, submitted_date, status, program, institution, study_period, status_updated_date"
+        "id, student_name, student_id, submitted_date, status, program, institution, study_period, status_updated_date, confidence_score"
       )
       .is("deleted_at", null)
       .order("submitted_date", { ascending: false });
@@ -128,6 +130,7 @@ export async function loadSummaries(): Promise<AppSummary[]> {
         institution: r.institution,
         studyPeriod: r.study_period,
         statusUpdatedDate: r.status_updated_date,
+        confidenceScore: r.confidence_score,
       }));
     }
     // fall through on error to local below
@@ -164,7 +167,8 @@ export async function loadSummaries(): Promise<AppSummary[]> {
   }
 
   deduped.sort(
-    (a, b) => new Date(b.submittedDate).getTime() - new Date(a.submittedDate).getTime()
+    (a, b) =>
+      new Date(b.submittedDate).getTime() - new Date(a.submittedDate).getTime()
   );
   return deduped;
 }
@@ -185,16 +189,19 @@ export async function loadSnapshot(id: string): Promise<Snapshot | null> {
       institution: string;
       study_period: string;
       status_updated_date: string;
+      confidence_score: number;
     };
-    const [{ data: app, error: e1 }, { data: snap}] = await Promise.all([
+    const [{ data: app, error: e1 }, { data: snap }] = await Promise.all([
       supabase
         .from("applications")
-        .select("id, student_name, student_id, submitted_date, status, program, institution, study_period, status_updated_date")
+        .select(
+          "id, student_name, student_id, submitted_date, status, program, institution, study_period, status_updated_date"
+        )
         .eq("id", id)
         .maybeSingle(),
       supabase
         .from("snapshots")
-        .select("*")  // Gets form_data, form_data_history, and admin fields
+        .select("*") // Gets form_data, form_data_history, and admin fields
         .eq("id", id)
         .maybeSingle(),
     ]);
@@ -236,10 +243,11 @@ export async function loadSnapshot(id: string): Promise<Snapshot | null> {
   }
 }
 
-
 //Helper Func: Recalculate status based on form data changes for supabase
-async function recalculateStatus(formData: any): Promise<string | null> {
-  if (!formData) { return null; }
+async function recalculateStatus(formData: FormData): Promise<{ status: string; score: number } | null> {
+  if (!formData) {
+    return null;
+  }
 
   try {
     const payload = {
@@ -249,14 +257,17 @@ async function recalculateStatus(formData: any): Promise<string | null> {
       osap_application: formData.osapApplication,
       provincial_need: formData.provincialNeed,
       federal_need: formData.federalNeed,
-      requested_items: formData.requestedItems || []
+      requested_items: formData.requestedItems || [],
     };
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/analysis/score`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/analysis/score`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }
+    );
 
     if (response.ok) {
       const data = await response.json();
@@ -272,25 +283,31 @@ async function recalculateStatus(formData: any): Promise<string | null> {
         newStatus = "Rejected";
       }
 
-      return newStatus;
+      return { status: newStatus, score };
     }
   } catch (error) {
     console.error(error);
   }
 
-  return null;  // Return null if calculation fails (for canceled state)
+  return null; // Return null if calculation fails (for canceled state)
 }
 /** Save/merge snapshot & summary (optionally pass fresh formData) */
-export async function saveSnapshotMerge(r: Row, formData?: any): Promise<void> {
+export async function saveSnapshotMerge(
+  r: Row,
+  formData?: FormData
+): Promise<void> {
   const now = new Date().toISOString();
 
   if (isSupabaseReady() && supabase) {
     // — This is where we connect to Supabase to upsert —
     let updatedStatus = r.status;
+    let updatedScore = r.confidenceScore;
+    
     if (formData) {
-      const calculatedStatus = await recalculateStatus(formData);
-      if (calculatedStatus) {
-        updatedStatus = calculatedStatus;
+      const result = await recalculateStatus(formData);
+      if (result) {
+        updatedStatus = result.status;
+        updatedScore = result.score;
       }
     }
     const summaryPayload = {
@@ -299,6 +316,7 @@ export async function saveSnapshotMerge(r: Row, formData?: any): Promise<void> {
       student_id: r.studentId,
       submitted_date: r.submittedDate,
       status: updatedStatus,
+      confidence_score: updatedScore,
       program: r.program,
       institution: r.institution,
       study_period: r.studyPeriod,
@@ -322,8 +340,8 @@ export async function saveSnapshotMerge(r: Row, formData?: any): Promise<void> {
             {
               data: currentSnap.form_data,
               timestamp: now,
-              modified_by: "admin"
-            }
+              modified_by: "admin",
+            },
           ],
           last_modified_at: now,
           last_modified_by: "admin",
@@ -355,7 +373,9 @@ export async function saveSnapshotMerge(r: Row, formData?: any): Promise<void> {
 
   // — Local fallback —
   const existingRaw = localStorage.getItem(SNAP_KEY(r.id));
-  const existing = existingRaw ? (JSON.parse(existingRaw) as Snapshot) : ({} as Snapshot);
+  const existing = existingRaw
+    ? (JSON.parse(existingRaw) as Snapshot)
+    : ({} as Snapshot);
 
   const next: Snapshot = {
     summary: {
@@ -371,19 +391,23 @@ export async function saveSnapshotMerge(r: Row, formData?: any): Promise<void> {
     },
     formData: formData ?? existing.formData ?? null,
     assignee: r.assignee ?? existing.assignee ?? "",
-    violationTags: Array.isArray(r.violationTags) ? r.violationTags : existing.violationTags ?? [],
+    violationTags: Array.isArray(r.violationTags)
+      ? r.violationTags
+      : existing.violationTags ?? [],
     violationDetails: r.violationDetails ?? existing.violationDetails ?? "",
     attachments: Array.isArray(r.attachments)
-     ? r.attachments
-     : Array.isArray(existing.attachments)
-     ? existing.attachments
-     : [],
+      ? r.attachments
+      : Array.isArray(existing.attachments)
+      ? existing.attachments
+      : [],
   };
   localStorage.setItem(SNAP_KEY(r.id), JSON.stringify(next));
 }
 
 /** Save refreshed applications list */
-export async function saveApplicationsList(summaries: AppSummary[]): Promise<void> {
+export async function saveApplicationsList(
+  summaries: AppSummary[]
+): Promise<void> {
   if (isSupabaseReady() && supabase) {
     // — This is where we connect to Supabase to upsert the list —
     const payload = summaries.map((s) => ({
@@ -411,7 +435,7 @@ export async function saveApplicationsList(summaries: AppSummary[]): Promise<voi
 
 /** Soft delete (Doesn't actually delete but marks it as 'deleted' for legal issues (must keep records for X years))*/
 export async function deleteApplication(
-  appId: string, 
+  appId: string,
   adminName: string = "admin",
   reason?: string
 ): Promise<void> {
@@ -422,7 +446,7 @@ export async function deleteApplication(
         deleted_at: new Date().toISOString(),
         deleted_by: adminName,
         deletion_reason: reason,
-        status: 'deleted'
+        status: "deleted",
       })
       .eq("id", appId);
 
@@ -435,7 +459,7 @@ export async function deleteApplication(
     if (raw) {
       const arr = JSON.parse(raw);
       if (Array.isArray(arr)) {
-        const filtered = arr.filter((a: any) => a.id !== appId);
+        const filtered = arr.filter((a: AppSummary) => a.id !== appId);
         localStorage.setItem("applications", JSON.stringify(filtered));
       }
     }
@@ -466,10 +490,12 @@ export async function attachFiles(
     for (const f of files) {
       const uid = uuid();
       const path = `${appId}/${uid}-${f.name}`;
-      const { error: upErr } = await supabase.storage.from("attachments").upload(path, f, {
-        upsert: false,
-        contentType: f.type || "application/octet-stream",
-      });
+      const { error: upErr } = await supabase.storage
+        .from("attachments")
+        .upload(path, f, {
+          upsert: false,
+          contentType: f.type || "application/octet-stream",
+        });
       if (upErr) {
         // Fallback to b64 for this file only
         const b64 = await b64FromFile(f);
@@ -510,12 +536,14 @@ export async function attachFiles(
 }
 
 /** Download a Supabase storage object as a Blob (used by Open) */
-export async function downloadAttachmentFromStorage(path: string): Promise<Blob | null> {
+export async function downloadAttachmentFromStorage(
+  path: string
+): Promise<Blob | null> {
   if (!(isSupabaseReady() && supabase)) return null;
-  // connect to Supabase Storage to create a signed URL 
+  // connect to Supabase Storage to create a signed URL
   const { data: signed, error } = await supabase.storage
-   .from("attachments")
-   .createSignedUrl(path, 60);
+    .from("attachments")
+    .createSignedUrl(path, 60);
   if (error || !signed?.signedUrl) return null;
   const resp = await fetch(signed.signedUrl);
   if (!resp.ok) return null;
@@ -527,7 +555,11 @@ export function resetLocalApplications(): void {
   if (typeof window === "undefined") return;
   const keys = Object.keys(localStorage);
   for (const k of keys) {
-    if (k.startsWith("applicationDetail:") || k === "applications" || k === "currentApplication") {
+    if (
+      k.startsWith("applicationDetail:") ||
+      k === "applications" ||
+      k === "currentApplication"
+    ) {
       localStorage.removeItem(k);
     }
   }

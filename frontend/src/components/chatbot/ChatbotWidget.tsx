@@ -8,7 +8,7 @@
  * - Conversation history display
  */
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, FormEvent } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 interface Message {
@@ -43,7 +43,7 @@ export function ChatbotWidget() {
     }
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const handleSendMessage = async (e: FormEvent) => {
     e.preventDefault();
     if (!message.trim() || isLoading) return;
 
@@ -63,7 +63,7 @@ export function ChatbotWidget() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/chat", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -165,7 +165,7 @@ export function ChatbotWidget() {
                     className="w-10 h-10 object-contain flex-shrink-0"
                   />
                 )}
-                <div
+                <div id='chatbotResponse'
                   className={`rounded-lg px-4 py-3 shadow-sm max-w-[85%] ${
                     msg.role === "user"
                       ? "bg-[#0066A1] text-white rounded-tr-none"

@@ -50,10 +50,14 @@ export default function ThankYouPage() {
           <div className="mb-8">
             <p className="text-gray-600 text-sm">Application ID</p>
             <p className="text-xl font-mono font-semibold text-[#0071a9]">
-              {app.id}
+              <div id="applicationId">
+                {app.id}
+              </div>
             </p>
             <p className="mt-2 text-sm text-gray-600">
-              Submitted by: {app.studentName}
+              <div id="submittedByName">
+                Submitted by: {app.studentName}
+              </div>
             </p>
           </div>
         )}

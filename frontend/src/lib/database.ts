@@ -4,12 +4,32 @@ import { Database } from "@/types/supabase";
 
 type StudentInsert = Database["public"]["Tables"]["student"]["Insert"];
 type OsapInfoInsert = Database["public"]["Tables"]["osap_info"]["Insert"];
-type DisabilityInfoInsert = Database["public"]["Tables"]["disability_info"]["Insert"];
+type DisabilityInfoInsert =
+  Database["public"]["Tables"]["disability_info"]["Insert"];
 type ProgramInfoInsert = Database["public"]["Tables"]["program_info"]["Insert"];
-
+// Insert: {
+//           code?: number | null
+//           institution_name: string
+//           institution_type: string
+//           previous_institution?: string | null
+//           program?: string | null
+//           program_info_id?: number
+//           student_id?: number | null
+//           study_end: string
+//           study_start: string
+//           study_type: string
+//           submitted_disability_elsewhere: boolean
+//         }
 // Helper to conditionally add optional fields
-const addIfPresent = (obj: Record<string, any>, key: string, value: any): void => {
-  if (value != null && value !== "" && value !== false) {
+const addIfPresent = <
+  T extends ProgramInfoInsert | OsapInfoInsert | DisabilityInfoInsert,
+  K extends keyof T
+>(
+  obj: T,
+  key: K,
+  value: T[K]
+): void => {
+  if (value != null && value !== "") {
     obj[key] = value;
   }
 };
@@ -17,37 +37,45 @@ const addIfPresent = (obj: Record<string, any>, key: string, value: any): void =
 /**
  * Calculate initial application status based on confidence score to store into supabase
  */
-const calculateInitialStatus = async (formData: FormData): Promise<string> => {
+const calculateInitialStatus = async (formData: FormData): Promise<{ status: string; score: number }> => {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/analysis/score`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        disability_type: formData.disabilityType,
-        study_type: formData.studyType,
-        has_osap_restrictions: formData.hasOSAPRestrictions,
-        osap_application: formData.osapApplication,
-        provincial_need: formData.provincialNeed,
-        federal_need: formData.federalNeed,
-        requested_items: formData.requestedItems
-      })
-    });
+    const response = await fetch(
+      `${
+        process.env.NEXT_PUBLIC_API_URL
+      }/api/analysis/score`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          disability_type: formData.disabilityType,
+          study_type: formData.studyType,
+          has_osap_restrictions: formData.hasOSAPRestrictions,
+          osap_application: formData.osapApplication,
+          provincial_need: formData.provincialNeed,
+          federal_need: formData.federalNeed,
+          requested_items: formData.requestedItems,
+        }),
+      }
+    );
 
     if (response.ok) {
       const data = await response.json();
       const score = data.confidence_score;
 
-      // Same thresholds as admin dashboard
-      if (score >= 90) return "Approved";
-      if (score >= 75) return "In Review";
-      return "Rejected";
+      // Convert score to status, similar to admin dashboard
+      let status: string;
+      if (score >= 90) {status = "Approved";}
+      else if (score >= 75) { status = "In Review";}
+      else {status = "Rejected";}
+
+      return { status, score };
     }
   } catch (error) {
     console.error(error);
   }
 
   // Fallback to 'Failed' if API call fails
-  return "Failed";
+  return { status: "Failed", score: 0 };
 };
 
 /**
@@ -95,7 +123,11 @@ export const saveSubmission = async (formData: FormData) => {
   };
   addIfPresent(programPayload, "program", formData.program);
   addIfPresent(programPayload, "code", formData.code);
-  addIfPresent(programPayload, "previous_institution", formData.previousInstitution);
+  addIfPresent(
+    programPayload,
+    "previous_institution",
+    formData.previousInstitution
+  );
 
   const { error: programError } = await supabase
     .from("program_info")
@@ -125,14 +157,18 @@ export const saveSubmission = async (formData: FormData) => {
     disability_type: formData.disabilityType,
     needs_psycho_ed_assessment: formData.needsPsychoEdAssessment,
   };
-  addIfPresent(disabilityPayload, "disability_verification_date", formData.disabilityVerificationDate);
+  addIfPresent(
+    disabilityPayload,
+    "disability_verification_date",
+    formData.disabilityVerificationDate
+  );
 
   // Handle functional limitations - convert object to array or use array directly
   if (formData.functionalLimitations) {
     if (Array.isArray(formData.functionalLimitations)) {
       const selected = formData.functionalLimitations
-        .filter(lim => lim.checked)
-        .map(lim => lim.label);
+        .filter((lim) => lim.checked)
+        .map((lim) => lim.label);
 
       if (selected.length > 0) {
         disabilityPayload.functional_limitations = selected.join(", ");
@@ -148,7 +184,7 @@ export const saveSubmission = async (formData: FormData) => {
 
   // 5. Insert requested items (if any)
   if (formData.requestedItems && formData.requestedItems.length > 0) {
-    const requestedItemsPayload = formData.requestedItems.map(item => ({
+    const requestedItemsPayload = formData.requestedItems.map((item) => ({
       student_id: studentId,
       category: item.category,
       item: item.item,
@@ -164,21 +200,22 @@ export const saveSubmission = async (formData: FormData) => {
   }
 
   // 6. Calculate initial status based on deterministic checks
-  const initialStatus = await calculateInitialStatus(formData);
-  
+  const { status: initialStatus, score: initialScore } = await calculateInitialStatus(formData);
+
   // 7. Create application record for admin dashboard
   const applicationId = `APP-${studentId}`;
-  
+
   const applicationPayload = {
     id: applicationId,
     student_name: `${formData.firstName} ${formData.lastName}`,
     student_id: formData.studentId,
     submitted_date: new Date().toISOString(),
     status: initialStatus,
+    confidence_score: initialScore,
     program: formData.program,
     institution: formData.institution,
     study_period: `${formData.studyPeriodStart} - ${formData.studyPeriodEnd}`,
-    status_updated_date: new Date().toISOString()
+    status_updated_date: new Date().toISOString(),
   };
 
   const { error: appError } = await supabase
@@ -193,7 +230,7 @@ export const saveSubmission = async (formData: FormData) => {
     form_data: formData,
     form_data_history: [],
     last_modified_at: new Date().toISOString(),
-    last_modified_by: 'student'
+    last_modified_by: "student",
   };
 
   const { error: snapError } = await supabase

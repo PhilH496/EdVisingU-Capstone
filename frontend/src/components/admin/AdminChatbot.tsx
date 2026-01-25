@@ -26,15 +26,20 @@ interface ApplicationData {
   disability_verification_date?: string;
   functional_limitations: string[];
   needs_psycho_ed_assessment: boolean;
-  requested_items: Array<{ category: string; item: string; cost: number; funding_source: string }>;
+  requested_items: Array<{
+    category: string;
+    item: string;
+    cost: number;
+    funding_source: string;
+  }>;
   institution: string;
   program?: string;
   analysis: {
-  decision: string;
-  confidence: number;
-  reasoning: string;
-  risk_factors: string[];
-  recommended_funding: number;
+    decision: string;
+    confidence: number;
+    reasoning: string;
+    risk_factors: string[];
+    recommended_funding: number;
   };
 }
 
@@ -48,7 +53,7 @@ interface Props {
 
 export function ApplicationChatbot({
   applicationData,
-  apiBaseUrl = "http://localhost:8000",
+  apiBaseUrl = process.env.NEXT_PUBLIC_API_URL,
   mode = "embedded",
   isOpen = true,
   onClose,
@@ -122,7 +127,11 @@ export function ApplicationChatbot({
   const handleSend = async () => {
     if (!input.trim() || loading) return;
 
-    const userMessage = { role: "user", content: input, timestamp: new Date() } as Message;
+    const userMessage = {
+      role: "user",
+      content: input,
+      timestamp: new Date(),
+    } as Message;
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
@@ -146,7 +155,11 @@ export function ApplicationChatbot({
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Sorry, an error occurred.", timestamp: new Date() },
+        {
+          role: "assistant",
+          content: "Sorry, an error occurred.",
+          timestamp: new Date(),
+        },
       ]);
     } finally {
       setLoading(false);
@@ -166,17 +179,28 @@ export function ApplicationChatbot({
               </div>
             )}
             <div>
-              <h3 className={`font-semibold text-base ${isFloating ? "text-white" : "text-gray-900"}`}>
+              <h3
+                className={`font-semibold text-base ${
+                  isFloating ? "text-white" : "text-gray-900"
+                }`}
+              >
                 {isFloating ? "Admin Assistant" : "Application Assistant"}
               </h3>
-              <p className={`text-sm ${isFloating ? "text-white/90" : "text-gray-600"}`}>
-                Ask about {applicationData.first_name}'s application
+              <p
+                className={`text-sm ${
+                  isFloating ? "text-white/90" : "text-gray-600"
+                }`}
+              >
+                Ask about {applicationData.first_name}&apos;s application
               </p>
             </div>
           </div>
 
           {isFloating && onClose && (
-            <button onClick={onClose} className="p-1 text-white hover:text-gray-200 rounded-full">
+            <button
+              onClick={onClose}
+              className="p-1 text-white hover:text-gray-200 rounded-full"
+            >
               <i className="fa-solid fa-xmark text-xl"></i>
             </button>
           )}
@@ -188,10 +212,17 @@ export function ApplicationChatbot({
         {messages.map((m, i) => {
           const isUser = m.role === "user";
           return (
-            <div key={i} className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
+            <div
+              key={i}
+              className={`flex gap-3 ${
+                isUser ? "justify-end" : "justify-start"
+              }`}
+            >
               <div
                 className={`max-w-[85%] rounded-lg px-4 py-3 shadow-sm ${
-                  isUser ? cls.userMsg : "bg-white text-gray-800 rounded-tl-none"
+                  isUser
+                    ? cls.userMsg
+                    : "bg-white text-gray-800 rounded-tl-none"
                 }`}
               >
                 {m.role === "assistant" ? (
@@ -199,7 +230,9 @@ export function ApplicationChatbot({
                     components={{
                       li: ({ children }) => (
                         <li className="flex">
-                          <span className="mr-2 font-bold text-gray-800">•</span>
+                          <span className="mr-2 font-bold text-gray-800">
+                            •
+                          </span>
                           <span>{children}</span>
                         </li>
                       ),
@@ -208,7 +241,9 @@ export function ApplicationChatbot({
                     {m.content}
                   </ReactMarkdown>
                 ) : (
-                  <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
+                  <p className="whitespace-pre-wrap leading-relaxed">
+                    {m.content}
+                  </p>
                 )}
               </div>
             </div>
@@ -218,7 +253,11 @@ export function ApplicationChatbot({
         {loading && (
           <div className="flex justify-start">
             <div className="bg-white rounded-lg px-4 py-3 shadow-sm">
-              <i className={`fa-solid fa-spinner fa-spin ${isFloating ? "text-red-800" : "text-cyan-800"}`}></i>
+              <i
+                className={`fa-solid fa-spinner fa-spin ${
+                  isFloating ? "text-red-800" : "text-cyan-800"
+                }`}
+              ></i>
             </div>
           </div>
         )}
@@ -243,7 +282,9 @@ export function ApplicationChatbot({
             onClick={handleSend}
             disabled={!input.trim() || loading}
             className={`p-3 rounded-lg transition-colors ${
-              input.trim() && !loading ? `${cls.sendBtn} text-white` : "bg-gray-200 text-gray-400"
+              input.trim() && !loading
+                ? `${cls.sendBtn} text-white`
+                : "bg-gray-200 text-gray-400"
             }`}
           >
             {loading ? (
