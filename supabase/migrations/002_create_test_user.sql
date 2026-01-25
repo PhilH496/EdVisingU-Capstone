@@ -1,18 +1,15 @@
 -- Create test user for Playwright automation tests
 -- This user will be used ONLY for automated testing
 
--- Step 1: Insert test user into auth.users if not exists
+-- IMPORTANT: Delete existing test user first if it exists
+DELETE FROM public.user_profiles WHERE email = 'test@playwright.test';
+DELETE FROM auth.users WHERE email = 'test@playwright.test';
+
+-- Step 1: Insert test user into auth.users
 DO $$
 DECLARE
-  test_user_id UUID;
+  test_user_id UUID := '00000000-0000-0000-0000-000000000001'::UUID;
 BEGIN
-  -- Check if test user already exists
-  SELECT id INTO test_user_id
-  FROM auth.users
-  WHERE email = 'test@playwright.test';
-
-  -- If user doesn't exist, create it
-  IF test_user_id IS NULL THEN
     INSERT INTO auth.users (
       id,
       instance_id,
@@ -21,6 +18,7 @@ BEGIN
       email_confirmed_at,
       created_at,
       updated_at,
+      confirmation_sent_at,
       aud,
       role,
       raw_app_meta_data,
@@ -31,10 +29,11 @@ BEGIN
       recovery_token
     )
     VALUES (
-      '00000000-0000-0000-0000-000000000001'::UUID, -- Fixed UUID for test user
+      test_user_id,
       '00000000-0000-0000-0000-000000000000',
       'test@playwright.test',
-      crypt('testpassword123', gen_salt('bf')), -- Password: testpassword123
+      '$2a$10$yJ3qN5Zr5Zr5Zr5Zr5Zr5uKJ3qN5Zr5Zr5Zr5Zr5Zr5Zr5Zr5Zr', -- Bcrypt hash for 'testpassword123'
+      now(),
       now(),
       now(),
       now(),
@@ -46,8 +45,7 @@ BEGIN
       '',
       '',
       ''
-    )
-    RETURNING id INTO test_user_id;
+    );
     
     RAISE NOTICE 'Created test user with ID: %', test_user_id;
   ELSE
