@@ -15,6 +15,7 @@ import {
   SetStateAction,
 } from "react";
 import type { ReactNode } from "react";
+import Head from "next/head";
 import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ApplicationAnalysisCard } from "@/components/admin/ApplicationAnalysisCard";
@@ -514,6 +515,16 @@ export default function AdminApplicationDetailPage() {
   };
 
   return (
+    <div>
+      <Head>
+        <title>
+          {summary?.studentName 
+            ? `${summary.studentName} - Application Details` 
+            : "Application Details"
+          }
+        </title>
+        <meta name="description" content="BSWD application review" />
+      </Head>
     <AdminLayout
       title="Application Details"
       rightSlot={
@@ -889,6 +900,7 @@ export default function AdminApplicationDetailPage() {
         </>
       )}
     </AdminLayout>
+    </div>
   );
 }
 

@@ -10,6 +10,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
+import Head from "next/head";
 import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import StatusBadge from "@/components/admin/StatusBadge";
@@ -135,8 +136,9 @@ function PaginationControls({
           disabled={currentPage === 1}
           className="px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           type="button"
+          aria-label="Previous page"
         >
-          <i className="fa-solid fa-chevron-left"/>
+          <i className="fa-solid fa-chevron-left" aria-hidden="true"/>
         </button>
 
         <span className="text-sm font-medium text-gray-700">
@@ -148,8 +150,9 @@ function PaginationControls({
           disabled={currentPage === totalPages}
           className="px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           type="button"
+          aria-label="Next page"
         >
-          <i className="fa-solid fa-chevron-right"/>
+          <i className="fa-solid fa-chevron-right" aria-hidden="true"/>
         </button>
       </div>
     </div>
@@ -426,6 +429,11 @@ export default function AdminDashboardPage() {
 
   // render
   return (
+    <div>
+      <Head>
+        <title>Admin Dashboard</title>
+        <meta name="description" content="Manage and review BSWD applications" />
+      </Head>
     <AdminLayout
       title="BSWD Admin Dashboard"
       description="Hello Admin! Manage assignments, violations, status, and attachments."
@@ -481,13 +489,9 @@ export default function AdminDashboardPage() {
         </label>
 
         <div className="flex items-center gap-2">
-          <span
-            className={`text-sm ${
-              editMode ? "text-gray-600" : "text-gray-400"
-            }`}
-          >
-            Set status:
-          </span>
+        <span className="text-sm text-gray-600">
+          Set status:
+        </span>
           <select
             value={bulkStatus}
             onChange={(e) => setBulkStatus(e.target.value)}
@@ -590,7 +594,7 @@ export default function AdminDashboardPage() {
           )}
 
           {/* Custom Sort Control */}
-          <span className="text-sm text-gray-500 font-medium">Sort By</span>
+          <span className="text-sm text-gray-700 font-medium">Sort By</span>
 
           <div className="relative">
             <button
@@ -600,7 +604,7 @@ export default function AdminDashboardPage() {
               <span className="truncate mr-2">
                 {SORT_MENU.find((x) => x.value === sortConfig.key)?.label}
               </span>
-              <span className="text-gray-400 text-xs">
+              <span className="text-gray-600 text-xs">
                 {sortConfig.direction === "asc" ? "▲" : "▼"}
               </span>
             </button>
@@ -613,7 +617,7 @@ export default function AdminDashboardPage() {
                   onClick={() => setIsSortMenuOpen(false)}
                 />
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 z-20 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-                  <div className="px-4 py-2 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <div className="px-4 py-2 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Order By
                   </div>
                   {SORT_MENU.map((opt) => {
@@ -661,7 +665,7 @@ export default function AdminDashboardPage() {
       )}
 
       {!hasRows ? (
-        <div className="px-5 py-10 text-gray-500">No applications found.</div>
+        <div className="px-5 py-10 text-gray-700">No applications found.</div>
       ) : (
         <div className="space-y-6">
           {pagination.paginatedRows.map((r: Row) => {
@@ -689,10 +693,10 @@ export default function AdminDashboardPage() {
                         <h2 className="font-semibold text-gray-900">
                           {r.studentName} ({r.studentId})
                         </h2>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-700">
                           {titleCase(r.institution)} — {r.program || "—"}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-700">
                           Application ID:{" "}
                           <span className="font-mono">{r.id}</span>
                         </p>
@@ -755,7 +759,7 @@ export default function AdminDashboardPage() {
                     <>
                       {/* Assigned To */}
                       <div>
-                        <label className="block text-sm text-gray-500 mb-1">
+                        <label className="block text-sm text-gray-700 mb-1">
                           Assigned To
                         </label>
                         <input
@@ -771,7 +775,7 @@ export default function AdminDashboardPage() {
 
                       {/* Violations (includes 'Other') */}
                       <div>
-                        <label className="block text-sm text-gray-500 mb-2">
+                        <label className="block text-sm text-gray-700 mb-2">
                           Violations / Issues (select all that apply)
                         </label>
 
@@ -933,7 +937,7 @@ export default function AdminDashboardPage() {
                           })()}
                         </div>
 
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-700 mt-1">
                           Most Common BSWD form issues (Write in
                           &quot;Other&quot; if issue does not appear).
                         </p>
@@ -941,7 +945,7 @@ export default function AdminDashboardPage() {
 
                       {/* Violation details */}
                       <div>
-                        <label className="block text-sm text-gray-500 mb-1">
+                        <label className="block text-sm text-gray-700 mb-1">
                           Other details (optional)
                         </label>
                         <textarea
@@ -959,7 +963,7 @@ export default function AdminDashboardPage() {
 
                       {/* Attachments */}
                       <div>
-                        <label className="block text-sm text-gray-500 mb-2">
+                        <label className="block text-sm text-gray-700 mb-2">
                           Attachments
                         </label>
 
@@ -974,7 +978,7 @@ export default function AdminDashboardPage() {
                                   <div className="font-medium truncate">
                                     {att.name}
                                   </div>
-                                  <div className="text-xs text-gray-500">
+                                  <div className="text-xs text-gray-700">
                                     {att.mime || "application/octet-stream"} •{" "}
                                     {att.size.toLocaleString()} bytes
                                   </div>
@@ -999,7 +1003,7 @@ export default function AdminDashboardPage() {
                             ))}
                           </ul>
                         ) : (
-                          <p className="text-sm text-gray-500 mb-2">
+                          <p className="text-sm text-gray-700 mb-2">
                             No attachments yet.
                           </p>
                         )}
@@ -1016,7 +1020,7 @@ export default function AdminDashboardPage() {
                             }}
                             className="block w-full text-sm text-gray-700 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-800 hover:file:bg-gray-200"
                           />
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs text-gray-700 mt-1">
                             Upload supporting documents
                           </p>
                         </div>
@@ -1059,6 +1063,7 @@ export default function AdminDashboardPage() {
         </div>
       )}
     </AdminLayout>
+    </div>
   );
 }
 

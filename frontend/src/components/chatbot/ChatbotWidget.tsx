@@ -10,6 +10,7 @@
 
 import { useState, useRef, useEffect, FormEvent } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { useDraggable } from '@/hooks/useDraggable';
 
 interface Message {
   role: "user" | "assistant";
@@ -24,6 +25,7 @@ export function ChatbotWidget() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { elementRef, onMouseDown } = useDraggable();
 
   // Auto-scroll to bottom when new msgs arrive
   const scrollToBottom = () => {
@@ -113,13 +115,20 @@ export function ChatbotWidget() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <div>    
       {/* Chat Window */}
       {isOpen && (
-        <div className="mb-4 w-96 sm:w-[450px] bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden animate-slideUp">
+        <div 
+          ref={elementRef}
+          onMouseDown={onMouseDown}
+          className="fixed bottom-6 right-6 z-50 w-96 sm:w-[450px] bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden animate-slideUp"
+        >
           {/* Header */}
-          <div className="bg-[#0066A1] text-white px-5 py-4 flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+          <div 
+            data-drag-handle
+            className="bg-[#0066A1] text-white px-5 py-4 flex items-center justify-between cursor-move select-none"
+          >
+            <div className="flex items-center space-x-3 pointer-events-none">
               <div>
                 <h3 className="font-semibold text-base">BSWD Assistant</h3>
                 <p className="text-sm text-blue-100">Online</p>
@@ -127,7 +136,7 @@ export function ChatbotWidget() {
             </div>
             <button
               onClick={handleToggle}
-              className="text-white hover:text-gray-200 transition-colors"
+              className="text-white hover:text-gray-200 transition-colors pointer-events-auto"
               aria-label="Close chat"
             >
               <i className="fa-solid fa-xmark text-xl"></i>
@@ -257,19 +266,14 @@ export function ChatbotWidget() {
       )}
 
       {/* Floating Action Button */}
-      <button
-        onClick={handleToggle}
-        className="w-16 h-16 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 bg-[#0066A1] hover:bg-[#004f7d] hover:scale-110"
-        aria-label="Open chat"
-      >
-        <i className="fa-solid fa-comment text-white text-3xl"></i>
-      </button>
-
-      {/* Notification Badge */}
       {!isOpen && (
-        <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-          <span className="text-white text-xs font-bold">!</span>
-        </div>
+        <button
+          onClick={handleToggle}
+          className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 bg-[#0066A1] hover:bg-[#004f7d] hover:scale-110"
+          aria-label="Open chat"
+        >
+          <i className="fa-solid fa-comment text-white text-3xl"></i>
+        </button>
       )}
     </div>
   );
