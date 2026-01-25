@@ -30,7 +30,6 @@ export interface FormData {
   postalCode: string;
   country: string;
   hasOsapApplication: boolean | undefined;
-  osapApplicationStartDate?: string;
 
   // Program Information
   institution: string;
@@ -45,7 +44,7 @@ export interface FormData {
 
   // OSAP Information
   osapApplication: "full-time" | "part-time" | "none";
-  osapApplicationStartDate: string;
+  osapApplicationStartDate?: string;
   federalNeed: number;
   provincialNeed: number;
   hasOSAPRestrictions: boolean;

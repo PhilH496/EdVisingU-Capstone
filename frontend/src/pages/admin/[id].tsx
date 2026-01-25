@@ -176,10 +176,6 @@ const ReviewAndSubmitShim = ({
   />
 );
 
-// Local UI types mirroring store
-type Summary = StoreSummary;
-type Snapshot = StoreSnapshot;
-
 function AdminApplicationDetailPage() {
   const router = useRouter();
   const { id } = router.query as { id?: string };
