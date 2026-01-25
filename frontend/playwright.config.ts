@@ -11,7 +11,7 @@ dotenv.config({ path: '.env.local' });
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  timeout: 40000, // this defines how long the test can run before it autofails
+  timeout: 60000, // this defines how long the test can run before it autofails
   testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -72,7 +72,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run dev',
+    command: 'npm run start',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
   },

@@ -1,0 +1,25 @@
+Dockerfile
+Dockerfile.test
+.dockerignore
+.git
+.github/
+README.md
+
+# Dependencies
+node_modules/
+.next/
+!.next/static
+!.next/standalone
+
+# Environment variables
+.env.local
+.env
+# TypeScript
+next-env.d.ts
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+playwright/.auth/
