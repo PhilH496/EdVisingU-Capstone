@@ -236,7 +236,11 @@ export function ChatbotWidget() {
               onSubmit={handleSendMessage}
               className="flex items-center space-x-2"
             >
+              <label htmlFor="chatbot-input-student" className="sr-only">
+                Type your message to BSWD Assistant
+              </label>
               <input
+                id="chatbot-input-student"
                 type="text"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}

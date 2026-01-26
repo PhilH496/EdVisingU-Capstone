@@ -209,8 +209,9 @@ export function ApplicationChatbot({
             <button
               onClick={onClose}
               className="p-1 text-white hover:text-gray-200 rounded-full pointer-events-auto"
+              aria-label="Close BSWD Assistant chat"
             >
-              <i className="fa-solid fa-xmark text-xl"></i>
+              <i className="fa-solid fa-xmark text-xl" aria-hidden="true"></i>
             </button>
           )}
         </div>
@@ -277,7 +278,11 @@ export function ApplicationChatbot({
       {/* Input Bar */}
       <div className="p-5 border-t bg-white rounded-b-lg">
         <div className="flex gap-2">
+          <label htmlFor="chatbot-input-admin">
+            Type your message to BSWD Assistant
+          </label>
           <input
+            id="chatbot-input-admin"
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -295,11 +300,12 @@ export function ApplicationChatbot({
                 ? `${cls.sendBtn} text-white`
                 : "bg-gray-200 text-gray-400 cursor-not-allowed"
             }`}
+            aria-label="Send message"
           >
             {loading ? (
-              <i className="fa-solid fa-spinner fa-spin text-xl"></i>
+              <i className="fa-solid fa-spinner fa-spin text-xl" aria-hidden="true"></i>
             ) : (
-              <i className="fa-solid fa-paper-plane text-xl"></i>
+              <i className="fa-solid fa-paper-plane text-xl" aria-hidden="true"></i>
             )}
           </button>
         </div>

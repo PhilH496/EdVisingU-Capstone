@@ -135,7 +135,7 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
       <div className="bg-gray-50 rounded-lg p-4 text-sm">
         <p className="font-semibold mb-2">Score Meaning:</p>
         <div className="space-y-1">
-          <p><span className="text-green-600 font-bold">90–100</span>: Approved</p>
+          <p><span className="text-green-700 font-bold">90–100</span>: Approved</p>
           <p><span className="text-blue-600 font-bold">75–89</span>: Needs Manual Review</p>
           <p><span className="text-red-600 font-bold">0–74</span>: Rejected</p>
         </div>
@@ -175,7 +175,7 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
             <ul className="text-sm space-y-1">
               {analysis.ai_analysis.risk_factors.map((r, i) => (
                 <li key={i} className="flex gap-2">
-                  <span className="text-yellow-600">⚠</span> {r}
+                  <span className="text-yellow-700">!</span> {r}
                 </li>
               ))}
             </ul>

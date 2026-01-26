@@ -474,16 +474,15 @@ export default function AdminDashboardPage() {
           {editMode ? "Exit Edit Mode" : "Edit"}
         </button>
 
-        <label className="inline-flex items-center gap-2 text-sm">
+        <label htmlFor="select-all-checkbox" className="inline-flex items-center gap-2 text-sm">
           <input
+            id="select-all-checkbox"
             type="checkbox"
             checked={allChecked}
             onChange={(e) => toggleSelectAll(e.target.checked)}
             className="h-4 w-4"
             disabled={!editMode}
-            title={
-              editMode ? "Select all applications" : "Enable Edit Mode first"
-            }
+            aria-label="Select all applications"
           />
           <span className={editMode ? "" : "opacity-50"}>Select All</span>
         </label>
@@ -497,11 +496,7 @@ export default function AdminDashboardPage() {
             onChange={(e) => setBulkStatus(e.target.value)}
             disabled={!editMode}
             className="px-3 py-2 border rounded-md text-sm disabled:opacity-50"
-            title={
-              editMode
-                ? "Choose status to apply to selected"
-                : "Enable Edit Mode first"
-            }
+            aria-label="Choose status to apply"
           >
             {STATUS_OPTIONS.map((s: string) => (
               <option key={s} value={s}>
@@ -513,11 +508,6 @@ export default function AdminDashboardPage() {
             onClick={applyBulkStatus}
             disabled={!editMode}
             className="px-4 py-2 rounded-lg bg-cyan-800 text-white hover:bg-cyan-700 text-sm disabled:opacity-50"
-            title={
-              editMode
-                ? "Apply to selected applications"
-                : "Enable Edit Mode first"
-            }
           >
             Apply to Selected
           </button>
@@ -525,7 +515,6 @@ export default function AdminDashboardPage() {
             onClick={clearSelection}
             disabled={!editMode}
             className="px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-100 text-sm disabled:opacity-50"
-            title={editMode ? "Clear selection" : "Enable Edit Mode first"}
           >
             Clear Selection
           </button>
@@ -574,11 +563,6 @@ export default function AdminDashboardPage() {
             }}
             disabled={!editMode || selectedCount === 0}
             className="px-4 py-2 rounded-lg bg-brand-light-red text-white hover:bg-red-400 text-sm disabled:opacity-50"
-            title={
-              editMode
-                ? "Delete selected applications"
-                : "Enable Edit Mode first"
-            }
           >
             Delete ({selectedCount})
           </button>
@@ -680,13 +664,14 @@ export default function AdminDashboardPage() {
                     <div className="flex items-start gap-3">
                       {editMode && (
                         <input
+                         id={`select-${r.id}`}
                           type="checkbox"
                           checked={!!r._selected}
                           onChange={(e) =>
                             updateRow(r.id, { _selected: e.target.checked })
                           }
                           className="mt-1 h-4 w-4"
-                          title="Select for bulk actions"
+                          aria-label={`Select application for ${r.studentName}`}
                         />
                       )}
                       <div>
@@ -712,7 +697,7 @@ export default function AdminDashboardPage() {
                             className={`px-3 py-1 rounded-full text-xs font-semibold border ${getScoreBadgeClasses(
                               score
                             )}`}
-                            title={`AI Confidence Score: ${score}/100`}
+                            aria-label={`AI Confidence Score: ${score} out of 100`}
                           >
                             {score}
                           </div>
@@ -721,11 +706,13 @@ export default function AdminDashboardPage() {
 
                       {editMode && (
                         <select
+                          id={`status-${r.id}`}
                           value={r.status}
                           onChange={(e) =>
                             updateRow(r.id, { status: e.target.value })
                           }
                           className="px-2 py-1.5 border border-gray-300 rounded-md text-xs"
+                          aria-label={`Changed status for ${r.studentName}`}
                         >
                           {STATUS_OPTIONS.map((s) => (
                             <option key={s} value={s}>
@@ -759,10 +746,14 @@ export default function AdminDashboardPage() {
                     <>
                       {/* Assigned To */}
                       <div>
-                        <label className="block text-sm text-gray-700 mb-1">
+                        <label 
+                        htmlFor={`assignee-${r.id}`} 
+                        className="block text-sm text-gray-700 mb-1"
+                        >
                           Assigned To
                         </label>
                         <input
+                          id={`assignee-${r.id}`}
                           type="text"
                           value={r.assignee || ""}
                           onChange={(e) =>
@@ -794,7 +785,7 @@ export default function AdminDashboardPage() {
                                     ? "bg-red-100 text-red-800 border-red-200"
                                     : "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200"
                                 }`}
-                                title={tag}
+                                aria-label={`${active ? 'Remove' : 'Add'} violation: ${tag}`}
                               >
                                 {tag}
                               </button>
@@ -945,10 +936,14 @@ export default function AdminDashboardPage() {
 
                       {/* Violation details */}
                       <div>
-                        <label className="block text-sm text-gray-700 mb-1">
+                        <label
+                        htmlFor={`violation-details-${r.id}`}
+                        className="block text-sm text-gray-700 mb-1"
+                        >
                           Other details (optional)
                         </label>
                         <textarea
+                          id={`violation-details-${r.id}`}
                           value={r.violationDetails || ""}
                           onChange={(e) =>
                             updateRow(r.id, {
@@ -1009,7 +1004,11 @@ export default function AdminDashboardPage() {
                         )}
 
                         <div>
+                          <label htmlFor={`file-upload-${r.id}`} className="block text-sm text-gray-700 mb-1">
+                            Upload supporting documents
+                          </label>
                           <input
+                            id={`file-upload-${r.id}`}
                             type="file"
                             multiple
                             onChange={async (e) => {
@@ -1020,9 +1019,6 @@ export default function AdminDashboardPage() {
                             }}
                             className="block w-full text-sm text-gray-700 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-800 hover:file:bg-gray-200"
                           />
-                          <p className="text-xs text-gray-700 mt-1">
-                            Upload supporting documents
-                          </p>
                         </div>
                       </div>
 
