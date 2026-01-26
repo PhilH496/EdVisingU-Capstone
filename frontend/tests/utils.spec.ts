@@ -6,7 +6,7 @@ const testStudentId = '1234567';
 
 // Test user credentials
 const TEST_USER_EMAIL = 'test@playwright.test';
-const TEST_USER_PASSWORD = 'testpassword123';
+const TEST_USER_PASSWORD = 'TestPass123!';
 
 async function login(page: any) {
   await page.goto('http://localhost:3000/login');
