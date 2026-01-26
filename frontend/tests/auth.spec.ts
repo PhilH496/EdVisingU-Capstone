@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-// Manually parse .env.local since process.env doesn't work reliably in Playwright workers
+// Load environment variables from .env.local (local dev) or process.env (Docker/CI)
 function loadEnvFile() {
   try {
     const envPath = join(__dirname, '../.env.local');
@@ -23,8 +23,13 @@ function loadEnvFile() {
     
     return env;
   } catch (err) {
-    console.error('Failed to load .env.local:', err);
-    return {};
+    // File doesn't exist in Docker/CI - use process.env instead
+    return {
+      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+      NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || ''
+    };
   }
 }
 
