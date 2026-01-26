@@ -36,6 +36,7 @@
     "placeholders": {
       "osapStartDate": "Select OSAP start date",
       "selectDate": "Select date",
+      "dob": "Select date",
       "studentId": "Enter student ID",
       "oen": "9-digit OEN",
       "firstName": "Enter first name",
@@ -48,6 +49,18 @@
       "province": "Select Province/Territory",
       "postalCode": "A1A 1A1",
       "country": "Canada"
+    },
+    "provinces": {
+      "ON": "Ontario",
+      "AB": "Alberta",
+      "BC": "British Columbia",
+      "MB": "Manitoba",
+      "NB": "New Brunswick",
+      "NL": "Newfoundland and Labrador",
+      "NS": "Nova Scotia",
+      "PE": "Prince Edward Island",
+      "QC": "Quebec",
+      "SK": "Saskatchewan"
     },
     "noOsapPanel": {
       "title": "OSAP application is required for BSWD funding",
@@ -274,12 +287,5 @@
       "required": "Please confirm the above statement before submitting your application."
     },
     "afterSubmit": "After submitting, you can track your application status on the status page."
-  },
-  "thankYou": {
-    "title": "Thank You for Your Submission!",
-    "subtitle": "Your BSWD/CSG-DSE application has been successfully submitted.",
-    "applicationIdLabel": "Application ID",
-    "submittedBy": "Submitted by",
-    "backButton": "Back to Application"
   }
 }
