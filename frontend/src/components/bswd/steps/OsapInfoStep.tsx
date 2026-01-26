@@ -9,6 +9,7 @@
  */
 
 import { FormData } from "@/types/bswd";
+import { useTranslation } from "@/lib/i18n"; // translation import
 
 const OSAP_MANUAL_URL = "https://osap.gov.on.ca/dc/TCONT003225";
 
@@ -18,9 +19,18 @@ interface OsapInfoStepProps {
 }
 
 export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
+  const { t, isLoaded } = useTranslation(); // translation helper
+  if (!isLoaded) return null; // make sure it loads properly
+
   // helper to update a single field while preserving the rest of the formData
   const setField = <K extends keyof FormData>(key: K, value: FormData[K]) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
+
+  const yesUpTo = (amount: number) => // helps with translation logic
+    t("osapInfo.values.yesUpTo").replace(
+      "{{amount}}",
+      amount.toLocaleString()
+    );
 
   // local state shortcuts
   const onFileStatus: "APPROVED" | "NONE" | "" =
@@ -52,17 +62,17 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold mb-2">
-        Section C: OSAP Information
+        {t("osapInfo.sectionHeader")}
       </h2>
       <p className="text-sm text-brand-text-gray">
-        Confirm your OSAP status, enter assessed needs, and note any
-        restrictions.
+        {t("osapInfo.description")}
       </p>
 
       {/* OSAP Application Type */}
       <div className="space-y-1">
         <label className="block text-sm font-medium text-brand-text-gray">
-          OSAP Application Type <span className="text-brand-light-red">*</span>
+          {t("osapInfo.labels.applicationType")}{" "}
+          <span className="text-brand-light-red">*</span>
         </label>
         <select
           className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
@@ -75,13 +85,13 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
           }
           disabled={false}
         >
-          <option value="none">Select type</option>
-          <option value="full-time">Full-Time OSAP</option>
-          <option value="part-time">Part-Time OSAP</option>
+          <option value="none">{t("osapInfo.options.applicationType.none")}</option>
+          <option value="full-time">{t("osapInfo.options.applicationType.fullTime")}</option>
+          <option value="part-time">{t("osapInfo.options.applicationType.partTime")}</option>
         </select>
         {onFileStatus !== "APPROVED" && (
           <p className="text-xs text-gray-500 mt-1">
-            Selectable after OSAP application is active & approved.
+            {t("osapInfo.helperText.applicationTypeLocked")}
           </p>
         )}
       </div>
@@ -90,7 +100,8 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-1">
           <label className="block text-sm font-medium text-brand-text-gray">
-            Federal Financial Need ($) <span className="text-brand-light-red">*</span>
+            {t("osapInfo.labels.federalNeed")}{" "}
+            <span className="text-brand-light-red">*</span>
           </label>
           <input
             type="number"
@@ -104,7 +115,7 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
         </div>
         <div className="space-y-1">
           <label className="block text-sm font-medium text-brand-text-gray">
-            Provincial Financial Need ($){" "}
+            {t("osapInfo.labels.provincialNeed")}{" "}
             <span className="text-brand-light-red">*</span>
           </label>
           <input
@@ -129,19 +140,19 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
               setField("hasOSAPRestrictions", e.currentTarget.checked)
             }
           />
-          Student has OSAP restrictions
+          {t("osapInfo.labels.restrictionsCheckbox")}
         </label>
         {hasRestrictions && (
           <div className="space-y-2">
             <label className="block text-sm font-medium text-brand-text-gray">
-              Type of Restriction{" "}
+              {t("osapInfo.labels.restrictionType")}{" "}
               <a
                 href={OSAP_MANUAL_URL}
                 target="_blank"
                 rel="noreferrer"
                 className="text-blue-600 hover:underline text-xs"
               >
-                (View OSAP Restriction Reasons)
+                ({t("osapInfo.links.viewRestrictionReasons")})
               </a>
             </label>
             <select
@@ -155,15 +166,15 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
                 }))
               }
             >
-              <option value="">Select type</option>
-              <option value="DEFAULT">Default</option>
-              <option value="OVERPAYMENT">Overpayment</option>
-              <option value="BANKRUPTCY">Bankruptcy</option>
-              <option value="FALSE_INFO">False Information</option>
+              <option value="">{t("osapInfo.placeholders.selectType")}</option>
+              <option value="DEFAULT">{t("osapInfo.options.restrictionType.default")}</option>
+              <option value="OVERPAYMENT">{t("osapInfo.options.restrictionType.overpayment")}</option>
+              <option value="BANKRUPTCY">{t("osapInfo.options.restrictionType.bankruptcy")}</option>
+              <option value="FALSE_INFO">{t("osapInfo.options.restrictionType.falseInfo")}</option>
               <option value="LOAN_FORGIVENESS_REVIEW">
-                Loan Forgiveness Review
+                {t("osapInfo.options.restrictionType.loanForgivenessReview")}
               </option>
-              <option value="OTHER">Other</option>
+              <option value="OTHER">{t("osapInfo.options.restrictionType.other")}</option>
             </select>
           </div>
         )}
@@ -172,39 +183,35 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
       {/* Eligibility Summary */}
       <div className="rounded-xl border border-gray-200 bg-[#e6fad2] p-4">
         <p className="font-semibold text-[#4e4e4e] mb-1">
-          Estimated Eligibility
+          {t("osapInfo.labels.eligibilityTitle")}
         </p>
         <div className="text-sm text-[#4e4e4e]">
           <p>
-            Federal CSG-DSE Eligible:{" "}
+            {t("osapInfo.labels.federalEligible")}:{" "}
             <span className="font-medium">
-              {federalEligible
-                ? `Yes (up to $${FED_CAP.toLocaleString()})`
-                : "No"}
+              {federalEligible ? yesUpTo(FED_CAP) : t("osapInfo.values.no")}
             </span>
           </p>
           <p>
-            Provincial BSWD Eligible:{" "}
+            {t("osapInfo.labels.provincialEligible")}:{" "}
             <span className="font-medium">
-              {provincialEligible
-                ? `Yes (up to $${PROV_CAP.toLocaleString()})`
-                : "No"}
+              {provincialEligible ? yesUpTo(PROV_CAP) : t("osapInfo.values.no")}
             </span>
           </p>
           <p>
-            Combined Maximum:{" "}
+            {t("osapInfo.labels.combinedMaximum")}:{" "}
             <span className="font-medium">
               ${combinedDisplay.toLocaleString()}
             </span>
           </p>
           {onFileStatus === "NONE" && (
             <p className="mt-1 italic text-[#4e4e4e]">
-              Pending manual review until OSAP application submitted.
+              {t("osapInfo.helperText.pendingManualReview")}
             </p>
           )}
           {hasRestrictions && (
             <p className="mt-1 italic text-[#4e4e4e]">
-              Funding may be subject to restriction clearance.
+              {t("osapInfo.helperText.restrictionClearance")}
             </p>
           )}
         </div>
