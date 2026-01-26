@@ -8,6 +8,22 @@ const testStudentId = '1234567';
 const TEST_USER_EMAIL = 'test@playwright.test';
 const TEST_USER_PASSWORD = 'TestPass123!';
 
+// Setup: Create test user before any tests run
+test.beforeAll(async () => {
+  try {
+    const { error } = await supabaseClient.auth.signUp({
+      email: TEST_USER_EMAIL,
+      password: TEST_USER_PASSWORD,
+    });
+    
+    if (error && !error.message.includes('already registered')) {
+      console.error('Error creating test user:', error);
+    }
+  } catch (err) {
+    console.error('Failed to create test user:', err);
+  }
+});
+
 async function login(page: any) {
   await page.goto('http://localhost:3000/login');
   await page.getByRole('textbox', { name: 'Email' }).fill(TEST_USER_EMAIL);
