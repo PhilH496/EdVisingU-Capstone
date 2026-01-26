@@ -165,6 +165,7 @@ export function ProgramInfoStep({
           <Popover open={institutionOpen} onOpenChange={setInstitutionOpen}>
             <PopoverTrigger asChild>
               <Button
+                id="institutionName"
                 variant="outline"
                 role="combobox"
                 aria-expanded={institutionOpen}
@@ -433,11 +434,12 @@ export function ProgramInfoStep({
 
       <div className="mt-4">
         {/* Previous institution disability documentation div */}
-        <label className="block text-base font-medium mb-2 text-left text-brand-text-gray">
+        <fieldset>
+        <legend className="block text-base font-medium mb-2 text-left text-brand-text-gray">
           Has the student submitted a completed OSAP Disability Verification
           Form or other disability documentation while attending another
           institution? <span className="text-sm text-brand-light-red mt-1">*</span>
-        </label>
+        </legend>
         <RadioGroup
           value={formData.submittedDisabilityElsewhere ? "yes" : "no"}
           onValueChange={(value) =>
@@ -457,6 +459,7 @@ export function ProgramInfoStep({
             <Label htmlFor="submitted-no">No</Label>
           </div>
         </RadioGroup>
+        </fieldset>
 
         {/* Previous institution combobox (used when "Yes") */}
         {formData.submittedDisabilityElsewhere === true && (

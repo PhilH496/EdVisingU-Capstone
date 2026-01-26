@@ -86,11 +86,11 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
   return (
     <div className="space-y-4">
       {/* OSAP application question with buttons */}
-      <div>
-        <label className="block text-sm font-medium mb-3 text-brand-text-gray">
+      <fieldset>
+        <legend className="block text-sm font-medium mb-3 text-brand-text-gray">
           Do you have an OSAP application?{" "}
           <span className="text-sm text-brand-light-red mt-1">*</span>
-        </label>
+        </legend>
         <div className="flex gap-4">
           <label className="inline-flex items-center gap-2 text-brand-text-gray">
             <input
@@ -111,7 +111,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             No
           </label>
         </div>
-      </div>
+      </fieldset>
 
       {/* Email input box when "No" is selected */}
       {showEmailInput && formData.hasOsapApplication === false && (
@@ -124,14 +124,20 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             Please enter your email address to receive information about OSAP application requirements:
           </p>
           <div className="flex gap-2">
-            <Input
-              type="email"
-              placeholder="your.email@example.com"
-              value={notificationEmail}
-              onChange={(e) => setNotificationEmail(e.target.value)}
-              className="flex-1"
-              disabled={emailSending || emailSent}
-            />
+            <div className="flex-1">
+              <label htmlFor="notification-email" className="sr-only">
+                Email address for OSAP information
+              </label>
+              <Input
+                id="notification-email"
+                type="email"
+                placeholder="your.email@example.com"
+                value={notificationEmail}
+                onChange={(e) => setNotificationEmail(e.target.value)}
+                className="w-full"
+                disabled={emailSending || emailSent}
+              />
+            </div>
             <Button
               onClick={handleSendEmail}
               disabled={!notificationEmail || emailSending || emailSent}

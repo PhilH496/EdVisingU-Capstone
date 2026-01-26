@@ -518,10 +518,7 @@ export default function AdminApplicationDetailPage() {
     <div>
       <Head>
         <title>
-          {summary?.studentName 
-            ? `${summary.studentName} - Application Details` 
-            : "Application Details"
-          }
+          {summary?.studentName || "Application Details"}
         </title>
         <meta name="description" content="BSWD application review" />
       </Head>

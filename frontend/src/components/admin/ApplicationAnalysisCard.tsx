@@ -116,7 +116,7 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <div className="text-xl font-bold">{finalScore}</div>
-              <div className="text-[10px] text-gray-600">score</div>
+              <div className="text-xs text-gray-600">score</div>
             </div>
           </div>
 

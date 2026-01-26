@@ -484,7 +484,7 @@ export default function AdminDashboardPage() {
             disabled={!editMode}
             aria-label="Select all applications"
           />
-          <span className={editMode ? "" : "opacity-50"}>Select All</span>
+          <span className={editMode ? "text-gray-900" : "text-gray-500"}>Select All</span>
         </label>
 
         <div className="flex items-center gap-2">

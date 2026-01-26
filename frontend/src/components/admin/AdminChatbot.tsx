@@ -278,7 +278,7 @@ export function ApplicationChatbot({
       {/* Input Bar */}
       <div className="p-5 border-t bg-white rounded-b-lg">
         <div className="flex gap-2">
-          <label htmlFor="chatbot-input-admin">
+          <label htmlFor="chatbot-input-admin" className="sr-only">
             Type your message to BSWD Assistant
           </label>
           <input
