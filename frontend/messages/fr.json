@@ -36,7 +36,6 @@
     "placeholders": {
       "osapStartDate": "Sélectionnez la date de début d’OSAP",
       "selectDate": "Sélectionnez une date",
-      "dob": "Sélectionnez une date",
       "studentId": "Entrez le numéro d’étudiant",
       "oen": "OEN à 9 chiffres",
       "firstName": "Entrez le prénom",
@@ -49,18 +48,6 @@
       "province": "Sélectionnez une province/un territoire",
       "postalCode": "A1A 1A1",
       "country": "Canada"
-    },
-    "provinces": {
-      "ON": "Ontario",
-      "AB": "Alberta",
-      "BC": "Colombie-Britannique",
-      "MB": "Manitoba",
-      "NB": "Nouveau-Brunswick",
-      "NL": "Terre-Neuve-et-Labrador",
-      "NS": "Nouvelle-Écosse",
-      "PE": "Île-du-Prince-Édouard",
-      "QC": "Québec",
-      "SK": "Saskatchewan"
     },
     "noOsapPanel": {
       "title": "Une demande d’OSAP est requise pour le financement BSWD",
@@ -112,5 +99,187 @@
       "question": "L’étudiant a-t-il soumis un formulaire de vérification du handicap OSAP ou une autre documentation relative au handicap dans un autre établissement ?",
       "previousInstitutionLabel": "Établissement précédent"
     }
+  },
+  "osapInfo": {
+    "sectionHeader": "Section C : Informations OSAP",
+    "description": "Confirmez votre statut OSAP, entrez les besoins évalués et indiquez toute restriction.",
+    "labels": {
+      "applicationType": "Type de demande OSAP",
+      "federalNeed": "Besoin financier fédéral ($)",
+      "provincialNeed": "Besoin financier provincial ($)",
+      "restrictionsCheckbox": "L’étudiant a des restrictions OSAP",
+      "restrictionType": "Type de restriction",
+      "eligibilityTitle": "Admissibilité estimée",
+      "federalEligible": "Admissible au CSG-DSE fédéral",
+      "provincialEligible": "Admissible au BSWD provincial",
+      "combinedMaximum": "Maximum combiné"
+    },
+    "placeholders": {
+      "selectType": "Sélectionner le type"
+    },
+    "helperText": {
+      "applicationTypeLocked": "Sélection disponible après l’activation et l’approbation de la demande OSAP.",
+      "pendingManualReview": "En attente d’un examen manuel jusqu’à la soumission de la demande OSAP.",
+      "restrictionClearance": "Le financement peut être soumis à la levée des restrictions."
+    },
+    "links": {
+      "viewRestrictionReasons": "Voir les motifs de restriction OSAP"
+    },
+    "options": {
+      "applicationType": {
+        "none": "Sélectionner le type",
+        "fullTime": "OSAP temps plein",
+        "partTime": "OSAP temps partiel"
+      },
+      "restrictionType": {
+        "default": "Défaut",
+        "overpayment": "Paiement en trop",
+        "bankruptcy": "Faillite",
+        "falseInfo": "Fausse information",
+        "loanForgivenessReview": "Révision de remise de prêt",
+        "other": "Autre"
+      }
+    },
+    "values": {
+      "yesUpTo": "Oui (jusqu’à {{amount}} $)",
+      "no": "Non"
+    }
+  },
+  "disabilityInfo": {
+    "sectionHeader": "Section D : Informations sur le handicap",
+    "verifiedStatusLabel": "L’étudiant a un statut de handicap vérifié auprès de l’OSAP",
+    "labels": {
+      "verificationDate": "Date de vérification du handicap",
+      "disabilityType": "Type de handicap",
+      "functionalLimitations": "Limitations fonctionnelles (facultatif — cochez tout ce qui s’applique)"
+    },
+    "placeholders": {
+      "selectDate": "Sélectionnez une date"
+    },
+    "disabilityTypes": {
+      "permanent": "Handicap permanent",
+      "persistentProlonged": "Handicap persistant ou prolongé"
+    },
+    "functionalLimitations": {
+      "mobility": "Mobilité",
+      "hearing": "Audition",
+      "cognitive": "Cognitif",
+      "communication": "Communication",
+      "chronicPain": "Douleur chronique",
+      "vision": "Vision",
+      "learning": "Apprentissage",
+      "mentalHealth": "Santé mentale",
+      "dexterity": "Dextérité",
+      "attention": "Attention/Concentration"
+    },
+    "psychoEd": {
+      "checkboxLabel": "Nécessite une évaluation psychoéducative pour la vérification d’un trouble d’apprentissage",
+      "emailWarning": "Veuillez entrer votre adresse courriel à la section A (Info étudiant) avant de demander une évaluation.",
+      "cardTitle": "Référence pour une évaluation psychoéducative",
+      "cardP1": "Vous serez automatiquement mis en relation avec un fournisseur d’évaluation qualifié dans votre région géographique ayant un contrat de référence avec nous, ou avec un fournisseur de votre établissement à un tarif réduit.",
+      "cardP2": "Les frais d’évaluation seront examinés pour approbation et soumis au service des finances de votre établissement pour paiement direct par virement électronique.",
+      "contactEmailLabel": "Adresse courriel de contact pour la référence d’évaluation",
+      "contactEmailPlaceholder": "Entrez votre adresse courriel",
+      "contactEmailHelp": "Nous enverrons les informations sur le fournisseur d’évaluation et les prochaines étapes à cette adresse courriel."
+    },
+    "emailStatus": {
+      "sending": "Envoi du courriel de référence...",
+      "sent": "Courriel de référence envoyé avec succès à",
+      "failedToSend": "Échec de l’envoi du courriel de référence. Veuillez contacter le support."
+    }
+  },
+  "serviceEquipment": {
+    "sectionHeader": "Section F : Services et équipement",
+    "equipmentHeader": "Équipement lié au handicap",
+    "servicesHeader": "Services liés au handicap",
+    "tabs": {
+      "equipment": "Équipement",
+      "services": "Services"
+    },
+    "labels": {
+      "cap": "Plafond",
+      "eligible": "Admissible"
+    },
+    "buttons": {
+      "addAllEquipment": "Ajouter tout l’équipement",
+      "addAllServices": "Ajouter tous les services",
+      "removeItem": "Retirer l’élément",
+      "added": "Ajouté ✓",
+      "addItem": "Ajouter un élément",
+      "addService": "Ajouter un service"
+    },
+    "headings": {
+      "equipment": "Équipement lié au handicap",
+      "services": "Services liés au handicap"
+    },
+    "requestedCount": {
+      "prefix": "élément(s) actuellement demandés"
+    },
+    "eligibility": {
+      "both": "BSWD et CSG-DSE",
+      "bswd": "BSWD",
+      "csgdse": "CSG-DSE"
+    },
+    "justification": {
+      "equipment": "Équipement demandé pour le soutien lié au handicap",
+      "service": "Service demandé pour le soutien lié au handicap"
+    },
+    "items": {
+      "equipment": {
+        "computerLaptop": "Ordinateur/portable",
+        "tablet": "Tablette",
+        "screenReadingSoftware": "Logiciel de lecture d’écran"
+      },
+      "services": {
+        "noteTakingServices": "Services de prise de notes",
+        "tutoringServices": "Services de tutorat",
+        "addAdhdCoaching": "Coaching TDA/TDAH"
+      },
+      "servicesCaps": {
+        "noteTakingServices": "1 500 | par cours ou 1 000 $ par licence",
+        "tutoringServices": "2 200 | par cours, 35 $/heure max",
+        "addAdhdCoaching": "2 000 | BSWD seulement, par année scolaire"
+      }
+    }
+  },
+  "review": {
+    "title": "Réviser et soumettre",
+    "description": "Veuillez vérifier les informations de votre demande ci-dessous avant de la soumettre.",
+    "notProvided": "Non fourni",
+    "to": "à",
+    "sections": {
+      "studentInfo": "Informations sur l’étudiant",
+      "programInfo": "Informations sur le programme",
+      "osapInfo": "Informations OSAP",
+      "disabilityInfo": "Informations sur le handicap",
+      "requestedItems": "Services et équipement demandés"
+    },
+    "student": {
+      "hasOsapApplication": "Demande d’OSAP"
+    },
+    "program": {
+      "institution": "Établissement",
+      "program": "Programme",
+      "studyPeriod": "Période d’ét'étude"
+    },
+    "osap": {
+      "hasRestrictions": "Restrictions OSAP"
+    },
+    "disability": {
+      "hasVerified": "Handicap vérifié"
+    },
+    "noItemsRequested": "Aucun élément demandé",
+    "confirmation": {
+      "text": "Je confirme que toutes les informations fournies dans cette demande sont exactes et complètes au meilleur de ma connaissance. Je comprends que fournir des informations fausses ou trompeuses peut entraîner le refus de ma demande ou l’annulation du financement.",
+      "required": "Veuillez confirmer l’énoncé ci-dessus avant de soumettre votre demande."
+    },
+    "afterSubmit": "Après la soumission, vous pouvez suivre l’état de votre demande sur la page de statut."
+  },
+  "thankYou": {
+    "title": "Merci pour votre soumission !",
+    "subtitle": "Votre demande BSWD/CSG-DSE a été soumise avec succès.",
+    "applicationIdLabel": "ID de la demande",
+    "submittedBy": "Soumis par",
+    "backButton": "Retour à la demande"
   }
 }
