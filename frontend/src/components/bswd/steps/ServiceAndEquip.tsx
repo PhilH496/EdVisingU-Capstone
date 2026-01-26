@@ -164,9 +164,9 @@ export function ServiceAndEquip({
       {tabFocus === "equipment" ? (
         <>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">
+            <h3 className="text-lg font-semibold">
               Disability-Related Equipment
-            </h2>
+            </h3>
             <button
               onClick={handleAddAll}
               disabled={areAllItemsAdded()}
@@ -194,9 +194,9 @@ export function ServiceAndEquip({
       ) : (
         <>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">
+            <h3 className="text-lg font-semibold">
               Disability-Related Services
-            </h2>
+            </h3>
             <button
               onClick={handleAddAll}
               disabled={areAllItemsAdded()}
@@ -318,7 +318,7 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
   return (
     <div className="border rounded-lg p-4 flex justify-between items-center">
       <div>
-        <h4 className="font-semibold">{itemInfo.name}</h4>
+        <div className="font-semibold">{itemInfo.name}</div>
         <p>
           <span>Cap: ${itemInfo.cap}</span>
           {type === "equipment" ? (

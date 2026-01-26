@@ -168,6 +168,7 @@ export function ProgramInfoStep({
                 variant="outline"
                 role="combobox"
                 aria-expanded={institutionOpen}
+                aria-label="Search for institution"
                 className="w-full justify-start text-left"
               >
                 {formData.institution
@@ -470,6 +471,7 @@ export function ProgramInfoStep({
                   variant="outline"
                   role="combobox"
                   aria-expanded={false}
+                  aria-label="Search for previous institution"
                   className="md:w-1/2 justify-start text-left"
                 >
                   {formData.previousInstitution
