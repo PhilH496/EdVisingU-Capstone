@@ -36,6 +36,7 @@
     "placeholders": {
       "osapStartDate": "Sélectionnez la date de début d’OSAP",
       "selectDate": "Sélectionnez une date",
+      "dob": "Sélectionnez une date",
       "studentId": "Entrez le numéro d’étudiant",
       "oen": "OEN à 9 chiffres",
       "firstName": "Entrez le prénom",
@@ -48,6 +49,18 @@
       "province": "Sélectionnez une province/un territoire",
       "postalCode": "A1A 1A1",
       "country": "Canada"
+    },
+    "provinces": {
+      "ON": "Ontario",
+      "AB": "Alberta",
+      "BC": "Colombie-Britannique",
+      "MB": "Manitoba",
+      "NB": "Nouveau-Brunswick",
+      "NL": "Terre-Neuve-et-Labrador",
+      "NS": "Nouvelle-Écosse",
+      "PE": "Île-du-Prince-Édouard",
+      "QC": "Québec",
+      "SK": "Saskatchewan"
     },
     "noOsapPanel": {
       "title": "Une demande d’OSAP est requise pour le financement BSWD",
@@ -274,12 +287,5 @@
       "required": "Veuillez confirmer l’énoncé ci-dessus avant de soumettre votre demande."
     },
     "afterSubmit": "Après la soumission, vous pouvez suivre l’état de votre demande sur la page de statut."
-  },
-  "thankYou": {
-    "title": "Merci pour votre soumission !",
-    "subtitle": "Votre demande BSWD/CSG-DSE a été soumise avec succès.",
-    "applicationIdLabel": "ID de la demande",
-    "submittedBy": "Soumis par",
-    "backButton": "Retour à la demande"
   }
 }
