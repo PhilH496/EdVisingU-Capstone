@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 const TEST_USER_EMAIL = 'test@playwright.test';
 const TEST_USER_PASSWORD = 'testpassword123';
 
-// Test for signup with random user - will be deleted after test
+// Test for signup with random user 
 const RANDOM_USER_EMAIL = `test-${Date.now()}@playwright.test`;
 const RANDOM_USER_PASSWORD = 'ValidPassword123!';
 
@@ -27,8 +27,11 @@ test.describe('Authentication Tests', () => {
     // Verify user is logged in (login page should not be visible)
     await expect(page).toHaveURL('http://localhost:3000/');
     
-    // Find and click logout button (assuming it's in navigation)
-    await page.getByRole('button', { name: /logout|sign out/i }).click();
+    // Click on user menu to reveal logout button (menu button shows user name/email)
+    await page.locator('button').filter({ hasText: /User|test/ }).click();
+    
+    // Wait for dropdown menu to appear and click logout
+    await page.getByRole('button', { name: /logout/i }).click();
     
     // Wait for redirect to login page
     await page.waitForURL('http://localhost:3000/login', { timeout: 10000 });
@@ -80,7 +83,8 @@ test.describe('Authentication Tests', () => {
     
     // Fill in signup form
     await page.getByRole('textbox', { name: /email/i }).fill(RANDOM_USER_EMAIL);
-    await page.getByRole('textbox', { name: /password/i }).fill(RANDOM_USER_PASSWORD);
+    await page.locator('#password').fill(RANDOM_USER_PASSWORD);
+    await page.locator('#confirm-password').fill(RANDOM_USER_PASSWORD);
     await page.getByRole('textbox', { name: /full name|name/i }).fill('Test User Playwright');
     
     // Submit signup form
@@ -133,7 +137,8 @@ test.describe('Authentication Tests', () => {
     
     // Try to sign up with weak password
     await page.getByRole('textbox', { name: /email/i }).fill(`weak-${Date.now()}@test.com`);
-    await page.getByRole('textbox', { name: /password/i }).fill('123'); // Too short
+    await page.locator('#password').fill('123'); // Too short
+    await page.locator('#confirm-password').fill('123');
     await page.getByRole('textbox', { name: /full name|name/i }).fill('Weak Password Test');
     
     // Submit signup form

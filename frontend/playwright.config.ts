@@ -21,9 +21,9 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
   workers: 1, // I was having issues with tests running in parralel since they were using the same supabase client.
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+
   reporter: 'html',
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  /* Shared settings for all the projects below.  */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
     baseURL: 'http://localhost:3000', // will eventually change to the production URL. For now, make sure your local server is running.
@@ -49,7 +49,7 @@ export default defineConfig({
       use: { ...devices['Desktop Safari'] },
     },
 
-    /* Test against mobile viewports. DO NOT DELETE OR UNCOMMENT THESE.*/ 
+    /* Test against mobile viewports.*/ 
     // {
     //   name: 'Mobile Chrome',
     //   use: { ...devices['Pixel 5'] },
@@ -72,8 +72,9 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run start',
+    command: 'npm run dev',
     url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true, // Always reuse existing server if available
+    timeout: 120000, // 2 minutes to start
   },
 });
