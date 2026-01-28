@@ -63,7 +63,7 @@ export function ChatbotWidget() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/chat", {
+      const response = await fetch("http://localhost:8000/api/chat-stream", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -81,18 +81,39 @@ export function ChatbotWidget() {
         throw new Error(`Server error: ${response.status}`);
       }
 
-      const data = await response.json();
+      // Initiate tools to read streaming data from backend
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
 
       // Add assistant response to chat
       const assistantMessage: Message = {
         role: "assistant",
-        content:
-          data.answer ||
-          data.response ||
-          "Sorry, I couldn't generate a response.",
+        content: "", //"Sorry, I couldn't generate a response."
         timestamp: new Date(),
       };
-      setMessages((prev) => [...prev, assistantMessage]);
+      let isFirstLoop = true;
+      while (true) {
+        const { value, done } = await reader!.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+
+        // Initally, chatbot reponse will have a loading icon
+        // When it reaches here
+        // The icon dissapears and replaced with a streamreponse
+        if (isFirstLoop) {
+          setMessages((prev) => [...prev, assistantMessage]);
+          setIsLoading(false);
+          isFirstLoop = false;
+        }
+        setMessages((prev) =>
+          prev.map((message, idx) => {
+            if (idx === prev.length - 1) {
+              return { ...message, content: message.content + chunk };
+            }
+            return message;
+          }),
+        );
+      }
     } catch (err) {
       console.error("Chat error:", err);
       setError(
