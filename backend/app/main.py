@@ -4,6 +4,7 @@ FastAPI Backend for BSWD Chatbot
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import List, Optional
 from contextlib import asynccontextmanager
@@ -13,7 +14,7 @@ import os
 # Add the app directory to the path so we can import chain
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from chain import get_or_create_chain, chat_with_memory
+from chain import get_or_create_chain, chat_with_memory, chat_with_memory_stream
 from .analysis_routes import router as analysis_router
 from .admin_routes import router as admin_router
 
@@ -119,6 +120,22 @@ async def chat(request: ChatRequest):
             detail=f"Error processing your message: {str(e)}"
         )
 
+@app.post("/api/chat-stream")
+async def chat(request: ChatRequest):
+    """
+    Main chat endpoint for STUDENT chatbot stream
+    """
+    try:
+        chain, memory = get_or_create_chain()
+        return StreamingResponse(chat_with_memory_stream(chain, memory, request.message), media_type="text/plain; charset=utf-8")
+
+        
+    except Exception as e:
+        print(f"Error processing chat: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error processing your message: {str(e)}"
+        )
 
 @app.post("/api/chat/reset")
 async def reset_conversation():
