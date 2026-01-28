@@ -8,8 +8,8 @@
  * - Conversation history display
  */
 
-import { useState, useRef, useEffect, FormEvent } from 'react';
-import ReactMarkdown from 'react-markdown';
+import { useState, useRef, useEffect, FormEvent } from "react";
+import ReactMarkdown from "react-markdown";
 
 interface Message {
   role: "user" | "assistant";
@@ -96,7 +96,7 @@ export function ChatbotWidget() {
     } catch (err) {
       console.error("Chat error:", err);
       setError(
-        "Failed to connect to chatbot. Please make sure the backend is running."
+        "Failed to connect to chatbot. Please make sure the backend is running.",
       );
 
       // Add error message to chat
@@ -172,26 +172,34 @@ export function ChatbotWidget() {
                       : "bg-white text-gray-800 rounded-tl-none"
                   }`}
                 >
-                {msg.role === 'assistant' ? (
-                  <div className="text-base max-w-none">
-                    <ReactMarkdown
-                      components={{
-                        p: ({node, ...props}) => <p className="mb-2" {...props} />,
-                        ul: ({node, ...props}) => <ul className="space-y-1 my-2 pl-0" {...props} />,
-                        li: ({node, children, ...props}) => (
-                          <li className="flex" {...props}>
-                            <span className="mr-2 font-bold text-brand-black flex-shrink-0">•</span>
-                            <span className="flex-1">{children}</span>
-                          </li>
-                        ),
-                      }}
-                    >
+                  {msg.role === "assistant" ? (
+                    <div className="text-base max-w-none">
+                      <ReactMarkdown
+                        components={{
+                          p: ({ node, ...props }) => (
+                            <p className="mb-2" {...props} />
+                          ),
+                          ul: ({ node, ...props }) => (
+                            <ul className="space-y-1 my-2 pl-0" {...props} />
+                          ),
+                          li: ({ node, children, ...props }) => (
+                            <li className="flex" {...props}>
+                              <span className="mr-2 font-bold text-brand-black flex-shrink-0">
+                                •
+                              </span>
+                              <span className="flex-1">{children}</span>
+                            </li>
+                          ),
+                        }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="text-base whitespace-pre-wrap">
                       {msg.content}
-                    </ReactMarkdown>
-                  </div>
-                ) : (
-                  <p className="text-base whitespace-pre-wrap">{msg.content}</p>
-                )}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
