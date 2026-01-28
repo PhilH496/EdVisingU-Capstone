@@ -245,7 +245,7 @@ export default function AdminApplicationDetailPage() {
 
       const response = await fetch(
         `${
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+          process.env.NEXT_PUBLIC_API_URL
         }/api/analysis/application`,
         {
           method: "POST",
@@ -410,6 +410,7 @@ export default function AdminApplicationDetailPage() {
       studentId: summary.studentId,
       submittedDate: summary.submittedDate,
       status: summary.status,
+      confidenceScore: summary.confidenceScore,
       program: fd.program,
       institution: fd.institution,
       studyPeriod: `${fd.studyPeriodStart} - ${fd.studyPeriodEnd}`,
@@ -422,13 +423,13 @@ export default function AdminApplicationDetailPage() {
       attachments: data?.attachments ?? [],
     };
 
-    // Triggers status recalculation and saves to Supabase
+    // Triggers status and score recalculation and saves to Supabase
     await storeSaveSnapshotMerge(updatedRow, fd);
 
-    // Fetch the recalculated status from Supabase
+    // Fetch the recalculated status and score from Supabase
     const { data: updatedApp } = await supabase
       .from("applications")
-      .select("status, status_updated_date")
+      .select("status, status_updated_date, confidence_score")
       .eq("id", summary.id)
       .single();
 
@@ -443,6 +444,7 @@ export default function AdminApplicationDetailPage() {
       institution: updatedRow.institution,
       studyPeriod: updatedRow.studyPeriod,
       statusUpdatedDate: updatedApp?.status_updated_date || nowIso,
+      confidenceScore: updatedApp?.confidence_score,
     };
 
     await storeSaveApplicationsList([nextSummary]);

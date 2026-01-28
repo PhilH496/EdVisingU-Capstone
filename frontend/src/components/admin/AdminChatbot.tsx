@@ -53,7 +53,7 @@ interface Props {
 
 export function ApplicationChatbot({
   applicationData,
-  apiBaseUrl = "http://localhost:8000",
+  apiBaseUrl = process.env.NEXT_PUBLIC_API_URL,
   mode = "embedded",
   isOpen = true,
   onClose,

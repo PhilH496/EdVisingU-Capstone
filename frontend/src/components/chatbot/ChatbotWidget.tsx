@@ -63,19 +63,22 @@ export function ChatbotWidget() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/chat-stream", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/chat-stream`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: userMessage,
+            history: messages.map((msg) => ({
+              role: msg.role,
+              content: msg.content,
+            })),
+          }),
         },
-        body: JSON.stringify({
-          message: userMessage,
-          history: messages.map((msg) => ({
-            role: msg.role,
-            content: msg.content,
-          })),
-        }),
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`Server error: ${response.status}`);
@@ -187,6 +190,7 @@ export function ChatbotWidget() {
                   />
                 )}
                 <div
+                  id="chatbotResponse"
                   className={`rounded-lg px-4 py-3 shadow-sm max-w-[85%] ${
                     msg.role === "user"
                       ? "bg-[#0066A1] text-white rounded-tr-none"
