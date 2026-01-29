@@ -19,6 +19,8 @@ import { Button } from "@/components/ui/button";
 import { useDateRange } from "@/hooks/UseDateRange";
 import { ChangeEvent, useState } from "react";
 import { sendNoOsapEmail } from "@/lib/notify";
+import { useTranslation } from "@/lib/i18n"; // translation import
+
 
 interface StudentInfoStepProps {
   formData: FormData;
@@ -35,6 +37,8 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
   const [emailSent, setEmailSent] = useState(false);
   const [showEmailInput, setShowEmailInput] = useState(false);
   const [notificationEmail, setNotificationEmail] = useState("");
+  const { t, isLoaded } = useTranslation(); // translation hook
+  if (!isLoaded) return null; // wait until translations load
 
   // Function to send No OSAP email using Edge Function
   const handleSendNoOsapEmail = async (emailToSend: string) => {
@@ -88,7 +92,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       {/* OSAP application question with buttons */}
       <fieldset>
         <legend className="block text-sm font-medium mb-3 text-brand-text-gray">
-          Do you have an OSAP application?{" "}
+          {t("studentInfo.osapQuestion")}
           <span className="text-sm text-brand-light-red mt-1">*</span>
         </legend>
         <div className="flex gap-4">
@@ -99,7 +103,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               checked={formData.hasOsapApplication === true}
               onChange={() => handleOsapSelection(true)}
             />
-            Yes
+            {t("common.yes")}
           </label>
           <label className="inline-flex items-center gap-2 text-brand-text-gray">
             <input
@@ -108,7 +112,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               checked={formData.hasOsapApplication === false}
               onChange={() => handleOsapSelection(false)}
             />
-            No
+            {t("common.no")}
           </label>
         </div>
       </fieldset>
@@ -118,10 +122,10 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
         <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
           <p className="text-sm font-medium text-green-800 mb-3">
             <i className="fa-solid fa-exclamation-triangle mr-2"></i>
-            OSAP application is required for BSWD funding
+            {t("studentInfo.noOsapPanel.title")}
           </p>
           <p className="text-sm text-gray-700 mb-3">
-            Please enter your email address to receive information about OSAP application requirements:
+            {t("studentInfo.noOsapPanel.description")}
           </p>
           <div className="flex gap-2">
             <div className="flex-1">
@@ -131,7 +135,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               <Input
                 id="notification-email"
                 type="email"
-                placeholder="your.email@example.com"
+                placeholder={t("studentInfo.noOsapPanel.emailPlaceholder")} // translation
                 value={notificationEmail}
                 onChange={(e) => setNotificationEmail(e.target.value)}
                 className="w-full"
@@ -144,17 +148,23 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               className="bg-brand-dark-blue hover:bg-blue-700 text-white"
             >
               {emailSending ? (
-                <span><i className="fa-solid fa-spinner fa-spin mr-2"></i>Sending...</span>
+                <span><i className="fa-solid fa-spinner fa-spin mr-2"></i>
+                  {t("studentInfo.noOsapPanel.button.sending")}
+                </span>
               ) : emailSent ? (
-                <span><i className="fa-solid fa-check mr-2"></i>Sent</span>
+                <span><i className="fa-solid fa-check mr-2"></i>
+                  {t("studentInfo.noOsapPanel.button.sent")}
+                </span>
               ) : (
-                <span><i className="fa-solid fa-paper-plane mr-2"></i>Send</span>
+                <span><i className="fa-solid fa-paper-plane mr-2"></i>
+                  {t("studentInfo.noOsapPanel.button.send")}
+                </span>
               )}
             </Button>
           </div>
           {emailSent && (
             <p className="text-sm text-green-600 mt-2">
-              ✓ Notification email sent to {notificationEmail}
+              {t("studentInfo.noOsapPanel.button.sentMessage")} {notificationEmail}
             </p>
           )}
         </div>
@@ -164,7 +174,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       {formData.hasOsapApplication === true && (
         <div>
           <Label htmlFor="osapApplicationStartDate" className="block text-sm font-medium mb-1 text-brand-text-gray">
-            OSAP Application Start Date{" "}
+            {t("studentInfo.labels.osapApplicationStartDate")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </Label>
           <Popover open={osapStartDate.open} onOpenChange={osapStartDate.setOpen}>
@@ -174,7 +184,9 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 id="osapApplicationStartDate"
                 className="w-full justify-between font-normal"
               >
-                {osapStartDate.date ? osapStartDate.date.toLocaleDateString() : "Select OSAP start date"}
+                {osapStartDate.date // translation
+                  ? osapStartDate.date.toLocaleDateString()
+                  : t("studentInfo.placeholders.osapStartDate")} 
                 <ChevronDownIcon />
               </Button>
             </PopoverTrigger>
@@ -199,8 +211,9 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
         </div>
       )}
 
-      <h2 className="text-xl font-semibold mb-4">Section A: Student Information</h2>
-
+      <h2 className="text-xl font-semibold mb-4">
+        {t("studentInfo.sectionHeader")}
+      </h2>
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
@@ -208,7 +221,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             htmlFor="studentId"
             className="block text-sm font-medium mb-1 text-brand-text-gray"
           >
-            Student ID{" "}
+            {t("studentInfo.labels.studentId")} {" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
@@ -223,12 +236,12 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               }
             }}
             className={lockCls("w-full px-3 py-2 border rounded-md")}
-            placeholder="Enter student ID"
+            placeholder={t("studentInfo.placeholders.studentId")} // translation 
             maxLength={8}
           />
           {formData.studentId && formData.studentId.length < 7 && (
             <p className="text-sm text-brand-light-red mt-1">
-              Student ID must be at least 7 digits
+              {t("studentInfo.validation.studentIdMinDigits")}
             </p>
           )}
         </div>
@@ -238,7 +251,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             htmlFor="oen"
             className="block text-sm font-medium mb-1 text-brand-text-gray"
           >
-            Ontario Education Number (OEN){" "}
+            {t("studentInfo.labels.oen")} {" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
@@ -253,12 +266,12 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               }
             }}
             className={lockCls("w-full px-3 py-2 border rounded-md")}
-            placeholder="9-digit OEN"
+            placeholder={t("studentInfo.placeholders.oen")} // translation
             maxLength={9}
           />
           {formData.oen && formData.oen.length !== 9 && (
             <p className="text-sm text-brand-light-red mt-1">
-              OEN must be exactly 9 digits
+              {t("studentInfo.validation.oenExactDigits")}
             </p>
           )}
         </div>
@@ -270,7 +283,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             htmlFor="firstName"
             className="block text-sm font-medium mb-1 text-brand-text-gray"
           >
-            First Name{" "}
+            {t("studentInfo.labels.firstName")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
@@ -285,7 +298,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               }
             }}
             className={lockCls("w-full px-3 py-2 border rounded-md")}
-            placeholder="Enter first name"
+            placeholder={t("studentInfo.placeholders.firstName")} // translation
           />
         </div>
 
@@ -294,7 +307,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             htmlFor="lastName"
             className="block text-sm font-medium mb-1 text-brand-text-gray"
           >
-            Last Name{" "}
+            {t("studentInfo.labels.lastName")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
@@ -309,7 +322,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               }
             }}
             className={lockCls("w-full px-3 py-2 border rounded-md")}
-            placeholder="Enter last name"
+            placeholder={t("studentInfo.placeholders.lastName")} // translation
           />
         </div>
       </div>
@@ -317,7 +330,8 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="dob" className="block text-base font-medium mb-1 text-brand-text-gray">
-            Date of Birth <span className="text-sm text-brand-light-red mt-1">*</span>
+            {t("studentInfo.labels.dob")}{" "}
+            <span className="text-sm text-brand-light-red mt-1">*</span>
           </Label>
           <Popover open={dob.open} onOpenChange={dob.setOpen}>
             <PopoverTrigger asChild>
@@ -327,7 +341,9 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 disabled={isLocked}
                 className={lockCls("w-full justify-between font-normal")}
               >
-                {dob.date ? dob.date.toLocaleDateString() : "Select date"}
+                {dob.date // translation
+                  ? dob.date.toLocaleDateString()
+                  : t("studentInfo.placeholders.selectDate")}
                 <ChevronDownIcon />
               </Button>
             </PopoverTrigger>
@@ -356,7 +372,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             htmlFor="sin"
             className="block text-sm font-medium mb-1 text-brand-text-gray"
           >
-            Social Insurance Number{" "}
+            {t("studentInfo.labels.sin")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
@@ -379,13 +395,13 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               }
             }}
             className={lockCls("w-full px-3 py-2 border rounded-md")}
-            placeholder="XXX-XXX-XXX"
+            placeholder={t("studentInfo.placeholders.sin")} // translations
             maxLength={11}
           />
           {formData.sin &&
             formData.sin.replace(/\D/g, "").length !== 9 && (
               <p className="text-sm text-brand-light-red mt-1">
-                SIN must be exactly 9 digits
+                {t("studentInfo.validation.sinExactDigits")}
               </p>
             )}
         </div>
@@ -397,7 +413,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             htmlFor="email"
             className="block text-sm font-medium mb-1 text-brand-text-gray"
           >
-            Email Address{" "}
+            {t("studentInfo.labels.email")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
@@ -409,7 +425,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               setFormData((prev) => ({ ...prev, email: e.target.value }))
             }
             className={lockCls("w-full px-3 py-2 border rounded-md")}
-            placeholder="YourEmail@example.com"
+            placeholder={t("studentInfo.placeholders.email")} // translations
           />
         </div>
 
@@ -418,7 +434,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             htmlFor="phone"
             className="block text-sm font-medium mb-1 text-brand-text-gray"
           >
-            Phone Number
+            {t("studentInfo.labels.phone")}
           </label>
           <Input
             id="phone"
@@ -442,7 +458,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               }
             }}
             className={lockCls("w-full px-3 py-2 border rounded-md")}
-            placeholder="(XXX) XXX-XXXX"
+            placeholder={t("studentInfo.placeholders.phone")} // translations
             maxLength={14}
           />
         </div>
@@ -451,7 +467,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       {/* Mailing Address */}
       <div>
         <h3 className="text-lg font-semibold mb-3 text-brand-text-gray">
-          Mailing Address
+          {t("studentInfo.mailingAddressHeader")}
         </h3>
 
         <div className="space-y-4">
@@ -460,7 +476,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
               htmlFor="address"
               className="block text-sm font-medium mb-1 text-brand-text-gray"
             >
-              Street Address{" "}
+              {t("studentInfo.labels.streetAddress")}{" "}
               <span className="text-sm text-brand-light-red mt-1">*</span>
             </label>
             <Input
@@ -472,7 +488,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 setFormData((prev) => ({ ...prev, address: e.target.value }))
               }
               className={lockCls("w-full px-3 py-2 border rounded-md")}
-              placeholder="123 Main Street"
+              placeholder={t("studentInfo.placeholders.streetAddress")} // translations
             />
           </div>
 
@@ -482,7 +498,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 htmlFor="city"
                 className="block text-sm font-medium mb-1 text-brand-text-gray"
               >
-                City{" "}
+                {t("studentInfo.labels.city")}{" "}
                 <span className="text-sm text-brand-light-red mt-1">*</span>
               </label>
               <Input
@@ -494,7 +510,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                   setFormData((prev) => ({ ...prev, city: e.target.value }))
                 }
                 className={lockCls("w-full px-3 py-2 border rounded-md")}
-                placeholder="Toronto"
+                placeholder={t("studentInfo.placeholders.city")} // translations
               />
             </div>
 
@@ -503,7 +519,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 htmlFor="province"
                 className="block text-sm font-medium mb-1 text-brand-text-gray"
               >
-                Province/Territory{" "}
+                {t("studentInfo.labels.province")}{" "}
                 <span className="text-sm text-brand-light-red mt-1">*</span>
               </label>
               <select
@@ -515,17 +531,19 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 }
                 className={lockCls("w-full px-3 py-2 border rounded-md")}
               >
-                <option value="">Select Province/Territory</option>
-                <option value="ON">Ontario</option>
-                <option value="AB">Alberta</option>
-                <option value="BC">British Columbia</option>
-                <option value="MB">Manitoba</option>
-                <option value="NB">New Brunswick</option>
-                <option value="NL">Newfoundland and Labrador</option>
-                <option value="NS">Nova Scotia</option>
-                <option value="PE">Prince Edward Island</option>
-                <option value="QC">Quebec</option>
-                <option value="SK">Saskatchewan</option>
+                <option value="">
+                  {t("studentInfo.placeholders.province")} 
+                </option>
+                <option value="ON">{t("studentInfo.provinces.ON")}</option>
+                <option value="AB">{t("studentInfo.provinces.AB")}</option>
+                <option value="BC">{t("studentInfo.provinces.BC")}</option>
+                <option value="MB">{t("studentInfo.provinces.MB")}</option>
+                <option value="NB">{t("studentInfo.provinces.NB")}</option>
+                <option value="NL">{t("studentInfo.provinces.NL")}</option>
+                <option value="NS">{t("studentInfo.provinces.NS")}</option>
+                <option value="PE">{t("studentInfo.provinces.PE")}</option>
+                <option value="QC">{t("studentInfo.provinces.QC")}</option>
+                <option value="SK">{t("studentInfo.provinces.SK")}</option>
               </select>
             </div>
           </div>
@@ -536,7 +554,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 htmlFor="postalCode"
                 className="block text-sm font-medium mb-1 text-brand-text-gray"
               >
-                Postal Code{" "}
+                {t("studentInfo.labels.postalCode")}{" "}
                 <span className="text-sm text-brand-light-red mt-1">*</span>
               </label>
               <Input
@@ -560,12 +578,12 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                   }
                 }}
                 className={lockCls("w-full px-3 py-2 border rounded-md")}
-                placeholder="A1A 1A1"
+                placeholder={t("studentInfo.placeholders.postalCode")} // translation
                 maxLength={7}
               />
               {formData.postalCode && formData.postalCode.replace(/\s/g, "").length !== 6 && (
                 <p className="text-sm text-brand-light-red mt-1">
-                  Postal code must be 6 characters (e.g., A1A 1A1)
+                  {t("studentInfo.validation.postalCodeFormat")}
                 </p>
               )}
             </div>
@@ -575,7 +593,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                 htmlFor="country"
                 className="block text-sm font-medium mb-1 text-brand-text-gray"
               >
-                Country{" "}
+                {t("studentInfo.labels.country")}{" "}
                 <span className="text-sm text-brand-light-red mt-1">*</span>
               </label>
               <Input
@@ -587,7 +605,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
                   setFormData((prev) => ({ ...prev, country: e.target.value }))
                 }
                 className={lockCls("w-full px-3 py-2 border rounded-md")}
-                placeholder="Canada"
+                placeholder={t("studentInfo.placeholders.country")} // translation
               />
             </div>
           </div>

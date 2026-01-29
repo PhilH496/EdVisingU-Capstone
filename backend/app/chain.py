@@ -177,6 +177,49 @@ def chat_with_memory(chain, memory, question: str):
         "source_documents": response.get("context", [])
     }
 
+def chat_with_memory_stream(chain, memory, question: str):
+    """
+    Execute a chat query with memory management.
+
+    Args:
+        chain: The conversation chain
+        memory: The conversation memory instance
+        question: The user's question
+        
+    Yeild:
+        dict: Response containing 'answer' and 'context' (source documents)
+    """
+
+    # Get chat history from memory
+    chat_history = memory.load_memory_variables({}).get("chat_history", [])
+
+    # Invoke the chain (stream)
+    response_stream = chain.stream({
+        "input": question,
+        "chat_history": chat_history
+    })
+
+    full_response = {
+        "answer": "",
+        "context": []
+    }
+
+    # Return answer token by token
+    for chunk in response_stream:
+        if "answer" in chunk:
+            token_answer = chunk["answer"]
+            full_response["answer"] += token_answer
+            yield token_answer
+        # Context is not used right now
+        # elif "context" in chunk:
+        #     token_context= chunk["context"]
+        #     full_response["context"] += token_context
+
+    # Save to memory after sending all the tokens
+    memory.save_context(
+        {"input": question},
+        {"answer": full_response["answer"]}
+    )
 
 # Global conversation chain and memory instances
 _conversation_chain = None
