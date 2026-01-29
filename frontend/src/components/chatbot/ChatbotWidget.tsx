@@ -8,8 +8,8 @@
  * - Conversation history display
  */
 
-import { useState, useRef, useEffect, FormEvent } from 'react';
-import ReactMarkdown from 'react-markdown';
+import { useState, useRef, useEffect, FormEvent } from "react";
+import ReactMarkdown from "react-markdown";
 
 interface Message {
   role: "user" | "assistant";
@@ -63,40 +63,64 @@ export function ChatbotWidget() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/chat-stream`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: userMessage,
+            history: messages.map((msg) => ({
+              role: msg.role,
+              content: msg.content,
+            })),
+          }),
         },
-        body: JSON.stringify({
-          message: userMessage,
-          history: messages.map((msg) => ({
-            role: msg.role,
-            content: msg.content,
-          })),
-        }),
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`Server error: ${response.status}`);
       }
 
-      const data = await response.json();
+      // Initiate tools to read streaming data from backend
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
 
       // Add assistant response to chat
       const assistantMessage: Message = {
         role: "assistant",
-        content:
-          data.answer ||
-          data.response ||
-          "Sorry, I couldn't generate a response.",
+        content: "", //"Sorry, I couldn't generate a response."
         timestamp: new Date(),
       };
-      setMessages((prev) => [...prev, assistantMessage]);
+      let isFirstLoop = true;
+      while (true) {
+        const { value, done } = await reader!.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+
+        // Initally, chatbot reponse will have a loading icon
+        // When it reaches here
+        // The icon dissapears and replaced with a streamreponse
+        if (isFirstLoop) {
+          setMessages((prev) => [...prev, assistantMessage]);
+          setIsLoading(false);
+          isFirstLoop = false;
+        }
+        setMessages((prev) =>
+          prev.map((message, idx) => {
+            if (idx === prev.length - 1) {
+              return { ...message, content: message.content + chunk };
+            }
+            return message;
+          }),
+        );
+      }
     } catch (err) {
       console.error("Chat error:", err);
       setError(
-        "Failed to connect to chatbot. Please make sure the backend is running."
+        "Failed to connect to chatbot. Please make sure the backend is running.",
       );
 
       // Add error message to chat
@@ -165,33 +189,42 @@ export function ChatbotWidget() {
                     className="w-10 h-10 object-contain flex-shrink-0"
                   />
                 )}
-                <div id='chatbotResponse'
+                <div
+                  id="chatbotResponse"
                   className={`rounded-lg px-4 py-3 shadow-sm max-w-[85%] ${
                     msg.role === "user"
                       ? "bg-[#0066A1] text-white rounded-tr-none"
                       : "bg-white text-gray-800 rounded-tl-none"
                   }`}
                 >
-                {msg.role === 'assistant' ? (
-                  <div className="text-base max-w-none">
-                    <ReactMarkdown
-                      components={{
-                        p: ({node, ...props}) => <p className="mb-2" {...props} />,
-                        ul: ({node, ...props}) => <ul className="space-y-1 my-2 pl-0" {...props} />,
-                        li: ({node, children, ...props}) => (
-                          <li className="flex" {...props}>
-                            <span className="mr-2 font-bold text-brand-black flex-shrink-0">•</span>
-                            <span className="flex-1">{children}</span>
-                          </li>
-                        ),
-                      }}
-                    >
+                  {msg.role === "assistant" ? (
+                    <div className="text-base max-w-none">
+                      <ReactMarkdown
+                        components={{
+                          p: ({ node, ...props }) => (
+                            <p className="mb-2" {...props} />
+                          ),
+                          ul: ({ node, ...props }) => (
+                            <ul className="space-y-1 my-2 pl-0" {...props} />
+                          ),
+                          li: ({ node, children, ...props }) => (
+                            <li className="flex" {...props}>
+                              <span className="mr-2 font-bold text-brand-black flex-shrink-0">
+                                •
+                              </span>
+                              <span className="flex-1">{children}</span>
+                            </li>
+                          ),
+                        }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="text-base whitespace-pre-wrap">
                       {msg.content}
-                    </ReactMarkdown>
-                  </div>
-                ) : (
-                  <p className="text-base whitespace-pre-wrap">{msg.content}</p>
-                )}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
