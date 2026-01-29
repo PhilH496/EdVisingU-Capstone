@@ -237,7 +237,7 @@ export function ChatbotWidget() {
               className="flex items-center space-x-2"
             >
               <label htmlFor="chatbot-input-student" className="sr-only">
-                Type your message to BSWD Assistant
+                Type your message...
               </label>
               <input
                 id="chatbot-input-student"
