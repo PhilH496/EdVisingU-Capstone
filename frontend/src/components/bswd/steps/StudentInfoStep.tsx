@@ -173,7 +173,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       {/* OSAP Application Start Date */}
       {formData.hasOsapApplication === true && (
         <div>
-          <Label htmlFor="osapApplicationStartDate" className="block text-sm font-medium mb-1 text-brand-text-gray">
+          <Label htmlFor="osap-application-start-date" className="block text-sm font-medium mb-1 text-brand-text-gray">
             {t("studentInfo.labels.osapApplicationStartDate")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </Label>
@@ -181,7 +181,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                id="osapApplicationStartDate"
+                id="osap-application-start-date"
                 className="w-full justify-between font-normal"
               >
                 {osapStartDate.date // translation
@@ -218,14 +218,14 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label
-            htmlFor="studentId"
+            htmlFor="student-id"
             className="block text-sm font-medium mb-1 text-brand-text-gray"
           >
             {t("studentInfo.labels.studentId")} {" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
-            id="studentId"
+            id="student-id"
             type="text"
             value={formData.studentId}
             disabled={isLocked}
@@ -280,14 +280,14 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label
-            htmlFor="firstName"
+            htmlFor="first-name"
             className="block text-sm font-medium mb-1 text-brand-text-gray"
           >
             {t("studentInfo.labels.firstName")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
-            id="firstName"
+            id="first-name"
             type="text"
             value={formData.firstName}
             disabled={isLocked}
@@ -304,14 +304,14 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
 
         <div>
           <label
-            htmlFor="lastName"
+            htmlFor="last-name"
             className="block text-sm font-medium mb-1 text-brand-text-gray"
           >
             {t("studentInfo.labels.lastName")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
-            id="lastName"
+            id="last-name"
             type="text"
             value={formData.lastName}
             disabled={isLocked}

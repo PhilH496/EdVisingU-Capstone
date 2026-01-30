@@ -94,7 +94,7 @@ export function ProgramInfoStep({
         {/* Institution Name div */}
         <div>
           <label
-            htmlFor="institutionName"
+            htmlFor="institution-name"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
             {t("programInfo.labels.institutionName")}{" "}
@@ -103,7 +103,7 @@ export function ProgramInfoStep({
           <Popover open={institutionOpen} onOpenChange={setInstitutionOpen}>
             <PopoverTrigger asChild>
               <Button
-                id="institutionName"
+                id="institution-name"
                 variant="outline"
                 role="combobox"
                 aria-expanded={institutionOpen}
@@ -165,7 +165,7 @@ export function ProgramInfoStep({
         {/* Institution Type div */}
         <div className="flex flex-col justify-end">
           <label
-            htmlFor="institutionType"
+            htmlFor="institution-type"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
             {t("programInfo.labels.institutionType")}{" "}
@@ -180,7 +180,7 @@ export function ProgramInfoStep({
               }))
             }
           >
-            <SelectTrigger id="institutionType" className="w-full">
+            <SelectTrigger id="institution-type" className="w-full">
               <SelectValue placeholder={t("programInfo.placeholders.select")} />
             </SelectTrigger>
             <SelectContent>
@@ -248,7 +248,7 @@ export function ProgramInfoStep({
         {/* Study Type div*/}
         <div>
           <label
-            htmlFor="studyType"
+            htmlFor="study-type"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
             {t("programInfo.labels.studyType")}{" "}
@@ -266,7 +266,7 @@ export function ProgramInfoStep({
               }))
             }
           >
-            <SelectTrigger id="studyType" className="w-full">
+            <SelectTrigger id="study-type" className="w-full">
               <SelectValue placeholder={t("programInfo.placeholders.select")} />
             </SelectTrigger>
             <SelectContent>
@@ -288,7 +288,7 @@ export function ProgramInfoStep({
         {/* Study Start Date div */}
         <div className="flex flex-col gap-3">
           <Label
-            htmlFor="startDate"
+            htmlFor="start-date"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
             {t("programInfo.labels.studyStartDate")}{" "}
@@ -298,7 +298,7 @@ export function ProgramInfoStep({
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                id="startDate"
+                id="start-date"
                 className="w-full justify-between font-normal"
               >
                 {start.date
@@ -342,7 +342,7 @@ export function ProgramInfoStep({
         {/* Study End Date div */}
         <div className="flex flex-col gap-3">
           <Label
-            htmlFor="endDate"
+            htmlFor="end-date"
             className="block text-base font-medium mb-1 text-brand-text-gray"
           >
             {t("programInfo.labels.studyEndDate")}{" "}
@@ -352,7 +352,7 @@ export function ProgramInfoStep({
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                id="endDate"
+                id="end-date"
                 className="w-full justify-between font-normal"
               >
                 {end.date

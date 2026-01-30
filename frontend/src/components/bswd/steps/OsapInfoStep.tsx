@@ -62,12 +62,12 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
       {/* OSAP Application Type */}
       <div className="space-y-1">
         <label 
-          htmlFor="osapApplicationType"
+          htmlFor="osap-application-type"
           className="block text-sm font-medium text-brand-text-gray">
           OSAP Application Type <span className="text-brand-light-red">*</span>
         </label>
         <select
-          id="osapApplicationType"
+          id="osap-application-type"
           className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
           value={applicationType}
           onChange={(e) =>
@@ -93,12 +93,12 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-1">
           <label 
-            htmlFor="federalNeed"
+            htmlFor="federal-need"
             className="block text-sm font-medium text-brand-text-gray">
             Federal Financial Need ($) <span className="text-brand-light-red">*</span>
           </label>
           <input
-            id="federalNeed"
+            id="federal-need"
             type="number"
             min={0}
             className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
@@ -110,13 +110,13 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
         </div>
         <div className="space-y-1">
           <label 
-            htmlFor="provincialNeed"
+            htmlFor="provincial-need"
             className="block text-sm font-medium text-brand-text-gray">
             Provincial Financial Need ($){" "}
             <span className="text-brand-light-red">*</span>
           </label>
           <input
-            id="provincialNeed"
+            id="provincial-need"
             type="number"
             min={0}
             className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
@@ -143,7 +143,7 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
         {hasRestrictions && (
           <div className="space-y-2">
             <label 
-              htmlFor="restrictionType" 
+              htmlFor="restriction-type" 
               className="block text-sm font-medium text-brand-text-gray">
               Type of Restriction{" "}
               <a
@@ -156,7 +156,7 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
               </a>
             </label>
             <select
-              id="restrictionType"
+              id="restriction-type"
               className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
               value={restrictionType ?? ""}
               onChange={(e) =>
