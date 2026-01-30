@@ -5,6 +5,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
+import { useDraggable } from "@/hooks/useDraggable";
 
 interface Message {
   role: "user" | "assistant";
@@ -71,6 +72,7 @@ export function ApplicationChatbot({
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { elementRef, onMouseDown } = useDraggable();
 
   /** Shared Conditions */
   const isFloating = mode === "floating";
@@ -81,7 +83,7 @@ export function ApplicationChatbot({
       ? "fixed bottom-6 right-6 w-96 sm:w-[450px] h-[500px] border rounded-lg bg-white shadow-2xl flex flex-col z-50 animate-slideUp"
       : "border rounded-xl bg-white shadow-sm flex flex-col h-[600px]",
     header: isFloating
-      ? "px-5 py-4 border-b bg-red-800 rounded-t-lg"
+      ? "px-5 py-4 border-b bg-red-800 rounded-t-lg cursor-move select-none"
       : "p-4 border-b bg-gradient-to-r from-cyan-50 to-blue-50",
     userMsg: isFloating
       ? "bg-red-800 text-white rounded-tr-none"
@@ -168,11 +170,18 @@ export function ApplicationChatbot({
   };
 
   return (
-    <div className={cls.container}>
+    <div 
+      ref={isFloating ? elementRef : null}
+      onMouseDown={isFloating ? onMouseDown : undefined}
+      className={cls.container}
+    >
       {/* Header */}
-      <div className={cls.header}>
+      <div 
+        data-drag-handle={isFloating}
+        className={cls.header}
+      >
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 pointer-events-none">
             {mode === "embedded" && (
               <div className="w-10 h-10 rounded-full bg-cyan-800 flex items-center justify-center">
                 <i className="fa-solid fa-robot text-white text-xl"></i>
@@ -199,9 +208,10 @@ export function ApplicationChatbot({
           {isFloating && onClose && (
             <button
               onClick={onClose}
-              className="p-1 text-white hover:text-gray-200 rounded-full"
+              className="p-1 text-white hover:text-gray-200 rounded-full pointer-events-auto"
+              aria-label="Close BSWD Assistant chat"
             >
-              <i className="fa-solid fa-xmark text-xl"></i>
+              <i className="fa-solid fa-xmark text-xl" aria-hidden="true"></i>
             </button>
           )}
         </div>
@@ -268,14 +278,18 @@ export function ApplicationChatbot({
       {/* Input Bar */}
       <div className="p-5 border-t bg-white rounded-b-lg">
         <div className="flex gap-2">
+          <label htmlFor="chatbot-input-admin" className="sr-only">
+            Type your message...
+          </label>
           <input
+            id="chatbot-input-admin"
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
             disabled={loading}
             placeholder="Type your message..."
-            className={`flex-1 px-4 py-3 border rounded-lg disabled:bg-gray-100 ${cls.focusRing}`}
+            className={`flex-1 px-4 py-3 border rounded-lg disabled:bg-gray-100 disabled:cursor-not-allowed ${cls.focusRing}`}
           />
 
           <button
@@ -284,13 +298,14 @@ export function ApplicationChatbot({
             className={`p-3 rounded-lg transition-colors ${
               input.trim() && !loading
                 ? `${cls.sendBtn} text-white`
-                : "bg-gray-200 text-gray-400"
+                : "bg-gray-200 text-gray-400 cursor-not-allowed"
             }`}
+            aria-label="Send message"
           >
             {loading ? (
-              <i className="fa-solid fa-spinner fa-spin text-xl"></i>
+              <i className="fa-solid fa-spinner fa-spin text-xl" aria-hidden="true"></i>
             ) : (
-              <i className="fa-solid fa-paper-plane text-xl"></i>
+              <i className="fa-solid fa-paper-plane text-xl" aria-hidden="true"></i>
             )}
           </button>
         </div>

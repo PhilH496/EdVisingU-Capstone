@@ -26,6 +26,7 @@ import { saveSubmission } from "@/lib/database";
 import { saveSnapshotMerge, saveApplicationsList } from "@/lib/adminStore";
 import { useTranslation } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import Head from "next/head";
 
 // Store all form data in a single state object
 // Initial values are set to empty strings, zeros, or false depending on field type
@@ -379,6 +380,16 @@ export default function BSWDApplicationPage() {
   }
 
   return (
+    <div>
+      <Head>
+        <title>
+          {currentStep === TOTAL_STEPS 
+            ? "Review & Submit" 
+            : stepsInfo[currentStep - 1]?.stepName
+          }
+        </title>
+        <meta name="description" content="Apply for Bursary for Students with Disabilities" />
+      </Head>
     <FormLayout
       title={t("title")}
       description=""
@@ -422,5 +433,6 @@ export default function BSWDApplicationPage() {
         canProceed={canProceed}
       />
     </FormLayout>
+    </div>
   );
 }

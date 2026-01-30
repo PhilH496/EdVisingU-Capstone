@@ -90,11 +90,11 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
   return (
     <div className="space-y-4">
       {/* OSAP application question with buttons */}
-      <div>
-        <label className="block text-sm font-medium mb-3 text-brand-text-gray">
+      <fieldset>
+        <legend className="block text-sm font-medium mb-3 text-brand-text-gray">
           {t("studentInfo.osapQuestion")}
           <span className="text-sm text-brand-light-red mt-1">*</span>
-        </label>
+        </legend>
         <div className="flex gap-4">
           <label className="inline-flex items-center gap-2 text-brand-text-gray">
             <input
@@ -115,7 +115,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             {t("common.no")}
           </label>
         </div>
-      </div>
+      </fieldset>
 
       {/* Email input box when "No" is selected */}
       {showEmailInput && formData.hasOsapApplication === false && (
@@ -128,14 +128,20 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             {t("studentInfo.noOsapPanel.description")}
           </p>
           <div className="flex gap-2">
-            <Input
-              type="email"
-              placeholder={t("studentInfo.noOsapPanel.emailPlaceholder")} // translation
-              value={notificationEmail}
-              onChange={(e) => setNotificationEmail(e.target.value)}
-              className="flex-1"
-              disabled={emailSending || emailSent}
-            />
+            <div className="flex-1">
+              <label htmlFor="notification-email" className="sr-only">
+                Email address for OSAP information
+              </label>
+              <Input
+                id="notification-email"
+                type="email"
+                placeholder={t("studentInfo.noOsapPanel.emailPlaceholder")} // translation
+                value={notificationEmail}
+                onChange={(e) => setNotificationEmail(e.target.value)}
+                className="w-full"
+                disabled={emailSending || emailSent}
+              />
+            </div>
             <Button
               onClick={handleSendEmail}
               disabled={!notificationEmail || emailSending || emailSent}
@@ -167,7 +173,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       {/* OSAP Application Start Date */}
       {formData.hasOsapApplication === true && (
         <div>
-          <Label htmlFor="osapApplicationStartDate" className="block text-sm font-medium mb-1 text-brand-text-gray">
+          <Label htmlFor="osap-application-start-date" className="block text-sm font-medium mb-1 text-brand-text-gray">
             {t("studentInfo.labels.osapApplicationStartDate")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </Label>
@@ -175,7 +181,7 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                id="osapApplicationStartDate"
+                id="osap-application-start-date"
                 className="w-full justify-between font-normal"
               >
                 {osapStartDate.date // translation
@@ -212,14 +218,14 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label
-            htmlFor="studentId"
+            htmlFor="student-id"
             className="block text-sm font-medium mb-1 text-brand-text-gray"
           >
             {t("studentInfo.labels.studentId")} {" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
-            id="studentId"
+            id="student-id"
             type="text"
             value={formData.studentId}
             disabled={isLocked}
@@ -274,14 +280,14 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label
-            htmlFor="firstName"
+            htmlFor="first-name"
             className="block text-sm font-medium mb-1 text-brand-text-gray"
           >
             {t("studentInfo.labels.firstName")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
-            id="firstName"
+            id="first-name"
             type="text"
             value={formData.firstName}
             disabled={isLocked}
@@ -298,14 +304,14 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
 
         <div>
           <label
-            htmlFor="lastName"
+            htmlFor="last-name"
             className="block text-sm font-medium mb-1 text-brand-text-gray"
           >
             {t("studentInfo.labels.lastName")}{" "}
             <span className="text-sm text-brand-light-red mt-1">*</span>
           </label>
           <Input
-            id="lastName"
+            id="last-name"
             type="text"
             value={formData.lastName}
             disabled={isLocked}
