@@ -10,6 +10,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
+import Head from "next/head";
 import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import StatusBadge from "@/components/admin/StatusBadge";
@@ -136,8 +137,9 @@ function PaginationControls({
           disabled={currentPage === 1}
           className="px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           type="button"
+          aria-label="Previous page"
         >
-          <i className="fa-solid fa-chevron-left"/>
+          <i className="fa-solid fa-chevron-left" aria-hidden="true"/>
         </button>
 
         <span className="text-sm font-medium text-gray-700">
@@ -149,8 +151,9 @@ function PaginationControls({
           disabled={currentPage === totalPages}
           className="px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           type="button"
+          aria-label="Next page"
         >
-          <i className="fa-solid fa-chevron-right"/>
+          <i className="fa-solid fa-chevron-right" aria-hidden="true"/>
         </button>
       </div>
     </div>
@@ -427,6 +430,11 @@ function AdminDashboardPage() {
 
   // render
   return (
+    <div>
+      <Head>
+        <title>Admin Dashboard</title>
+        <meta name="description" content="Manage and review BSWD applications" />
+      </Head>
     <AdminLayout
       title="BSWD Admin Dashboard"
       description="Hello Admin! Manage assignments, violations, status, and attachments."
@@ -467,38 +475,29 @@ function AdminDashboardPage() {
           {editMode ? "Exit Edit Mode" : "Edit"}
         </button>
 
-        <label className="inline-flex items-center gap-2 text-sm">
+        <label htmlFor="select-all-checkbox" className="inline-flex items-center gap-2 text-sm">
           <input
+            id="select-all-checkbox"
             type="checkbox"
             checked={allChecked}
             onChange={(e) => toggleSelectAll(e.target.checked)}
             className="h-4 w-4"
             disabled={!editMode}
-            title={
-              editMode ? "Select all applications" : "Enable Edit Mode first"
-            }
+            aria-label="Select all applications"
           />
-          <span className={editMode ? "" : "opacity-50"}>Select All</span>
+          <span className={editMode ? "text-gray-900" : "text-gray-500"}>Select All</span>
         </label>
 
         <div className="flex items-center gap-2">
-          <span
-            className={`text-sm ${
-              editMode ? "text-gray-600" : "text-gray-400"
-            }`}
-          >
-            Set status:
-          </span>
+        <span className="text-sm text-gray-600">
+          Set status:
+        </span>
           <select
             value={bulkStatus}
             onChange={(e) => setBulkStatus(e.target.value)}
             disabled={!editMode}
             className="px-3 py-2 border rounded-md text-sm disabled:opacity-50"
-            title={
-              editMode
-                ? "Choose status to apply to selected"
-                : "Enable Edit Mode first"
-            }
+            aria-label="Choose status to apply"
           >
             {STATUS_OPTIONS.map((s: string) => (
               <option key={s} value={s}>
@@ -510,11 +509,6 @@ function AdminDashboardPage() {
             onClick={applyBulkStatus}
             disabled={!editMode}
             className="px-4 py-2 rounded-lg bg-cyan-800 text-white hover:bg-cyan-700 text-sm disabled:opacity-50"
-            title={
-              editMode
-                ? "Apply to selected applications"
-                : "Enable Edit Mode first"
-            }
           >
             Apply to Selected
           </button>
@@ -522,7 +516,6 @@ function AdminDashboardPage() {
             onClick={clearSelection}
             disabled={!editMode}
             className="px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-100 text-sm disabled:opacity-50"
-            title={editMode ? "Clear selection" : "Enable Edit Mode first"}
           >
             Clear Selection
           </button>
@@ -571,11 +564,6 @@ function AdminDashboardPage() {
             }}
             disabled={!editMode || selectedCount === 0}
             className="px-4 py-2 rounded-lg bg-brand-light-red text-white hover:bg-red-400 text-sm disabled:opacity-50"
-            title={
-              editMode
-                ? "Delete selected applications"
-                : "Enable Edit Mode first"
-            }
           >
             Delete ({selectedCount})
           </button>
@@ -591,7 +579,7 @@ function AdminDashboardPage() {
           )}
 
           {/* Custom Sort Control */}
-          <span className="text-sm text-gray-500 font-medium">Sort By</span>
+          <span className="text-sm text-gray-700 font-medium">Sort By</span>
 
           <div className="relative">
             <button
@@ -601,7 +589,7 @@ function AdminDashboardPage() {
               <span className="truncate mr-2">
                 {SORT_MENU.find((x) => x.value === sortConfig.key)?.label}
               </span>
-              <span className="text-gray-400 text-xs">
+              <span className="text-gray-600 text-xs">
                 {sortConfig.direction === "asc" ? "▲" : "▼"}
               </span>
             </button>
@@ -614,7 +602,7 @@ function AdminDashboardPage() {
                   onClick={() => setIsSortMenuOpen(false)}
                 />
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 z-20 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-                  <div className="px-4 py-2 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <div className="px-4 py-2 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Order By
                   </div>
                   {SORT_MENU.map((opt) => {
@@ -662,7 +650,7 @@ function AdminDashboardPage() {
       )}
 
       {!hasRows ? (
-        <div className="px-5 py-10 text-gray-500">No applications found.</div>
+        <div className="px-5 py-10 text-gray-700">No applications found.</div>
       ) : (
         <div className="space-y-6">
           {pagination.paginatedRows.map((r: Row) => {
@@ -677,23 +665,24 @@ function AdminDashboardPage() {
                     <div className="flex items-start gap-3">
                       {editMode && (
                         <input
+                         id={`select-${r.id}`}
                           type="checkbox"
                           checked={!!r._selected}
                           onChange={(e) =>
                             updateRow(r.id, { _selected: e.target.checked })
                           }
                           className="mt-1 h-4 w-4"
-                          title="Select for bulk actions"
+                          aria-label={`Select application for ${r.studentName}`}
                         />
                       )}
                       <div>
                         <h2 className="font-semibold text-gray-900">
                           {r.studentName} ({r.studentId})
                         </h2>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-700">
                           {titleCase(r.institution)} — {r.program || "—"}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-700">
                           Application ID:{" "}
                           <span className="font-mono">{r.id}</span>
                         </p>
@@ -709,7 +698,7 @@ function AdminDashboardPage() {
                             className={`px-3 py-1 rounded-full text-xs font-semibold border ${getScoreBadgeClasses(
                               score
                             )}`}
-                            title={`AI Confidence Score: ${score}/100`}
+                            aria-label={`AI Confidence Score: ${score} out of 100`}
                           >
                             {score}
                           </div>
@@ -718,11 +707,13 @@ function AdminDashboardPage() {
 
                       {editMode && (
                         <select
+                          id={`status-${r.id}`}
                           value={r.status}
                           onChange={(e) =>
                             updateRow(r.id, { status: e.target.value })
                           }
                           className="px-2 py-1.5 border border-gray-300 rounded-md text-xs"
+                          aria-label={`Changed status for ${r.studentName}`}
                         >
                           {STATUS_OPTIONS.map((s) => (
                             <option key={s} value={s}>
@@ -756,10 +747,14 @@ function AdminDashboardPage() {
                     <>
                       {/* Assigned To */}
                       <div>
-                        <label className="block text-sm text-gray-500 mb-1">
+                        <label 
+                        htmlFor={`assignee-${r.id}`} 
+                        className="block text-sm text-gray-700 mb-1"
+                        >
                           Assigned To
                         </label>
                         <input
+                          id={`assignee-${r.id}`}
                           type="text"
                           value={r.assignee || ""}
                           onChange={(e) =>
@@ -772,7 +767,7 @@ function AdminDashboardPage() {
 
                       {/* Violations (includes 'Other') */}
                       <div>
-                        <label className="block text-sm text-gray-500 mb-2">
+                        <label className="block text-sm text-gray-700 mb-2">
                           Violations / Issues (select all that apply)
                         </label>
 
@@ -791,7 +786,7 @@ function AdminDashboardPage() {
                                     ? "bg-red-100 text-red-800 border-red-200"
                                     : "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200"
                                 }`}
-                                title={tag}
+                                aria-label={`${active ? 'Remove' : 'Add'} violation: ${tag}`}
                               >
                                 {tag}
                               </button>
@@ -934,7 +929,7 @@ function AdminDashboardPage() {
                           })()}
                         </div>
 
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-700 mt-1">
                           Most Common BSWD form issues (Write in
                           &quot;Other&quot; if issue does not appear).
                         </p>
@@ -942,10 +937,14 @@ function AdminDashboardPage() {
 
                       {/* Violation details */}
                       <div>
-                        <label className="block text-sm text-gray-500 mb-1">
+                        <label
+                        htmlFor={`violation-details-${r.id}`}
+                        className="block text-sm text-gray-700 mb-1"
+                        >
                           Other details (optional)
                         </label>
                         <textarea
+                          id={`violation-details-${r.id}`}
                           value={r.violationDetails || ""}
                           onChange={(e) =>
                             updateRow(r.id, {
@@ -960,7 +959,7 @@ function AdminDashboardPage() {
 
                       {/* Attachments */}
                       <div>
-                        <label className="block text-sm text-gray-500 mb-2">
+                        <label className="block text-sm text-gray-700 mb-2">
                           Attachments
                         </label>
 
@@ -975,7 +974,7 @@ function AdminDashboardPage() {
                                   <div className="font-medium truncate">
                                     {att.name}
                                   </div>
-                                  <div className="text-xs text-gray-500">
+                                  <div className="text-xs text-gray-700">
                                     {att.mime || "application/octet-stream"} •{" "}
                                     {att.size.toLocaleString()} bytes
                                   </div>
@@ -1000,13 +999,17 @@ function AdminDashboardPage() {
                             ))}
                           </ul>
                         ) : (
-                          <p className="text-sm text-gray-500 mb-2">
+                          <p className="text-sm text-gray-700 mb-2">
                             No attachments yet.
                           </p>
                         )}
 
                         <div>
+                          <label htmlFor={`file-upload-${r.id}`} className="block text-sm text-gray-700 mb-1">
+                            Upload supporting documents
+                          </label>
                           <input
+                            id={`file-upload-${r.id}`}
                             type="file"
                             multiple
                             onChange={async (e) => {
@@ -1017,9 +1020,6 @@ function AdminDashboardPage() {
                             }}
                             className="block w-full text-sm text-gray-700 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-800 hover:file:bg-gray-200"
                           />
-                          <p className="text-xs text-gray-500 mt-1">
-                            Upload supporting documents
-                          </p>
                         </div>
                       </div>
 
@@ -1060,6 +1060,7 @@ function AdminDashboardPage() {
         </div>
       )}
     </AdminLayout>
+    </div>
   );
 }
 

@@ -29,6 +29,7 @@ import { useTranslation } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
+import Head from "next/head";
 
 // Store all form data in a single state object
 // Initial values are set to empty strings, zeros, or false depending on field type

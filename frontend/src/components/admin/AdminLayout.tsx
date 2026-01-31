@@ -1,4 +1,5 @@
 import Head from "next/head";
+import Image from "next/image";
 import { ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -26,11 +27,14 @@ export function AdminLayout({ title, description, rightSlot, children }: Props) 
         {/* Ontario Black Header (matches app) */}
         <header className="bg-black">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between py-4">
-              <img
+            <div className="flex items-center py-4">
+              <Image
                 src="/ontario-logo.png"
                 alt="Ontario"
-                className="block h-8 w-auto filter invert contrast-100"
+                width={130}
+                height={30}
+                priority
+                className="block filter invert contrast-100"
               />
               <div className="flex items-center gap-4">
                 <span className="text-white text-sm">

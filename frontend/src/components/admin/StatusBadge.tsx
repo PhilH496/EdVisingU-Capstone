@@ -26,8 +26,6 @@ export function StatusBadge({ status, className = "" }: Props) {
     <span
       className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs border ${cls} ${className}`}
       style={{ fontFamily: `"Raleway","Helvetica Neue",Helvetica,Arial,sans-serif` }}
-      aria-label={`Status: ${status}`}
-      title={status}
     >
       {status}
     </span>

@@ -42,7 +42,7 @@ export function FormLayout({ children, title, description, headerAction }: FormL
       </header>
 
       {/* Main content/card */}
-      <div className="py-8">
+      <main className="py-8">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="bg-white rounded-lg shadow p-6">
             <div className="mb-6 text-left flex justify-between">
@@ -56,7 +56,7 @@ export function FormLayout({ children, title, description, headerAction }: FormL
             {children}
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

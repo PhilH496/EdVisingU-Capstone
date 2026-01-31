@@ -15,6 +15,7 @@ import {
   SetStateAction,
 } from "react";
 import type { ReactNode } from "react";
+import Head from "next/head";
 import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ApplicationAnalysisCard } from "@/components/admin/ApplicationAnalysisCard";
@@ -515,6 +516,13 @@ function AdminApplicationDetailPage() {
   };
 
   return (
+    <div>
+      <Head>
+        <title>
+          {summary?.studentName || "Application Details"}
+        </title>
+        <meta name="description" content="BSWD application review" />
+      </Head>
     <AdminLayout
       title="Application Details"
       rightSlot={
@@ -890,6 +898,7 @@ function AdminApplicationDetailPage() {
         </>
       )}
     </AdminLayout>
+    </div>
   );
 }
 
