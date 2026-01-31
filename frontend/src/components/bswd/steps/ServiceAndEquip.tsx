@@ -19,9 +19,10 @@ export function ServiceAndEquip({
   setFormData,
 }: ServiceAndEquipProps) {
   const { t, isLoaded } = useTranslation(); // translation handling
-  if (!isLoaded) return null;
 
   const [tabFocus, setTabFocus] = useState("equipment");
+
+  if (!isLoaded) return null;
 
   // Database mock up
   const availableEquip = [
@@ -173,9 +174,9 @@ export function ServiceAndEquip({
       {tabFocus === "equipment" ? (
         <>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold">
+            <h2 className="text-lg font-semibold">
               {t("serviceEquipment.equipmentHeader")}
-            </h3>
+            </h2>
             <button
               onClick={handleAddAll}
               disabled={areAllItemsAdded()}
@@ -203,9 +204,9 @@ export function ServiceAndEquip({
       ) : (
         <>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold">
+            <h2 className="text-lg font-semibold">
               {t("serviceEquipment.servicesHeader")}
-            </h3>
+            </h2>
             <button
               onClick={handleAddAll}
               disabled={areAllItemsAdded()}
@@ -291,6 +292,10 @@ interface ItemProps {
 // Create equipment item / service item component
 const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
   const { t, isLoaded } = useTranslation(); // translation handling
+
+  // Hover state to change text to 'Remove Item' when hovering an already-added item
+  const [hovered, setHovered] = useState(false);
+
   if (!isLoaded) return null;
 
   const itemType = type === "equipment" ? "Equipment" : "Service";
@@ -299,9 +304,6 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
   const isAdded = formData.requestedItems.some(
     (item) => item.category === itemType && item.item === itemInfo.name
   );
-
-  // Hover state to change text to 'Remove Item' when hovering an already-added item
-  const [hovered, setHovered] = useState(false);
 
   const handleAddItem = () => {
     if (isAdded) {
@@ -341,7 +343,7 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
   return (
     <div className="border rounded-lg p-4 flex justify-between items-center">
       <div>
-        <div className="font-semibold">{itemInfo.name}</div>
+        <h4 className="font-semibold">{itemInfo.name}</h4>
         <p>
           <span>
             {t("serviceEquipment.labels.cap")}: ${itemInfo.cap}
@@ -351,13 +353,21 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
               <span className="px-2">&#124;</span>
               <span>
                 {t("serviceEquipment.labels.eligible")}:{" "}
-                {getEligibility(itemInfo.bswdEligible, itemInfo.csgdseEligible, t)}
+                {getEligibility(
+                  itemInfo.bswdEligible,
+                  itemInfo.csgdseEligible,
+                  t
+                )}
               </span>
             </>
           ) : (
             <div>
               {t("serviceEquipment.labels.eligible")}:{" "}
-              {getEligibility(itemInfo.bswdEligible, itemInfo.csgdseEligible, t)}
+              {getEligibility(
+                itemInfo.bswdEligible,
+                itemInfo.csgdseEligible,
+                t
+              )}
             </div>
           )}
         </p>
