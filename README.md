@@ -42,5 +42,5 @@ Windows PowerShell:
 ```
 6. Run the development server:
 ```
-   uvicorn app.main:app --reload --port 8000
+   uvicorn app.main:app
 ```
