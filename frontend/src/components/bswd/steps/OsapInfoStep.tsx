@@ -70,11 +70,14 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
 
       {/* OSAP Application Type */}
       <div className="space-y-1">
-        <label className="block text-sm font-medium text-brand-text-gray">
-          {t("osapInfo.labels.applicationType")}{" "}
+        <label 
+          htmlFor="osap-application-type"
+          className="block text-sm font-medium text-brand-text-gray">
+          {t("osapInfo.labels.applicationType")}{" "} 
           <span className="text-brand-light-red">*</span>
         </label>
         <select
+          id="osap-application-type"
           className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
           value={applicationType}
           onChange={(e) =>
@@ -99,11 +102,14 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
       {/* Assessed Needs (kept, but not gating display caps) */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-1">
-          <label className="block text-sm font-medium text-brand-text-gray">
-            {t("osapInfo.labels.federalNeed")}{" "}
+          <label 
+            htmlFor="federal-need"
+            className="block text-sm font-medium text-brand-text-gray">
+            {t("osapInfo.labels.federalNeed")}{" "} 
             <span className="text-brand-light-red">*</span>
           </label>
           <input
+            id="federal-need"
             type="number"
             min={0}
             className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
@@ -114,11 +120,14 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
           />
         </div>
         <div className="space-y-1">
-          <label className="block text-sm font-medium text-brand-text-gray">
+          <label 
+            htmlFor="provincial-need"
+            className="block text-sm font-medium text-brand-text-gray">
             {t("osapInfo.labels.provincialNeed")}{" "}
             <span className="text-brand-light-red">*</span>
           </label>
           <input
+            id="provincial-need"
             type="number"
             min={0}
             className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
@@ -144,7 +153,9 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
         </label>
         {hasRestrictions && (
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-brand-text-gray">
+            <label 
+              htmlFor="restriction-type" 
+              className="block text-sm font-medium text-brand-text-gray">
               {t("osapInfo.labels.restrictionType")}{" "}
               <a
                 href={OSAP_MANUAL_URL}
@@ -156,6 +167,7 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
               </a>
             </label>
             <select
+              id="restriction-type"
               className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
               value={restrictionType ?? ""}
               onChange={(e) =>

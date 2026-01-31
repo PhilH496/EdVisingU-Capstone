@@ -11,7 +11,7 @@ dotenv.config({ path: '.env.local' });
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  timeout: 60000, // this defines how long the test can run before it autofails
+  timeout: 40000, // this defines how long the test can run before it autofails
   testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -49,7 +49,7 @@ export default defineConfig({
       use: { ...devices['Desktop Safari'] },
     },
 
-    /* Test against mobile viewports. DO NOT DELETE OR UNCOMMENT THESE.*/ 
+    /* Test against mobile viewports. DO NOT DELETE OR UNCOMMENT THESE.*/
     // {
     //   name: 'Mobile Chrome',
     //   use: { ...devices['Pixel 5'] },
@@ -72,8 +72,9 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run start',
+    command: process.env.CI ? 'npm run start': 'npm run dev',
     url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true, // Always reuse existing server if available
+    timeout: 120000, // 2 minutes to start
   },
 });

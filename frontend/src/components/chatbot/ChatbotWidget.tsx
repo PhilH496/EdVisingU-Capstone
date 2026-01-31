@@ -10,6 +10,7 @@
 
 import { useState, useRef, useEffect, FormEvent } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { useDraggable } from '@/hooks/useDraggable';
 
 interface Message {
   role: "user" | "assistant";
@@ -24,6 +25,7 @@ export function ChatbotWidget() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { elementRef, onMouseDown } = useDraggable();
 
   // Auto-scroll to bottom when new msgs arrive
   const scrollToBottom = () => {
@@ -63,40 +65,64 @@ export function ChatbotWidget() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/chat-stream`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: userMessage,
+            history: messages.map((msg) => ({
+              role: msg.role,
+              content: msg.content,
+            })),
+          }),
         },
-        body: JSON.stringify({
-          message: userMessage,
-          history: messages.map((msg) => ({
-            role: msg.role,
-            content: msg.content,
-          })),
-        }),
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`Server error: ${response.status}`);
       }
 
-      const data = await response.json();
+      // Initiate tools to read streaming data from backend
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
 
       // Add assistant response to chat
       const assistantMessage: Message = {
         role: "assistant",
-        content:
-          data.answer ||
-          data.response ||
-          "Sorry, I couldn't generate a response.",
+        content: "", //"Sorry, I couldn't generate a response."
         timestamp: new Date(),
       };
-      setMessages((prev) => [...prev, assistantMessage]);
+      let isFirstLoop = true;
+      while (true) {
+        const { value, done } = await reader!.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+
+        // Initally, chatbot reponse will have a loading icon
+        // When it reaches here
+        // The icon dissapears and replaced with a streamreponse
+        if (isFirstLoop) {
+          setMessages((prev) => [...prev, assistantMessage]);
+          setIsLoading(false);
+          isFirstLoop = false;
+        }
+        setMessages((prev) =>
+          prev.map((message, idx) => {
+            if (idx === prev.length - 1) {
+              return { ...message, content: message.content + chunk };
+            }
+            return message;
+          }),
+        );
+      }
     } catch (err) {
       console.error("Chat error:", err);
       setError(
-        "Failed to connect to chatbot. Please make sure the backend is running."
+        "Failed to connect to chatbot. Please make sure the backend is running.",
       );
 
       // Add error message to chat
@@ -113,13 +139,20 @@ export function ChatbotWidget() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <div>    
       {/* Chat Window */}
       {isOpen && (
-        <div className="mb-4 w-96 sm:w-[450px] bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden animate-slideUp">
+        <div 
+          ref={elementRef}
+          onMouseDown={onMouseDown}
+          className="fixed bottom-6 right-6 z-50 w-96 sm:w-[450px] bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden animate-slideUp"
+        >
           {/* Header */}
-          <div className="bg-[#0066A1] text-white px-5 py-4 flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+          <div 
+            data-drag-handle
+            className="bg-[#0066A1] text-white px-5 py-4 flex items-center justify-between cursor-move select-none"
+          >
+            <div className="flex items-center space-x-3 pointer-events-none">
               <div>
                 <h3 className="font-semibold text-base">BSWD Assistant</h3>
                 <p className="text-sm text-blue-100">Online</p>
@@ -127,7 +160,7 @@ export function ChatbotWidget() {
             </div>
             <button
               onClick={handleToggle}
-              className="text-white hover:text-gray-200 transition-colors"
+              className="text-white hover:text-gray-200 transition-colors pointer-events-auto"
               aria-label="Close chat"
             >
               <i className="fa-solid fa-xmark text-xl"></i>
@@ -165,33 +198,42 @@ export function ChatbotWidget() {
                     className="w-10 h-10 object-contain flex-shrink-0"
                   />
                 )}
-                <div id='chatbotResponse'
+                <div
+                  id="chatbotResponse"
                   className={`rounded-lg px-4 py-3 shadow-sm max-w-[85%] ${
                     msg.role === "user"
                       ? "bg-[#0066A1] text-white rounded-tr-none"
                       : "bg-white text-gray-800 rounded-tl-none"
                   }`}
                 >
-                {msg.role === 'assistant' ? (
-                  <div className="text-base max-w-none">
-                    <ReactMarkdown
-                      components={{
-                        p: ({node, ...props}) => <p className="mb-2" {...props} />,
-                        ul: ({node, ...props}) => <ul className="space-y-1 my-2 pl-0" {...props} />,
-                        li: ({node, children, ...props}) => (
-                          <li className="flex" {...props}>
-                            <span className="mr-2 font-bold text-brand-black flex-shrink-0">•</span>
-                            <span className="flex-1">{children}</span>
-                          </li>
-                        ),
-                      }}
-                    >
+                  {msg.role === "assistant" ? (
+                    <div className="text-base max-w-none">
+                      <ReactMarkdown
+                        components={{
+                          p: ({ node, ...props }) => (
+                            <p className="mb-2" {...props} />
+                          ),
+                          ul: ({ node, ...props }) => (
+                            <ul className="space-y-1 my-2 pl-0" {...props} />
+                          ),
+                          li: ({ node, children, ...props }) => (
+                            <li className="flex" {...props}>
+                              <span className="mr-2 font-bold text-brand-black flex-shrink-0">
+                                •
+                              </span>
+                              <span className="flex-1">{children}</span>
+                            </li>
+                          ),
+                        }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="text-base whitespace-pre-wrap">
                       {msg.content}
-                    </ReactMarkdown>
-                  </div>
-                ) : (
-                  <p className="text-base whitespace-pre-wrap">{msg.content}</p>
-                )}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
@@ -227,7 +269,11 @@ export function ChatbotWidget() {
               onSubmit={handleSendMessage}
               className="flex items-center space-x-2"
             >
+              <label htmlFor="chatbot-input-student" className="sr-only">
+                Type your message...
+              </label>
               <input
+                id="chatbot-input-student"
                 type="text"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
@@ -257,19 +303,14 @@ export function ChatbotWidget() {
       )}
 
       {/* Floating Action Button */}
-      <button
-        onClick={handleToggle}
-        className="w-16 h-16 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 bg-[#0066A1] hover:bg-[#004f7d] hover:scale-110"
-        aria-label="Open chat"
-      >
-        <i className="fa-solid fa-comment text-white text-3xl"></i>
-      </button>
-
-      {/* Notification Badge */}
       {!isOpen && (
-        <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-          <span className="text-white text-xs font-bold">!</span>
-        </div>
+        <button
+          onClick={handleToggle}
+          className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 bg-[#0066A1] hover:bg-[#004f7d] hover:scale-110"
+          aria-label="Open chat"
+        >
+          <i className="fa-solid fa-comment text-white text-3xl"></i>
+        </button>
       )}
     </div>
   );

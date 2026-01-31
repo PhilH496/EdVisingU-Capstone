@@ -1,5 +1,7 @@
 import Head from "next/head";
+import Image from "next/image";
 import { ReactNode } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Props = {
   title: string;
@@ -9,6 +11,8 @@ type Props = {
 };
 
 export function AdminLayout({ title, description, rightSlot, children }: Props) {
+  const { profile, signOut } = useAuth();
+
   return (
     <>
       <Head>
@@ -24,11 +28,25 @@ export function AdminLayout({ title, description, rightSlot, children }: Props) 
         <header className="bg-black">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center py-4">
-              <img
+              <Image
                 src="/ontario-logo.png"
                 alt="Ontario"
-                className="block h-8 w-auto filter invert contrast-100"
+                width={130}
+                height={30}
+                priority
+                className="block filter invert contrast-100"
               />
+              <div className="flex items-center gap-4">
+                <span className="text-white text-sm">
+                  {profile?.full_name || profile?.email}
+                </span>
+                <button
+                  onClick={() => signOut()}
+                  className="text-white hover:text-gray-300 text-sm font-medium"
+                >
+                  Sign Out
+                </button>
+              </div>
             </div>
           </div>
         </header>

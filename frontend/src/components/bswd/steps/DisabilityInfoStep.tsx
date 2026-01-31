@@ -134,8 +134,8 @@ export function DisabilityInfoStep({
       <div>
         <div className="flex items-center">
           <input
-            id="isDisabilityVerified"
-            name="isDisabilityVerified"
+            id="is-disability-verified"
+            name="is-disability-verified"
             type="checkbox"
             checked={formData.disabilityType !== "not-verified"}
             onChange={(e) => {
@@ -154,7 +154,7 @@ export function DisabilityInfoStep({
             className="h-4 w-4 border-gray-300 rounded focus:ring-[#0071a9]"
           />
           <label
-            htmlFor="isDisabilityVerified"
+            htmlFor="is-disability-verified"
             className="ml-3 text-sm font-medium text-[#4e4e4e]"
           >
             {t("disabilityInfo.verifiedStatusLabel")}
@@ -165,7 +165,7 @@ export function DisabilityInfoStep({
       {/* Disability Verification Date */}
       <div className="flex flex-col gap-3">
         <Label
-          htmlFor="endDate"
+          htmlFor="end-date"
           className="block text-base font-medium mb-1 text-brand-text-gray"
         >
           {t("disabilityInfo.labels.verificationDate")}{" "}
@@ -178,7 +178,7 @@ export function DisabilityInfoStep({
           <PopoverTrigger asChild disabled={isVerificationDisabled}>
             <Button
               variant="outline"
-              id="endDate"
+              id="end-date"
               className="w-full max-w-xs justify-between font-normal"
             >
               {verificationDate.date
@@ -287,8 +287,8 @@ export function DisabilityInfoStep({
       <div className="pt-2 border-t border-gray-200 mt-6">
         <div className="flex items-start my-4">
           <input
-            id="requiresPsychoEducational"
-            name="requiresPsychoEducational"
+            id="requires-psycho-educational"
+            name="requires-psycho-educational"
             type="checkbox"
             checked={requiresPsychoEducational}
             onChange={handlePsychoEdChange}
@@ -296,7 +296,7 @@ export function DisabilityInfoStep({
             className="h-5 w-5 border-gray-300 rounded focus:ring-[#0071a9] disabled:opacity-50 disabled:cursor-not-allowed"
           />
           <label
-            htmlFor="requiresPsychoEducational"
+            htmlFor="requires-psycho-educational"
             className="ml-3 text-[15px] font-medium text-[#4e4e4e] leading-snug"
           >
             {t("disabilityInfo.psychoEd.checkboxLabel")}
@@ -380,7 +380,7 @@ export function DisabilityInfoStep({
 
             <div className="mt-4">
               <label
-                htmlFor="psychoEdEmail"
+                htmlFor="psycho-ed-email"
                 className="block text-sm font-medium text-[#4e4e4e] mb-2"
               >
                 {t("disabilityInfo.psychoEd.contactEmailLabel")}{" "}
@@ -388,8 +388,8 @@ export function DisabilityInfoStep({
               </label>
               <input
                 type="email"
-                id="psychoEdEmail"
-                name="psychoEdEmail"
+                id="psycho-ed-email"
+                name="psycho-ed-email"
                 placeholder={t("disabilityInfo.psychoEd.contactEmailPlaceholder")}
                 value={formData.email || ""}
                 onChange={(e) =>
