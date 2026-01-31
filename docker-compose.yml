@@ -22,7 +22,8 @@ services:
       - "3000:3000"
     environment:
       - RESEND_API_KEY=${RESEND_API_KEY}
-      - NEXT_PUBLIC_API_URL=http://backend:8000
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - SUPABASE_URL=${SUPABASE_URL}
     depends_on:
       - backend
     networks:

@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Image from "next/image";
 import { ReactNode } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Props = {
   title: string;
@@ -10,6 +11,8 @@ type Props = {
 };
 
 export function AdminLayout({ title, description, rightSlot, children }: Props) {
+  const { profile, signOut } = useAuth();
+
   return (
     <>
       <Head>
@@ -33,6 +36,17 @@ export function AdminLayout({ title, description, rightSlot, children }: Props) 
                 priority
                 className="block filter invert contrast-100"
               />
+              <div className="flex items-center gap-4">
+                <span className="text-white text-sm">
+                  {profile?.full_name || profile?.email}
+                </span>
+                <button
+                  onClick={() => signOut()}
+                  className="text-white hover:text-gray-300 text-sm font-medium"
+                >
+                  Sign Out
+                </button>
+              </div>
             </div>
           </div>
         </header>

@@ -39,6 +39,10 @@ const addIfPresent = <
  */
 const calculateInitialStatus = async (formData: FormData): Promise<{ status: string; score: number }> => {
   try {
+    // Create AbortController with 30 second timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
     const response = await fetch(
       `${
         process.env.NEXT_PUBLIC_API_URL
@@ -55,8 +59,11 @@ const calculateInitialStatus = async (formData: FormData): Promise<{ status: str
           federal_need: formData.federalNeed,
           requested_items: formData.requestedItems,
         }),
+        signal: controller.signal,
       }
     );
+
+    clearTimeout(timeoutId);
 
     if (response.ok) {
       const data = await response.json();
@@ -71,11 +78,15 @@ const calculateInitialStatus = async (formData: FormData): Promise<{ status: str
       return { status, score };
     }
   } catch (error) {
-    console.error(error);
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.warn('Score calculation timed out or was cancelled');
+    } else {
+      console.error('Error calculating status:', error);
+    }
   }
 
-  // Fallback to 'Failed' if API call fails
-  return { status: "Failed", score: 0 };
+  // Fallback to 'In Review' if API call fails (safer than 'Failed')
+  return { status: "In Review", score: 50 };
 };
 
 /**

@@ -14,6 +14,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import StatusBadge from "@/components/admin/StatusBadge";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import {
   AppSummary,
   Row,
@@ -159,7 +160,7 @@ function PaginationControls({
   );
 }
 
-export default function AdminDashboardPage() {
+function AdminDashboardPage() {
   const [rows, setRows] = useState<Row[]>([]);
   const [bulkStatus, setBulkStatus] = useState<string>("Submitted");
   const [allChecked, setAllChecked] = useState<boolean>(false);
@@ -1073,4 +1074,12 @@ function getScoreBadgeClasses(score: number) {
     return "bg-blue-100 text-blue-800 border-blue-200";
   }
   return "bg-red-100 text-red-800 border-red-200";
+}
+
+export default function AdminDashboardPageWithAuth() {
+  return (
+    <ProtectedRoute requireRole="admin">
+      <AdminDashboardPage />
+    </ProtectedRoute>
+  );
 }
