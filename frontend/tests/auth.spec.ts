@@ -24,7 +24,6 @@ test.describe('Auth Tests', () => {
     await page.getByLabel('Email address').fill(TEST_USER_EMAIL);
     await page.getByLabel('Password').fill(TEST_USER_PASSWORD);
     await page.getByRole('button', { name: 'Sign in' }).click();
-    await page.waitForURL('http://localhost:3000/');
     await page.locator('button').filter({ hasText: TEST_USER_EMAIL }).click();
     await page.getByRole('button', { name: 'Logout' }).click();
     await page.waitForURL('http://localhost:3000/login');
@@ -37,18 +36,19 @@ test.describe('Auth Tests', () => {
     await page.getByLabel('Email address').fill(TEST_USER_EMAIL);
     await page.getByLabel('Password').fill(TEST_USER_PASSWORD_SHORT);
     await page.getByRole('button', { name: 'Sign in' }).click();
-    await expect(page.locator('form')).toContainText('Invalid login credentials');
+    await expect(page.locator('#login-error')).toBeVisible({ timeout: 10000 }); // need to include this so webkit can consistently see it. i hate webkit
+    await expect(page.locator('#login-error')).toHaveText('Invalid login credentials');
   });
 
   // Assert short password error
   test('bad short password', async ({ page }) => {
     await page.goto('http://localhost:3000/signup');
     await page.getByLabel('Email address').fill(TEST_USER_EMAIL);
-    await page.locator('#password').fill(TEST_USER_PASSWORD_SHORT); // need to use locator here to avoid getByLabel resolving to 2 elements
+    await page.locator('#password').fill(TEST_USER_PASSWORD_SHORT);
     await page.locator('#confirm-password').fill(TEST_USER_PASSWORD_SHORT);
     await page.getByLabel('Full Name').fill('Weak Password Test');
     await page.getByRole('button', { name: 'Sign up' }).click();
-    await page.pause();
+    await expect(page.locator('#submit-error')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('#submit-error')).toHaveText('Password must be at least 8 characters');
   });
 
@@ -60,6 +60,7 @@ test.describe('Auth Tests', () => {
     await page.locator('#confirm-password').fill(TEST_USER_PASSWORD_NO_SYMBOL);
     await page.getByLabel('Full Name').fill('Missing Symbol Test');
     await page.getByRole('button', { name: 'Sign up' }).click();
+    await expect(page.locator('#submit-error')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('#submit-error')).toHaveText('Password must contain uppercase, lowercase, number, and symbol');
   });
 });
