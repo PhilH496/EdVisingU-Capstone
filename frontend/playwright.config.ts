@@ -11,7 +11,7 @@ dotenv.config({ path: '.env.local' });
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  timeout: 60000, // this defines how long the test can run before it autofails
+  timeout: 40000, // this defines how long the test can run before it autofails
   testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
