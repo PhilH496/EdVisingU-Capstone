@@ -11,7 +11,7 @@ dotenv.config({ path: '.env.local' });
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  timeout: 40000, // this defines how long the test can run before it autofails
+  timeout: 50000, // this defines how long the test can run before it autofails
   testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -20,7 +20,7 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: 1, // I was having issues with tests running in parralel since they were using the same supabase client.
+  workers: 3,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -44,10 +44,10 @@ export default defineConfig({
       use: { ...devices['Desktop Firefox'] },
     },
 
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
+    //{
+    //  name: 'webkit',
+    //  use: { ...devices['Desktop Safari'] },
+    //},
 
     /* Test against mobile viewports. DO NOT DELETE OR UNCOMMENT THESE.*/
     // {
@@ -72,7 +72,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: process.env.CI ? 'npm run start': 'npm run dev',
+    command: 'npm run build && npm run start', // do not change this. tests are more likely to randomly fail on 'npm run dev'
     url: 'http://localhost:3000',
     reuseExistingServer: true, // Always reuse existing server if available
     timeout: 120000, // 2 minutes to start

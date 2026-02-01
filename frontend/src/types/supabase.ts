@@ -285,7 +285,7 @@ export type Database = {
           phone?: string | null;
           postal_code: string;
           province: string;
-          sin: number;
+          sin: string;
           student_id?: number;
         };
         Update: {
@@ -301,7 +301,7 @@ export type Database = {
           phone?: string | null;
           postal_code?: string;
           province?: string;
-          sin?: number;
+          sin?: string;
           student_id?: number;
         };
         Relationships: [];

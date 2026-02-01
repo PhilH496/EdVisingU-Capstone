@@ -104,7 +104,7 @@ export const saveSubmission = async (formData: FormData) => {
     first_name: formData.firstName,
     last_name: formData.lastName,
     dob: formData.dateOfBirth,
-    sin: parseInt(formData.sin),
+    sin: formData.sin,
     email: formData.email,
     address: formData.address,
     city: formData.city,

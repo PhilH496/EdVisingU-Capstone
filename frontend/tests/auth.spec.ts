@@ -8,14 +8,12 @@ test.describe('Auth Tests', () => {
   let userID: string;
 
   // this doubles as a signup test if you think about it
-  test.beforeAll(async () => {
+  test.beforeEach(async () => {
     userID = await signUpTestUser();
   });
 
-  test.afterAll(async () => {
-    if (userID) {
-      await deleteTestUser(userID);
-    }
+  test.afterEach(async () => {
+    await deleteTestUser(userID);
   });
 
   // Login and logout functionality
