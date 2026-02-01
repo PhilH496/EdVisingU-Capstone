@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { deleteTestData, generateNumericId, signUpTestUser, deleteTestUser, TEST_USER_EMAIL, TEST_USER_PASSWORD } from './utils';
+import { deleteTestData, generateNumericId, signUpTestUser, deleteTestUser, TEST_USER_EMAIL, TEST_USER_PASSWORD, openDatePicker } from './utils';
 
 const studentID = generateNumericId(8);
 const applicationID = 'APP-' + studentID;
@@ -32,20 +32,21 @@ test.describe('Student Form Tests', () => {
     // student info step
     await page.getByRole('radio', { name: 'Yes' }).check();
     await page.getByRole('button', { name: 'OSAP Application Start Date *' }).click();
-    await page.getByRole('button', { name: 'Go to the Previous Month' }).click();
-    await page.getByRole('button', { name: 'Go to the Previous Month' }).click();
-    await page.getByRole('button', { name: 'Go to the Previous Month' }).click();
-    await page.getByLabel('Choose the Year').selectOption('2024');
-    await page.getByLabel('Choose the Month').selectOption('11');
-    await page.getByRole('button', { name: 'Thursday, December 12th,' }).click();
+    const osapPicker = openDatePicker(page);
+    await osapPicker.getByRole('button', { name: 'Go to the Previous Month' }).first().click();
+    await osapPicker.getByRole('button', { name: 'Go to the Previous Month' }).first().click();
+    await osapPicker.getByRole('button', { name: 'Go to the Previous Month' }).first().click();
+    await osapPicker.getByLabel('Choose the Year').first().selectOption('2024');
+    await osapPicker.getByLabel('Choose the Month').first().selectOption('11');
+    await osapPicker.getByRole('button', { name: 'Thursday, December 12th,' }).click();
     await page.getByLabel('Student ID *').fill(studentID);
     await page.getByLabel('Ontario Education Number (OEN').fill(OEN);
     await page.getByLabel('First Name *').fill('John');
     await page.getByLabel('Last Name *').fill('Test');
     await page.getByRole('button', { name: 'Date of Birth *' }).click();
-    await page.getByLabel('Choose the Year').selectOption('2004');
-    await page.getByLabel('Choose the Month').selectOption('7');
-    await page.getByRole('button', { name: 'Friday, August 27th,' }).click();
+    await openDatePicker(page).getByLabel('Choose the Year').first().selectOption('2004');
+    await openDatePicker(page).getByLabel('Choose the Month').first().selectOption('7');
+    await openDatePicker(page).getByRole('button', { name: 'Friday, August 27th,' }).click();
     await page.getByLabel('Social Insurance Number *').fill(SIN);
     await page.getByLabel('Email Address *').fill(TEST_USER_EMAIL);
     await page.getByLabel('Phone Number').fill('(123) 456-7890');
@@ -91,11 +92,9 @@ test.describe('Student Form Tests', () => {
     await page.getByText('Disability Verification Date *Select date').click();
     await page.getByRole('checkbox', { name: 'Student has verified' }).check();
     await page.getByRole('button', { name: 'Disability Verification Date *' }).click();
-    await page.getByRole('button', { name: 'Wednesday, January 21st,' }).click();
-    await page.getByRole('button', { name: 'Disability Verification Date *' }).click();
-    await page.getByLabel('Choose the Year').selectOption('2025');
-    await page.getByLabel('Choose the Month').selectOption('7');
-    await page.getByRole('button', { name: 'Wednesday, August 27th,' }).click();
+    await openDatePicker(page).getByLabel('Choose the Year').first().selectOption('2025');
+    await openDatePicker(page).getByLabel('Choose the Month').first().selectOption('7');
+    await openDatePicker(page).getByRole('button', { name: 'Wednesday, August 27th,' }).click();
     await page.getByText('Persistent or Prolonged').click();
     await page.getByText('Permanent Disability').click();
     await page.getByRole('checkbox', { name: 'Dexterity' }).check();

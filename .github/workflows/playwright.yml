@@ -30,7 +30,7 @@ jobs:
         SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       # Starts apps, runs tests, and exits when tests finish
-      run: docker compose up --build --exit-code-from frontend
+      run: docker compose up --build
 
     # Copy report to outside of the runner
     - name: Copy Playwright Report

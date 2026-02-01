@@ -1,10 +1,13 @@
 import { randomInt } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { supabase as supabaseClient } from '@/lib/supabase';
+import { Page } from '@playwright/test';
+
 // test credentials which change every test run to prevent race conditions
 export const TEST_USER_EMAIL = 'test@playwright' + generateNumericId(8) + '.test';
 export const TEST_USER_PASSWORD = 'TestPass123!';
-
+// helper function to open the last date picker dialog
+export const openDatePicker = (page: Page) => page.getByRole('dialog').last();
 /**
  * Returns a string of cryptographically random numeric digits.
  * @param num Length of the string (number of digits 0–9).
