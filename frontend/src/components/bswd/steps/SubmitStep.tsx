@@ -64,7 +64,7 @@ else if (rawLimits && typeof rawLimits === "object") {
             <p className="text-gray-500">
               Student ID <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-studentID" className="font-medium text-gray-900">
               {formData.studentId || "Not provided"}
             </p>
           </div>
@@ -73,7 +73,7 @@ else if (rawLimits && typeof rawLimits === "object") {
               Ontario Education Number (OEN){" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-oen" className="font-medium text-gray-900">
               {formData.oen || "Not provided"}
             </p>
           </div>
@@ -81,7 +81,7 @@ else if (rawLimits && typeof rawLimits === "object") {
             <p className="text-gray-500">
               First Name <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-first-name" className="font-medium text-gray-900">
               {formData.firstName || "Not provided"}
             </p>
           </div>
@@ -89,7 +89,7 @@ else if (rawLimits && typeof rawLimits === "object") {
             <p className="text-gray-500">
               Last Name <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-last-name" className="font-medium text-gray-900">
               {formData.lastName || "Not provided"}
             </p>
           </div>
@@ -98,7 +98,7 @@ else if (rawLimits && typeof rawLimits === "object") {
               Date of Birth{" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-dob" className="font-medium text-gray-900">
               {formData.dateOfBirth || "Not provided"}
             </p>
           </div>
@@ -107,7 +107,7 @@ else if (rawLimits && typeof rawLimits === "object") {
               Social Insurance Number{" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-sin" className="font-medium text-gray-900">
               {formData.sin || "Not provided"}
             </p>
           </div>
@@ -116,13 +116,13 @@ else if (rawLimits && typeof rawLimits === "object") {
               Email Address{" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-email" className="font-medium text-gray-900">
               {formData.email || "Not provided"}
             </p>
           </div>
           <div>
             <p className="text-gray-500">Phone Number</p>
-            <p className="font-medium text-gray-900">
+            <p id="review-phone" className="font-medium text-gray-900">
               {formData.phone || "Not provided"}
             </p>
           </div>
@@ -131,7 +131,7 @@ else if (rawLimits && typeof rawLimits === "object") {
               Street Address{" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-address" className="font-medium text-gray-900">
               {formData.address || "Not provided"}
             </p>
           </div>
@@ -139,7 +139,7 @@ else if (rawLimits && typeof rawLimits === "object") {
             <p className="text-gray-500">
               City <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-city" className="font-medium text-gray-900">
               {formData.city || "Not provided"}
             </p>
           </div>
@@ -148,7 +148,7 @@ else if (rawLimits && typeof rawLimits === "object") {
               Province/Territory{" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-province" className="font-medium text-gray-900">
               {formData.province || "Not provided"}
             </p>
           </div>
@@ -156,7 +156,7 @@ else if (rawLimits && typeof rawLimits === "object") {
             <p className="text-gray-500">
               Postal Code <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-postal-code" className="font-medium text-gray-900">
               {formData.postalCode || "Not provided"}
             </p>
           </div>
@@ -164,7 +164,7 @@ else if (rawLimits && typeof rawLimits === "object") {
             <p className="text-gray-500">
               Country <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-country" className="font-medium text-gray-900">
               {formData.country || "Not provided"}
             </p>
           </div>
@@ -173,7 +173,7 @@ else if (rawLimits && typeof rawLimits === "object") {
               Has OSAP Application{" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-has-osap" className="font-medium text-gray-900">
               {formData.hasOsapApplication === true
                 ? "Yes"
                 : formData.hasOsapApplication === false
@@ -187,7 +187,7 @@ else if (rawLimits && typeof rawLimits === "object") {
                 OSAP Application Start Date{" "}
                 <span className="text-brand-light-red">*</span>
               </p>
-              <p className="font-medium text-gray-900">
+              <p id="review-osap-start" className="font-medium text-gray-900">
                 {formData.osapApplicationStartDate || "Not provided"}
               </p>
             </div>
@@ -206,25 +206,25 @@ else if (rawLimits && typeof rawLimits === "object") {
         <div className="grid md:grid-cols-2 gap-4 text-sm">
           <div>
             <p className="text-gray-500">Institution</p>
-            <p className="font-medium text-gray-900">
+            <p id="review-institution" className="font-medium text-gray-900">
               {formData.institution || "Not provided"}
             </p>
           </div>
           <div>
             <p className="text-gray-500">Program</p>
-            <p className="font-medium text-gray-900">
+            <p id="review-program" className="font-medium text-gray-900">
               {formData.program || "Not provided"}
             </p>
           </div>
           <div>
             <p className="text-gray-500">Study Type</p>
-            <p className="font-medium text-gray-900 capitalize">
+            <p id="review-study-type" className="font-medium text-gray-900 capitalize">
               {formData.studyType || "Not provided"}
             </p>
           </div>
           <div>
             <p className="text-gray-500">Study Period</p>
-            <p className="font-medium text-gray-900">
+            <p id="review-study-period" className="font-medium text-gray-900">
               {formData.studyPeriodStart && formData.studyPeriodEnd
                 ? `${formData.studyPeriodStart} to ${formData.studyPeriodEnd}`
                 : "Not provided"}
@@ -244,25 +244,25 @@ else if (rawLimits && typeof rawLimits === "object") {
         <div className="grid md:grid-cols-2 gap-4 text-sm">
           <div>
             <p className="text-gray-500">OSAP Application Type</p>
-            <p className="font-medium text-gray-900 capitalize">
+            <p id="review-osap-type" className="font-medium text-gray-900 capitalize">
               {formData.osapApplication || "Not provided"}
             </p>
           </div>
           <div>
             <p className="text-gray-500">Has OSAP Restrictions</p>
-            <p className="font-medium text-gray-900">
+            <p id="review-has-restrictions" className="font-medium text-gray-900">
               {formData.hasOSAPRestrictions ? "Yes" : "No"}
             </p>
           </div>
           <div>
             <p className="text-gray-500">Federal Need</p>
-            <p className="font-medium text-gray-900">
+            <p id="review-federal-need" className="font-medium text-gray-900">
               ${formData.federalNeed || 0}
             </p>
           </div>
           <div>
             <p className="text-gray-500">Provincial Need</p>
-            <p className="font-medium text-gray-900">
+            <p id="review-provincial-need" className="font-medium text-gray-900">
               ${formData.provincialNeed || 0}
             </p>
           </div>
@@ -280,19 +280,19 @@ else if (rawLimits && typeof rawLimits === "object") {
         <div className="grid md:grid-cols-2 gap-4 text-sm">
           <div>
             <p className="text-gray-500">Has Verified Disability</p>
-            <p className="font-medium text-gray-900">
+            <p id="review-has-disability" className="font-medium text-gray-900">
               {formData.hasVerifiedDisability ? "Yes" : "No"}
             </p>
           </div>
           <div>
             <p className="text-gray-500">Disability Type</p>
-            <p className="font-medium text-gray-900 capitalize">
+            <p id="review-disability-type" className="font-medium text-gray-900 capitalize">
               {formData.disabilityType?.replace(/-/g, " ") || "Not provided"}
             </p>
           </div>
           <div className="md:col-span-2">
             <p className="text-gray-500">Functional Limitations</p>
-            <p className="font-medium text-gray-900">
+            <p id="review-limitations" className="font-medium text-gray-900">
               {functionalLimitationLabels.length > 0
                 ? functionalLimitationLabels.join(", ")
                 : "Not provided"}
@@ -314,6 +314,7 @@ else if (rawLimits && typeof rawLimits === "object") {
             {formData.requestedItems.map((item, index) => (
               <div
                 key={index}
+                id={`review-requested-item-${index}`}
                 className="border-l-4 border-brand-dark-blue pl-4 py-2"
               >
                 <div className="flex justify-between items-start">
