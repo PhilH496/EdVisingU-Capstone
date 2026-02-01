@@ -1,15 +1,23 @@
+import { randomInt } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { supabase as supabaseClient } from '@/lib/supabase';
-// test credentials which change every test run to prevent race conditions maybe
+import { Page } from '@playwright/test';
+
+// test credentials which change every test run to prevent race conditions
 export const TEST_USER_EMAIL = 'test@playwright' + generateNumericId(8) + '.test';
 export const TEST_USER_PASSWORD = 'TestPass123!';
-
+// helper function to open the last date picker dialog
+export const openDatePicker = (page: Page) => page.getByRole('dialog').last();
 /**
- * Returns a random number
- * @param num Specifies max number of characters 
+ * Returns a string of cryptographically random numeric digits.
+ * @param num Length of the string (number of digits 0–9).
  */
 export function generateNumericId(num: number): string {
-  return (Date.now() + Math.random()).toString().substring(0, num);
+  let id = '';
+  for (let i = 0; i < num; i++) {
+    id += randomInt(0, 10);
+  }
+  return id;
 }
 
 /**
@@ -52,17 +60,16 @@ export async function deleteTestData(testApplicationId: string, testStudentId: s
       .from("applications")
       .delete()
       .eq("id", testApplicationId);
-
+    
     const studentResult = await supabaseClient
       .from("student")
       .delete()
       .eq("student_id", testStudentId);
 
-
     if (appResult.error) {
-      console.error("Error deleting application data:", appResult.error);
-    } else {
-      console.error("Error deleting test student data", studentResult.error)
+      console.error("Error deleting test application data: ", appResult.error);
+    } else if (studentResult.error) {
+      console.error("Error deleting test student data: ", studentResult.error);
     }
   }
 }
