@@ -82,7 +82,7 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
               {t("studentInfo.labels.studentId")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-studentID" className="font-medium text-gray-900">
               {formData.studentId || t("review.notProvided")}
             </p>
           </div>
@@ -91,7 +91,7 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
               {t("studentInfo.labels.oen")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-oen" className="font-medium text-gray-900">
               {formData.oen || t("review.notProvided")}
             </p>
           </div>
@@ -100,7 +100,7 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
               {t("studentInfo.labels.firstName")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-first-name" className="font-medium text-gray-900">
               {formData.firstName || t("review.notProvided")}
             </p>
           </div>
@@ -109,7 +109,7 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
               {t("studentInfo.labels.lastName")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-last-name" className="font-medium text-gray-900">
               {formData.lastName || t("review.notProvided")}
             </p>
           </div>
@@ -118,7 +118,7 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
               {t("studentInfo.labels.dob")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-dob" className="font-medium text-gray-900">
               {formData.dateOfBirth || t("review.notProvided")}
             </p>
           </div>
@@ -127,7 +127,7 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
               {t("studentInfo.labels.sin")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-sin" className="font-medium text-gray-900">
               {formData.sin || t("review.notProvided")}
             </p>
           </div>
@@ -136,14 +136,14 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
               {t("studentInfo.labels.email")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-email" className="font-medium text-gray-900">
               {formData.email || t("review.notProvided")}
             </p>
           </div>
           <div>
-            <p className="text-gray-500">{t("studentInfo.labels.phone")}</p>
-            <p className="font-medium text-gray-900">
-             {formData.phone || t("review.notProvided")}
+            <p className="text-gray-500">Phone Number</p>
+            <p id="review-phone" className="font-medium text-gray-900">
+              {formData.phone || t("review.notProvided")}
             </p>
           </div>
           <div>
@@ -151,7 +151,7 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
               {t("studentInfo.labels.streetAddress")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-address" className="font-medium text-gray-900">
               {formData.address || t("review.notProvided")}
             </p>
           </div>
@@ -160,7 +160,7 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
               {t("studentInfo.labels.city")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-city" className="font-medium text-gray-900">
               {formData.city || t("review.notProvided")}
             </p>
           </div>
@@ -169,7 +169,7 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
               {t("studentInfo.labels.province")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-province" className="font-medium text-gray-900">
               {formData.province || t("review.notProvided")}
             </p>
           </div>
@@ -178,7 +178,7 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
               {t("studentInfo.labels.postalCode")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-postal-code" className="font-medium text-gray-900">
               {formData.postalCode || t("review.notProvided")}
             </p>
           </div>
@@ -187,7 +187,7 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
               {t("studentInfo.labels.country")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-country" className="font-medium text-gray-900">
               {formData.country || t("review.notProvided")}
             </p>
           </div>
@@ -196,7 +196,7 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
               {t("review.student.hasOsapApplication")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
-            <p className="font-medium text-gray-900">
+            <p id="review-has-osap" className="font-medium text-gray-900">
               {formatYesNoNotProvided(formData.hasOsapApplication)}
             </p>
           </div>
@@ -206,7 +206,7 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
                 {t("studentInfo.labels.osapApplicationStartDate")}{" "}
                 <span className="text-brand-light-red">*</span>
               </p>
-              <p className="font-medium text-gray-900">
+              <p id="review-osap-start" className="font-medium text-gray-900">
                 {formData.osapApplicationStartDate || t("review.notProvided")}
               </p>
             </div>
@@ -225,25 +225,25 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
         <div className="grid md:grid-cols-2 gap-4 text-sm">
           <div>
             <p className="text-gray-500">{t("review.program.institution")}</p>
-            <p className="font-medium text-gray-900">
+            <p id="review-institution" className="font-medium text-gray-900">
               {formData.institution || t("review.notProvided")}
             </p>
           </div>
           <div>
             <p className="text-gray-500">{t("review.program.program")}</p>
-            <p className="font-medium text-gray-900">
+            <p id="review-program" className="font-medium text-gray-900">
               {formData.program || t("review.notProvided")}
             </p>
           </div>
           <div>
             <p className="text-gray-500">{t("programInfo.labels.studyType")}</p>
-            <p className="font-medium text-gray-900 capitalize">
+            <p id="review-study-type" className="font-medium text-gray-900 capitalize">
               {formData.studyType || t("review.notProvided")}
             </p>
           </div>
           <div>
             <p className="text-gray-500">{t("review.program.studyPeriod")}</p>
-            <p className="font-medium text-gray-900">
+            <p id="review-study-period" className="font-medium text-gray-900">
               {formData.studyPeriodStart && formData.studyPeriodEnd
                 ? `${formData.studyPeriodStart} to ${formData.studyPeriodEnd}`
                 : "Not provided"}
@@ -263,25 +263,25 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
         <div className="grid md:grid-cols-2 gap-4 text-sm">
           <div>
             <p className="text-gray-500">{t("osapInfo.labels.applicationType")}</p>
-            <p className="font-medium text-gray-900 capitalize">
+            <p id="review-osap-type" className="font-medium text-gray-900 capitalize">
               {formData.osapApplication || t("review.notProvided")}
             </p>
           </div>
           <div>
             <p className="text-gray-500">{t("review.osap.hasRestrictions")}</p>
-            <p className="font-medium text-gray-900">
+            <p id="review-has-restrictions" className="font-medium text-gray-900">
               {formData.hasOSAPRestrictions ? t("common.yes") : t("common.no")}
             </p>
           </div>
           <div>
             <p className="text-gray-500">{t("osapInfo.labels.federalNeed")}</p>
-            <p className="font-medium text-gray-900">
+            <p id="review-federal-need" className="font-medium text-gray-900">
               ${formData.federalNeed || 0}
             </p>
           </div>
           <div>
             <p className="text-gray-500">{t("osapInfo.labels.provincialNeed")}</p>
-            <p className="font-medium text-gray-900">
+            <p id="review-provincial-need" className="font-medium text-gray-900">
               ${formData.provincialNeed || 0}
             </p>
           </div>
@@ -299,19 +299,19 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
         <div className="grid md:grid-cols-2 gap-4 text-sm">
           <div>
             <p className="text-gray-500">{t("review.disability.hasVerified")}</p>
-            <p className="font-medium text-gray-900">
+            <p id="review-has-disability" className="font-medium text-gray-900">
               {formData.hasVerifiedDisability ? t("common.yes") : t("common.no")}
             </p>
           </div>
           <div>
             <p className="text-gray-500">{t("disabilityInfo.labels.disabilityType")}</p>
-            <p className="font-medium text-gray-900 capitalize">
+            <p id="review-disability-type" className="font-medium text-gray-900 capitalize">
               {formData.disabilityType?.replace(/-/g, " ") || t("review.notProvided")}
             </p>
           </div>
           <div className="md:col-span-2">
             <p className="text-gray-500">{t("disabilityInfo.labels.functionalLimitations")}</p>
-            <p className="font-medium text-gray-900">
+            <p id="review-limitations" className="font-medium text-gray-900">
               {functionalLimitationLabels.length > 0
                 ? functionalLimitationLabels.join(", ")
                 : t("review.notProvided")}
@@ -333,6 +333,7 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
             {formData.requestedItems.map((item, index) => (
               <div
                 key={index}
+                id={`review-requested-item-${index}`}
                 className="border-l-4 border-brand-dark-blue pl-4 py-2"
               >
                 <div className="flex justify-between items-start">
