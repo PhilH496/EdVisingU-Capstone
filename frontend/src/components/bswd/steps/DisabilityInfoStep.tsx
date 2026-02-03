@@ -1,5 +1,5 @@
 /**
- * Step 1: DisabilityInfoStep component
+ * Step 4: DisabilityInfoStep component
  *
  * Fourth step of the BSWD application form that collects disability information about the student.
  */
@@ -18,6 +18,7 @@ import { ChangeEvent, useState } from "react";
 import { format } from "date-fns";
 import { FormData } from "@/types/bswd";
 import { sendPsychoEdReferral } from "@/lib/notify";
+import { useTranslation } from "@/lib/i18n"; // translation
 
 interface DisabilityInfoStepProps {
   formData: FormData;
@@ -28,6 +29,8 @@ export function DisabilityInfoStep({
   formData,
   setFormData,
 }: DisabilityInfoStepProps) {
+  const { t, isLoaded } = useTranslation(); // translation logic + handler
+
   const verificationDate = useDateRange();
   // Local state for the psycho-educational assessment checkbox
   const [requiresPsychoEducational, setRequiresPsychoEducational] = useState(
@@ -45,10 +48,10 @@ export function DisabilityInfoStep({
     error: null,
   });
 
+  if (!isLoaded) return null;
+
   // Handler for psycho-educational assessment checkbox
-  const handlePsychoEdChange = async (
-    e: ChangeEvent<HTMLInputElement>
-  ) => {
+  const handlePsychoEdChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const isChecked = e.target.checked;
     setRequiresPsychoEducational(isChecked);
 
@@ -86,7 +89,7 @@ export function DisabilityInfoStep({
         setEmailStatus({
           sending: false,
           sent: false,
-          error: "Failed to send referral email. Please contact support.",
+          error: t("disabilityInfo.emailStatus.failedToSend"),
         });
       }
     } else if (!isChecked) {
@@ -122,14 +125,16 @@ export function DisabilityInfoStep({
         fontFamily: `"Raleway", "Helvetica Neue", Helvetica, Arial, sans-serif`,
       }}
     >
-      <h2 className="text-xl font-semibold mb-4">Section D: Disability Info</h2>
+      <h2 className="text-xl font-semibold mb-4">
+        {t("disabilityInfo.sectionHeader")}
+      </h2>
 
       {/* Verified Status Checkbox */}
       <div>
         <div className="flex items-center">
           <input
-            id="is-disability-verified"
-            name="is-disability-verified"
+            id="isDisabilityVerified"
+            name="isDisabilityVerified"
             type="checkbox"
             checked={formData.disabilityType !== "not-verified"}
             onChange={(e) => {
@@ -148,10 +153,10 @@ export function DisabilityInfoStep({
             className="h-4 w-4 border-gray-300 rounded focus:ring-[#0071a9]"
           />
           <label
-            htmlFor="is-disability-verified"
+            htmlFor="isDisabilityVerified"
             className="ml-3 text-sm font-medium text-[#4e4e4e]"
           >
-            Student has verified disability status with OSAP
+            {t("disabilityInfo.verifiedStatusLabel")}
           </label>
         </div>
       </div>
@@ -159,10 +164,10 @@ export function DisabilityInfoStep({
       {/* Disability Verification Date */}
       <div className="flex flex-col gap-3">
         <Label
-          htmlFor="end-date"
+          htmlFor="endDate"
           className="block text-base font-medium mb-1 text-brand-text-gray"
         >
-          Disability Verification Date{" "}
+          {t("disabilityInfo.labels.verificationDate")}{" "}
           <span className="text-sm text-brand-light-red mt-1">*</span>
         </Label>
         <Popover
@@ -172,12 +177,12 @@ export function DisabilityInfoStep({
           <PopoverTrigger asChild disabled={isVerificationDisabled}>
             <Button
               variant="outline"
-              id="end-date"
+              id="endDate"
               className="w-full max-w-xs justify-between font-normal"
             >
               {verificationDate.date
                 ? verificationDate.date.toLocaleDateString()
-                : "Select date"}
+                : t("disabilityInfo.placeholders.selectDate")}
               <ChevronDownIcon />
             </Button>
           </PopoverTrigger>
@@ -206,14 +211,17 @@ export function DisabilityInfoStep({
         <div>
           <fieldset>
             <legend className="text-base font-medium mb-2 text-[#4e4e4e]">
-              Disability Type
+              {t("disabilityInfo.labels.disabilityType")}
             </legend>
             <div className="space-y-2">
               {[
-                { value: "permanent" as const, label: "Permanent Disability" },
+                {
+                  value: "permanent" as const,
+                  label: t("disabilityInfo.disabilityTypes.permanent"),
+                },
                 {
                   value: "persistent-prolonged" as const,
-                  label: "Persistent or Prolonged Disability",
+                  label: t("disabilityInfo.disabilityTypes.persistentProlonged"),
                 },
               ].map((type) => (
                 <div key={type.value} className="flex items-center">
@@ -249,7 +257,7 @@ export function DisabilityInfoStep({
       <div>
         <fieldset>
           <legend className="text-base font-medium mb-2 text-[#4e4e4e]">
-            Functional Limitations (optional - check all that apply)
+            {t("disabilityInfo.labels.functionalLimitations")}
           </legend>
           <div className="grid grid-cols-2 gap-x-8 gap-y-3">
             {functionalLimitations.map((limitation) => (
@@ -266,7 +274,7 @@ export function DisabilityInfoStep({
                   htmlFor={limitation.name}
                   className="ml-3 text-sm text-[#4e4e4e]"
                 >
-                  {limitation.label}
+                  {t(`disabilityInfo.functionalLimitations.${limitation.name}`)}
                 </label>
               </div>
             ))}
@@ -278,8 +286,8 @@ export function DisabilityInfoStep({
       <div className="pt-2 border-t border-gray-200 mt-6">
         <div className="flex items-start my-4">
           <input
-            id="requires-psycho-educational"
-            name="requires-psycho-educational"
+            id="requiresPsychoEducational"
+            name="requiresPsychoEducational"
             type="checkbox"
             checked={requiresPsychoEducational}
             onChange={handlePsychoEdChange}
@@ -287,19 +295,17 @@ export function DisabilityInfoStep({
             className="h-5 w-5 border-gray-300 rounded focus:ring-[#0071a9] disabled:opacity-50 disabled:cursor-not-allowed"
           />
           <label
-            htmlFor="requires-psycho-educational"
+            htmlFor="requiresPsychoEducational"
             className="ml-3 text-[15px] font-medium text-[#4e4e4e] leading-snug"
           >
-            Requires Psycho-Educational Assessment for Learning Disability
-            Verification
+            {t("disabilityInfo.psychoEd.checkboxLabel")}
           </label>
         </div>
 
         {/* Email validation warning */}
         {!formData.email && (
           <div className="ml-8 mb-4 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md p-3">
-            <TriangleAlertIcon /> Please enter your email address in Section A (Student Info)
-            before requesting an assessment.
+            <TriangleAlertIcon /> {t("disabilityInfo.psychoEd.emailWarning")}
           </div>
         )}
 
@@ -325,13 +331,13 @@ export function DisabilityInfoStep({
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               ></path>
             </svg>
-            Sending referral email...
+            {t("disabilityInfo.emailStatus.sending")}
           </div>
         )}
 
         {emailStatus.sent && (
           <div className="ml-8 mb-4 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md p-3">
-            ✓ Referral email sent successfully to {formData.email}
+            {t("disabilityInfo.emailStatus.sent")} {formData.email}
           </div>
         )}
 
@@ -362,37 +368,28 @@ export function DisabilityInfoStep({
               </div>
               <div className="ml-3">
                 <h3 className="text-base font-semibold text-[#4e4e4e]">
-                  Psycho-Educational Assessment Referral
+                  {t("disabilityInfo.psychoEd.cardTitle")}
                 </h3>
                 <div className="mt-2 text-sm text-[#4e4e4e]">
-                  <p>
-                    You will be automatically connected with a qualified
-                    assessment provider in your geographical area who has a
-                    referral contract with us, or with a provider at your
-                    institution at a discounted rate.
-                  </p>
-                  <p className="mt-2">
-                    The assessment fee will be reviewed for approval and
-                    submitted to your institution&apos;s finance office for
-                    direct payment via EFT.
-                  </p>
+                  <p>{t("disabilityInfo.psychoEd.cardP1")}</p>
+                  <p className="mt-2">{t("disabilityInfo.psychoEd.cardP2")}</p>
                 </div>
               </div>
             </div>
 
             <div className="mt-4">
               <label
-                htmlFor="psycho-ed-email"
+                htmlFor="psychoEdEmail"
                 className="block text-sm font-medium text-[#4e4e4e] mb-2"
               >
-                Contact Email for Assessment Referral{" "}
+                {t("disabilityInfo.psychoEd.contactEmailLabel")}{" "}
                 <span className="text-[#d62929]">*</span>
               </label>
               <input
                 type="email"
-                id="psycho-ed-email"
-                name="psycho-ed-email"
-                placeholder="Enter your email address"
+                id="psychoEdEmail"
+                name="psychoEdEmail"
+                placeholder={t("disabilityInfo.psychoEd.contactEmailPlaceholder")}
                 value={formData.email || ""}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, email: e.target.value }))
@@ -401,8 +398,7 @@ export function DisabilityInfoStep({
                 required={requiresPsychoEducational}
               />
               <p className="mt-2 text-xs text-[#4e4e4e]">
-                We will send assessment provider information and next steps to
-                this email address.
+                {t("disabilityInfo.psychoEd.contactEmailHelp")}
               </p>
             </div>
           </div>

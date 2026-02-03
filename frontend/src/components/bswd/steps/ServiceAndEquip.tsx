@@ -6,6 +6,7 @@
 
 import { FormData } from "@/types/bswd";
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n"; // translation import
 
 interface ServiceAndEquipProps {
   formData: FormData;
@@ -17,27 +18,31 @@ export function ServiceAndEquip({
   formData,
   setFormData,
 }: ServiceAndEquipProps) {
+  const { t, isLoaded } = useTranslation(); // translation handling
+
   const [tabFocus, setTabFocus] = useState("equipment");
+
+  if (!isLoaded) return null;
 
   // Database mock up
   const availableEquip = [
     {
       id: 1,
-      name: "Computer/Laptop",
+      name: t("serviceEquipment.items.equipment.computerLaptop"),
       cap: 3500,
       bswdEligible: true,
       csgdseEligible: true,
     },
     {
       id: 2,
-      name: "Tablet",
+      name: t("serviceEquipment.items.equipment.tablet"),
       cap: 800,
       bswdEligible: true,
       csgdseEligible: true,
     },
     {
       id: 3,
-      name: "Screen Reading Software",
+      name: t("serviceEquipment.items.equipment.screenReadingSoftware"),
       cap: 2600,
       bswdEligible: true,
       csgdseEligible: true,
@@ -48,22 +53,22 @@ export function ServiceAndEquip({
   const availableServies = [
     {
       id: 1,
-      name: "Note-taking Services",
-      cap: "1,500 | per course or $1,000 per license",
+      name: t("serviceEquipment.items.services.noteTakingServices"),
+      cap: t("serviceEquipment.items.servicesCaps.noteTakingServices"),
       bswdEligible: true,
       csgdseEligible: true,
     },
     {
       id: 2,
-      name: "Tutoring Services",
-      cap: "2,200 | per course, $35/hour max",
+      name: t("serviceEquipment.items.services.tutoringServices"),
+      cap: t("serviceEquipment.items.servicesCaps.tutoringServices"),
       bswdEligible: true,
       csgdseEligible: true,
     },
     {
       id: 3,
-      name: "ADD/ADHD Coaching",
-      cap: "2,000 | BSWD only, per academic year",
+      name: t("serviceEquipment.items.services.addAdhdCoaching"),
+      cap: t("serviceEquipment.items.servicesCaps.addAdhdCoaching"),
       bswdEligible: true,
       csgdseEligible: false,
     },
@@ -102,10 +107,15 @@ export function ServiceAndEquip({
       .map((item) => ({
         category: itemType,
         item: item.name,
-        cost: typeof item.cap === 'number' ? item.cap : 0,
+        cost: typeof item.cap === "number" ? item.cap : 0,
         justification: `${itemType} requested for disability support`,
-        fundingSource: (item.bswdEligible && item.csgdseEligible) ? 'both' : 
-                       (item.bswdEligible ? 'bswd' : 'csg-dse') as 'bswd' | 'csg-dse' | 'both'
+        fundingSource:
+          item.bswdEligible && item.csgdseEligible
+            ? "both"
+            : (item.bswdEligible ? "bswd" : "csg-dse") as
+                | "bswd"
+                | "csg-dse"
+                | "both",
       }));
 
     setFormData((prev) => {
@@ -141,7 +151,7 @@ export function ServiceAndEquip({
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold mb-4">
-        Section F: Services and Equipment
+        {t("serviceEquipment.sectionHeader")}
       </h2>
 
       {/* duplicate warning removed — condition is unreachable */}
@@ -150,8 +160,8 @@ export function ServiceAndEquip({
       {formData.requestedItems && formData.requestedItems.length > 0 && (
         <div className="bg-green-50 border border-green-200 rounded-md p-3 mb-4">
           <p className="text-base text-green-800">
-            <strong>{formData.requestedItems.length}</strong> item(s) currently
-            requested
+            <strong>{formData.requestedItems.length}</strong>{" "}
+            {t("serviceEquipment.requestedCount.prefix")}
           </p>
         </div>
       )}
@@ -164,9 +174,9 @@ export function ServiceAndEquip({
       {tabFocus === "equipment" ? (
         <>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold">
-              Disability-Related Equipment
-            </h3>
+            <h2 className="text-lg font-semibold">
+              {t("serviceEquipment.equipmentHeader")}
+            </h2>
             <button
               onClick={handleAddAll}
               disabled={areAllItemsAdded()}
@@ -176,7 +186,7 @@ export function ServiceAndEquip({
                   : "bg-brand-dark-blue hover:bg-brand-dark-blue/90 text-white"
               }`}
             >
-              Add All Equipment
+              {t("serviceEquipment.buttons.addAllEquipment")}
             </button>
           </div>
           {availableEquip.map((equip) => {
@@ -194,9 +204,9 @@ export function ServiceAndEquip({
       ) : (
         <>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold">
-              Disability-Related Services
-            </h3>
+            <h2 className="text-lg font-semibold">
+              {t("serviceEquipment.servicesHeader")}
+            </h2>
             <button
               onClick={handleAddAll}
               disabled={areAllItemsAdded()}
@@ -206,7 +216,7 @@ export function ServiceAndEquip({
                   : "bg-brand-dark-blue hover:bg-brand-dark-blue/90 text-white"
               }`}
             >
-              Add All Services
+              {t("serviceEquipment.buttons.addAllServices")}
             </button>
           </div>
           {availableServies.map((equip) => {
@@ -233,6 +243,9 @@ interface TabFocusProps {
 
 // TabBar compoennt
 const TabBar = ({ tabFocus, setTabFocus }: TabFocusProps) => {
+  const { t, isLoaded } = useTranslation(); // translation handling
+  if (!isLoaded) return null;
+
   return (
     <div className="grid grid-cols-2 bg-gray-200 text-center rounded-md">
       <button
@@ -244,7 +257,7 @@ const TabBar = ({ tabFocus, setTabFocus }: TabFocusProps) => {
           setTabFocus("equipment");
         }}
       >
-        Equipment
+        {t("serviceEquipment.tabs.equipment")}
       </button>
       <button
         className={
@@ -255,7 +268,7 @@ const TabBar = ({ tabFocus, setTabFocus }: TabFocusProps) => {
           setTabFocus("services");
         }}
       >
-        Services
+        {t("serviceEquipment.tabs.services")}
       </button>
     </div>
   );
@@ -278,15 +291,19 @@ interface ItemProps {
 
 // Create equipment item / service item component
 const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
+  const { t, isLoaded } = useTranslation(); // translation handling
+
+  // Hover state to change text to 'Remove Item' when hovering an already-added item
+  const [hovered, setHovered] = useState(false);
+
+  if (!isLoaded) return null;
+
   const itemType = type === "equipment" ? "Equipment" : "Service";
 
   // Check if this item is already added
   const isAdded = formData.requestedItems.some(
     (item) => item.category === itemType && item.item === itemInfo.name
   );
-
-  // Hover state to change text to 'Remove Item' when hovering an already-added item
-  const [hovered, setHovered] = useState(false);
 
   const handleAddItem = () => {
     if (isAdded) {
@@ -302,10 +319,18 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
       const newItem = {
         category: itemType,
         item: itemInfo.name,
-        cost: typeof itemInfo.cap === 'number' ? itemInfo.cap : 0,
-        justification: `${itemType} requested for disability support`,
-        fundingSource: (itemInfo.bswdEligible && itemInfo.csgdseEligible) ? 'both' : 
-                       (itemInfo.bswdEligible ? 'bswd' : 'csg-dse') as 'bswd' | 'csg-dse' | 'both'
+        cost: typeof itemInfo.cap === "number" ? itemInfo.cap : 0,
+        justification:
+          itemType === "Equipment"
+            ? t("serviceEquipment.justification.equipment")
+            : t("serviceEquipment.justification.service"),
+        fundingSource:
+          itemInfo.bswdEligible && itemInfo.csgdseEligible
+            ? "both"
+            : (itemInfo.bswdEligible ? "bswd" : "csg-dse") as
+                | "bswd"
+                | "csg-dse"
+                | "both",
       };
 
       setFormData((prev) => ({
@@ -318,21 +343,31 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
   return (
     <div className="border rounded-lg p-4 flex justify-between items-center">
       <div>
-        <div className="font-semibold">{itemInfo.name}</div>
+        <h4 className="font-semibold">{itemInfo.name}</h4>
         <p>
-          <span>Cap: ${itemInfo.cap}</span>
+          <span>
+            {t("serviceEquipment.labels.cap")}: ${itemInfo.cap}
+          </span>
           {type === "equipment" ? (
             <>
               <span className="px-2">&#124;</span>
               <span>
-                Eligible:{" "}
-                {getEligibility(itemInfo.bswdEligible, itemInfo.csgdseEligible)}
+                {t("serviceEquipment.labels.eligible")}:{" "}
+                {getEligibility(
+                  itemInfo.bswdEligible,
+                  itemInfo.csgdseEligible,
+                  t
+                )}
               </span>
             </>
           ) : (
             <div>
-              Eligible:{" "}
-              {getEligibility(itemInfo.bswdEligible, itemInfo.csgdseEligible)}
+              {t("serviceEquipment.labels.eligible")}:{" "}
+              {getEligibility(
+                itemInfo.bswdEligible,
+                itemInfo.csgdseEligible,
+                t
+              )}
             </div>
           )}
         </p>
@@ -349,9 +384,11 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
       >
         {isAdded
           ? hovered
-            ? "Remove Item"
-            : "Added ✓"
-          : `Add ${type === "equipment" ? "Item" : "Service"}`}
+            ? t("serviceEquipment.buttons.removeItem")
+            : t("serviceEquipment.buttons.added")
+          : type === "equipment"
+          ? t("serviceEquipment.buttons.addItem")
+          : t("serviceEquipment.buttons.addService")}
       </button>
     </div>
   );
@@ -359,13 +396,17 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
 
 // Helper Function
 // Retrieve eligible string according to bswd and csg-dse status
-function getEligibility(bswd: boolean, csgdse: boolean) {
+function getEligibility(
+  bswd: boolean,
+  csgdse: boolean,
+  t: (key: string) => string
+) {
   if (bswd && csgdse) {
-    return "BSWD & CSG-DSE";
+    return t("serviceEquipment.eligibility.both");
   } else if (bswd) {
-    return "BSWD";
+    return t("serviceEquipment.eligibility.bswd");
   } else if (csgdse) {
-    return "CSG-DSE";
+    return t("serviceEquipment.eligibility.csgdse");
   } else {
     throw new Error("Both BSWD and CSG-DSE are not eligible");
   }
