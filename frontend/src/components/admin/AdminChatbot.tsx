@@ -139,7 +139,7 @@ export function ApplicationChatbot({
     setLoading(true);
 
     try {
-      const response = await fetch(`${apiBaseUrl}/api/chat`, {
+      const response = await fetch(`${apiBaseUrl}/api/chat-stream`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -148,12 +148,38 @@ export function ApplicationChatbot({
         }),
       });
 
-      const data = await response.json();
+      // Initiate tools to read streaming data from backend
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
 
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: data.answer, timestamp: new Date() },
-      ]);
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: "",
+        timestamp: new Date(),
+      };
+      let isFirstLoop = true;
+      while (true) {
+        const { value, done } = await reader!.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+
+        // Initally, chatbot reponse will have a loading icon
+        // When it reaches here
+        // The icon dissapears and replaced with a streamreponse
+        if (isFirstLoop) {
+          setMessages((prev) => [...prev, assistantMessage]);
+          setLoading(false);
+          isFirstLoop = false;
+        }
+        setMessages((prev) =>
+          prev.map((message, idx) => {
+            if (idx === prev.length - 1) {
+              return { ...message, content: message.content + chunk };
+            }
+            return message;
+          }),
+        );
+      }
     } catch {
       setMessages((prev) => [
         ...prev,
