@@ -8,6 +8,24 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 
+// Password requirement indicator component
+function PasswordRequirement({ met, text }: { met: boolean; text: string }) {
+  return (
+    <div className="flex items-center text-xs">
+      {met ? (
+        <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+        </svg>
+      ) : (
+        <svg className="w-4 h-4 text-gray-300 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+        </svg>
+      )}
+      <span className={met ? 'text-green-700' : 'text-gray-500'}>{text}</span>
+    </div>
+  );
+}
+
 export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,6 +36,15 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { signUp } = useAuth();
+
+  // Real-time password validation checks
+  const passwordChecks = {
+    minLength: password.length >= 8,
+    hasUpperCase: /[A-Z]/.test(password),
+    hasLowerCase: /[a-z]/.test(password),
+    hasNumber: /[0-9]/.test(password),
+    hasSymbol: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -152,6 +179,32 @@ export default function SignupPage() {
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="At least 8 characters with uppercase, lowercase, number, symbol"
               />
+              
+              {/* Password Requirements Checklist */}
+              {password && (
+                <div className="mt-2 space-y-1">
+                  <PasswordRequirement 
+                    met={passwordChecks.minLength} 
+                    text="At least 8 characters" 
+                  />
+                  <PasswordRequirement 
+                    met={passwordChecks.hasUpperCase} 
+                    text="Contains uppercase letter (A-Z)" 
+                  />
+                  <PasswordRequirement 
+                    met={passwordChecks.hasLowerCase} 
+                    text="Contains lowercase letter (a-z)" 
+                  />
+                  <PasswordRequirement 
+                    met={passwordChecks.hasNumber} 
+                    text="Contains number (0-9)" 
+                  />
+                  <PasswordRequirement 
+                    met={passwordChecks.hasSymbol} 
+                    text="Contains symbol (!@#$%^&*...)" 
+                  />
+                </div>
+              )}
             </div>
 
             <div>
