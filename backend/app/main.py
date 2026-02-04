@@ -162,6 +162,9 @@ async def reset_conversation():
             status_code=500,
             detail=f"Error resetting conversation: {str(e)}"
         )
+        
+app.include_router(analysis_router)
+app.include_router(admin_router)
 
 
 if __name__ == "__main__":

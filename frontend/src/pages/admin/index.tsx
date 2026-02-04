@@ -15,6 +15,7 @@ import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import StatusBadge from "@/components/admin/StatusBadge";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { PaginationControls } from "@/components/admin/PaginationControls";
 import {
   AppSummary,
   Row,
@@ -25,140 +26,20 @@ import {
   saveApplicationsList as storeSaveApplicationsList,
   saveSnapshotMerge as storeSaveSnapshotMerge,
   attachFiles as storeAttachFiles,
-  downloadAttachmentFromStorage,
-  resetLocalApplications,
   deleteApplication,
 } from "@/lib/adminStore";
-
-const STATUS_OPTIONS = [
-  "Submitted",
-  "In Review",
-  "Approved",
-  "Rejected",
-  "Pending",
-];
-
-const ITEMS_PER_PAGE = 50;
-
-// Sort Options Definition
-type SortKey = "Recent" | "Score" | "Status" | "Name";
-type SortDirection = "asc" | "desc";
-
-const SORT_MENU: { label: string; value: SortKey }[] = [
-  { label: "Most Recent", value: "Recent" },
-  { label: "Confidence Score", value: "Score" },
-  { label: "Application Status", value: "Status" },
-  { label: "Alphabetical (Name)", value: "Name" },
-];
-
-const titleCase = (s: string | undefined) => {
-  if (!s) return "—";
-  return s
-    .toLowerCase()
-    .split(/\s+/)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
-};
-
-const openAttachment = async (att: Attachment) => {
-  try {
-    if (att.supabasePath) {
-      const blob = await downloadAttachmentFromStorage(att.supabasePath);
-      if (!blob) throw new Error("Unable to download from storage");
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank", "noopener,noreferrer");
-      return;
-    }
-    if (!att.dataB64) throw new Error("No data to open");
-    const bin = atob(att.dataB64);
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    const blob = new Blob([bytes], {
-      type: att.mime || "application/octet-stream",
-    });
-    const url = URL.createObjectURL(blob);
-    window.open(url, "_blank", "noopener,noreferrer");
-  } catch {
-    alert("Unable to open file.");
-  }
-};
-
-// Pagination Component, capping 50 applications per page
-function PaginationControls({
-  currentPage,
-  totalPages,
-  startIndex,
-  endIndex,
-  totalItems,
-  onPageChange,
-}: {
-  currentPage: number;
-  totalPages: number;
-  startIndex: number;
-  endIndex: number;
-  totalItems: number;
-  onPageChange: (page: number) => void;
-}) {
-  if (totalPages <= 1) return null;
-
-  const handlePageChange = (newPage: number) => {
-    onPageChange(newPage);
-    
-    // Scroll to top when going to next page
-    try {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (error) {
-      // Fallback for browsers that don't support smooth scrolling
-      window.scrollTo(0, 0);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentPage > 1) {
-      handlePageChange(currentPage - 1);
-    }
-  };
-
-  const handleNext = () => {
-    if (currentPage < totalPages) {
-      handlePageChange(currentPage + 1);
-    }
-  };
-
-  return (
-    <div className="flex items-center justify-between">
-      <div className="text-sm text-gray-600">
-        Showing {startIndex + 1}–{endIndex} of {totalItems} applications
-      </div>
-
-      <div className="flex items-center gap-3">
-        <button
-          onClick={handlePrevious}
-          disabled={currentPage === 1}
-          className="px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          type="button"
-          aria-label="Previous page"
-        >
-          <i className="fa-solid fa-chevron-left" aria-hidden="true"/>
-        </button>
-
-        <span className="text-sm font-medium text-gray-700">
-          Page {currentPage} of {totalPages}
-        </span>
-
-        <button
-          onClick={handleNext}
-          disabled={currentPage === totalPages}
-          className="px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          type="button"
-          aria-label="Next page"
-        >
-          <i className="fa-solid fa-chevron-right" aria-hidden="true"/>
-        </button>
-      </div>
-    </div>
-  );
-}
+import {
+  STATUS_OPTIONS,
+  ITEMS_PER_PAGE,
+  SORT_MENU,
+  SortKey,
+  SortDirection,
+} from "@/lib/admin/constants";
+import {
+  titleCase,
+  openAttachment,
+  getScoreBadgeClasses,
+} from "@/lib/admin/adminUtils";
 
 function AdminDashboardPage() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -446,22 +327,6 @@ function AdminDashboardPage() {
           >
             Back to Application
           </Link>
-          {process.env.NODE_ENV !== "production" && (
-            <button
-              onClick={() => {
-                if (confirm("Delete ALL local applications and snapshots?")) {
-                  resetLocalApplications();
-                  setRows([]);
-                  setToolbarMsg("All local application data cleared.");
-                  setTimeout(() => setToolbarMsg(""), 1500);
-                }
-              }}
-              className="px-4 py-2 text-sm rounded-xl border border-red-300 bg-red-50 text-red-700 hover:bg-red-100"
-              title="Clears all locally stored applications (does not touch Supabase)"
-            >
-              Reset Applications
-            </button>
-          )}
         </div>
       }
     >
@@ -1062,18 +927,6 @@ function AdminDashboardPage() {
     </AdminLayout>
     </div>
   );
-}
-
-// Score bubble UI
-
-function getScoreBadgeClasses(score: number) {
-  if (score >= 90) {
-    return "bg-green-100 text-green-800 border-green-200";
-  }
-  if (score >= 75) {
-    return "bg-blue-100 text-blue-800 border-blue-200";
-  }
-  return "bg-red-100 text-red-800 border-red-200";
 }
 
 export default function AdminDashboardPageWithAuth() {
