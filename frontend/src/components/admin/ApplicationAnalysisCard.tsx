@@ -83,7 +83,7 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
   ];
 
   return (
-    <div className="border rounded-xl bg-white shadow-sm p-6 space-y-6">
+    <div id="admin-ai-analysis-card" className="border rounded-xl bg-white shadow-sm p-6 space-y-6">
       {/* Header and Score */}
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
@@ -116,7 +116,7 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <div className="text-xl font-bold">{finalScore}</div>
-              <div className="text-xs text-gray-600">score</div>
+              <div id="admin-ai-analysis-score" className="text-xs text-gray-600">score</div>
             </div>
           </div>
 
@@ -168,7 +168,7 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
 
         {/* Risk Factors */}
         {analysis.ai_analysis.risk_factors.length > 0 && (
-          <div className="mb-4">
+          <div id="admin-ai-analysis-risk-factors" className="mb-4">
             <div className="font-semibold mb-2 flex items-center gap-1">
               <AlertCircle className="w-4 h-4 text-yellow-600" /> Risk Factors
             </div>
@@ -183,7 +183,7 @@ export function ApplicationAnalysisCard({ analysis, loading }: Props) {
         )}
 
         {/* AI Reasoning */}
-        <div className="p-4 bg-gray-50 rounded-lg">
+        <div id="admin-ai-analysis-reasoning" className="p-4 bg-gray-50 rounded-lg">
           <p className="font-semibold mb-2">AI Reasoning</p>
           <p className="text-sm">{analysis.ai_analysis.reasoning}</p>
         </div>
