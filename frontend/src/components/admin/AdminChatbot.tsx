@@ -170,16 +170,13 @@ export function ApplicationChatbot({
   };
 
   return (
-    <div 
+    <div
       ref={isFloating ? elementRef : null}
       onMouseDown={isFloating ? onMouseDown : undefined}
       className={cls.container}
     >
       {/* Header */}
-      <div 
-        data-drag-handle={isFloating}
-        className={cls.header}
-      >
+      <div data-drag-handle={isFloating} className={cls.header}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 pointer-events-none">
             {mode === "embedded" && (
@@ -303,9 +300,15 @@ export function ApplicationChatbot({
             aria-label="Send message"
           >
             {loading ? (
-              <i className="fa-solid fa-spinner fa-spin text-xl" aria-hidden="true"></i>
+              <i
+                className="fa-solid fa-spinner fa-spin text-xl"
+                aria-hidden="true"
+              ></i>
             ) : (
-              <i className="fa-solid fa-paper-plane text-xl" aria-hidden="true"></i>
+              <i
+                className="fa-solid fa-paper-plane text-xl"
+                aria-hidden="true"
+              ></i>
             )}
           </button>
         </div>
