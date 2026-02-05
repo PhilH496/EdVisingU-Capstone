@@ -388,6 +388,7 @@ function AdminApplicationDetailPage() {
             <div className="mb-4 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <button
+                  id="admin-enable-edit-mode-btn"
                   type="button"
                   onClick={() => setIsEditMode((v) => !v)}
                   className={`px-4 py-2 text-sm rounded-xl border transition-colors ${
@@ -404,6 +405,7 @@ function AdminApplicationDetailPage() {
                   {isEditMode ? "Editing Enabled" : "Enable Edit Mode"}
                 </button>
                 <button
+                  id="admin-save-changes-btn"
                   type="button"
                   onClick={handleSave}
                   disabled={!isEditMode || !isDirty || saving}
@@ -428,6 +430,7 @@ function AdminApplicationDetailPage() {
                 )}
               </div>
               <button
+                id="admin-run-ai-analysis-btn"
                 onClick={analyzeApplication}
                 disabled={analyzing}
                 className="px-4 py-2 text-sm rounded-xl bg-brand-dark-blue text-white hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"

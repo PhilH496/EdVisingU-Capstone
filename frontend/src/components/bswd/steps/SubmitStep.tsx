@@ -1,5 +1,13 @@
+/**
+ * Step 6: Review and Submit Component
+ *
+ * Last step of the BSWD application form that reviews and submits the students information
+ */
+
 import { FormData } from "@/types/bswd";
 import { FileText, User, GraduationCap, DollarSign, Heart } from "lucide-react";
+import { useTranslation } from "@/lib/i18n"; // translation
+import { use, useTransition } from "react";
 
 interface ReviewAndSubmitProps {
   formData: FormData;
@@ -9,8 +17,11 @@ interface ReviewAndSubmitProps {
 }
 
 export function ReviewAndSubmit({formData, isConfirmed, setIsConfirmed}: ReviewAndSubmitProps) {
+  const { t, isLoaded } = useTranslation();
+  if (!isLoaded) return null;
   // Normalize functionalLimitations so filter/map are always safe
 const rawLimits = formData.functionalLimitations;
+  
 
 let functionalLimitationLabels: string[] = [];
 
@@ -40,14 +51,20 @@ else if (rawLimits && typeof rawLimits === "object") {
     .map(([key]) => key);
 }
 
+const formatYesNoNotProvided = (value: boolean | undefined | null) => { // translation helper
+  if (value === true) return t("common.yes");
+  if (value === false) return t("common.no");
+  return t("review.notProvided");
+};
+
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Review and Submit
+          {t("review.title")}
         </h2>
         <p className="text-gray-600">
-          Please review your application information below before submitting.
+          {t("review.description")}
         </p>
       </div>
 
@@ -56,139 +73,141 @@ else if (rawLimits && typeof rawLimits === "object") {
         <div className="flex items-center space-x-2 mb-4">
           <User className="h-5 w-5 text-brand-dark-blue" />
           <h3 className="text-lg font-semibold text-gray-900">
-            Student Information
+            {t("review.sections.studentInfo")}
           </h3>
         </div>
         <div className="grid md:grid-cols-2 gap-4 text-sm">
           <div>
             <p className="text-gray-500">
-              Student ID <span className="text-brand-light-red">*</span>
+              {t("studentInfo.labels.studentId")}{" "}
+              <span className="text-brand-light-red">*</span>
             </p>
             <p id="review-studentID" className="font-medium text-gray-900">
-              {formData.studentId || "Not provided"}
+              {formData.studentId || t("review.notProvided")}
             </p>
           </div>
           <div>
             <p className="text-gray-500">
-              Ontario Education Number (OEN){" "}
+              {t("studentInfo.labels.oen")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
             <p id="review-oen" className="font-medium text-gray-900">
-              {formData.oen || "Not provided"}
+              {formData.oen || t("review.notProvided")}
             </p>
           </div>
           <div>
             <p className="text-gray-500">
-              First Name <span className="text-brand-light-red">*</span>
+              {t("studentInfo.labels.firstName")}{" "}
+              <span className="text-brand-light-red">*</span>
             </p>
             <p id="review-first-name" className="font-medium text-gray-900">
-              {formData.firstName || "Not provided"}
+              {formData.firstName || t("review.notProvided")}
             </p>
           </div>
           <div>
             <p className="text-gray-500">
-              Last Name <span className="text-brand-light-red">*</span>
+              {t("studentInfo.labels.lastName")}{" "}
+              <span className="text-brand-light-red">*</span>
             </p>
             <p id="review-last-name" className="font-medium text-gray-900">
-              {formData.lastName || "Not provided"}
+              {formData.lastName || t("review.notProvided")}
             </p>
           </div>
           <div>
             <p className="text-gray-500">
-              Date of Birth{" "}
+              {t("studentInfo.labels.dob")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
             <p id="review-dob" className="font-medium text-gray-900">
-              {formData.dateOfBirth || "Not provided"}
+              {formData.dateOfBirth || t("review.notProvided")}
             </p>
           </div>
           <div>
             <p className="text-gray-500">
-              Social Insurance Number{" "}
+              {t("studentInfo.labels.sin")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
             <p id="review-sin" className="font-medium text-gray-900">
-              {formData.sin || "Not provided"}
+              {formData.sin || t("review.notProvided")}
             </p>
           </div>
           <div>
             <p className="text-gray-500">
-              Email Address{" "}
+              {t("studentInfo.labels.email")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
             <p id="review-email" className="font-medium text-gray-900">
-              {formData.email || "Not provided"}
+              {formData.email || t("review.notProvided")}
             </p>
           </div>
           <div>
             <p className="text-gray-500">Phone Number</p>
             <p id="review-phone" className="font-medium text-gray-900">
-              {formData.phone || "Not provided"}
+              {formData.phone || t("review.notProvided")}
             </p>
           </div>
           <div>
             <p className="text-gray-500">
-              Street Address{" "}
+              {t("studentInfo.labels.streetAddress")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
             <p id="review-address" className="font-medium text-gray-900">
-              {formData.address || "Not provided"}
+              {formData.address || t("review.notProvided")}
             </p>
           </div>
           <div>
             <p className="text-gray-500">
-              City <span className="text-brand-light-red">*</span>
+              {t("studentInfo.labels.city")}{" "}
+              <span className="text-brand-light-red">*</span>
             </p>
             <p id="review-city" className="font-medium text-gray-900">
-              {formData.city || "Not provided"}
+              {formData.city || t("review.notProvided")}
             </p>
           </div>
           <div>
             <p className="text-gray-500">
-              Province/Territory{" "}
+              {t("studentInfo.labels.province")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
             <p id="review-province" className="font-medium text-gray-900">
-              {formData.province || "Not provided"}
+              {formData.province || t("review.notProvided")}
             </p>
           </div>
           <div>
             <p className="text-gray-500">
-              Postal Code <span className="text-brand-light-red">*</span>
+              {t("studentInfo.labels.postalCode")}{" "}
+              <span className="text-brand-light-red">*</span>
             </p>
             <p id="review-postal-code" className="font-medium text-gray-900">
-              {formData.postalCode || "Not provided"}
+              {formData.postalCode || t("review.notProvided")}
             </p>
           </div>
           <div>
             <p className="text-gray-500">
-              Country <span className="text-brand-light-red">*</span>
+              {t("studentInfo.labels.country")}{" "}
+              <span className="text-brand-light-red">*</span>
             </p>
             <p id="review-country" className="font-medium text-gray-900">
-              {formData.country || "Not provided"}
+              {formData.country || t("review.notProvided")}
             </p>
           </div>
           <div>
             <p className="text-gray-500">
-              Has OSAP Application{" "}
+              {t("review.student.hasOsapApplication")}{" "}
               <span className="text-brand-light-red">*</span>
             </p>
             <p id="review-has-osap" className="font-medium text-gray-900">
-              {formData.hasOsapApplication === true
-                ? "Yes"
-                : formData.hasOsapApplication === false
-                ? "No"
-                : "Not provided"}
+              {formatYesNoNotProvided(formData.hasOsapApplication)}
             </p>
           </div>
           {formData.hasOsapApplication === true && (
             <div>
               <p className="text-gray-500">
-                OSAP Application Start Date{" "}
+                {t("studentInfo.labels.osapApplicationStartDate")}{" "}
                 <span className="text-brand-light-red">*</span>
               </p>
               <p id="review-osap-start" className="font-medium text-gray-900">
-                {formData.osapApplicationStartDate || "Not provided"}
+                {formData.osapApplicationStartDate || t("review.notProvided")}
               </p>
             </div>
           )}
@@ -200,30 +219,30 @@ else if (rawLimits && typeof rawLimits === "object") {
         <div className="flex items-center space-x-2 mb-4">
           <GraduationCap className="h-5 w-5 text-brand-dark-blue" />
           <h3 className="text-lg font-semibold text-gray-900">
-            Program Information
+            {t("review.sections.programInfo")}
           </h3>
         </div>
         <div className="grid md:grid-cols-2 gap-4 text-sm">
           <div>
-            <p className="text-gray-500">Institution</p>
+            <p className="text-gray-500">{t("review.program.institution")}</p>
             <p id="review-institution" className="font-medium text-gray-900">
-              {formData.institution || "Not provided"}
+              {formData.institution || t("review.notProvided")}
             </p>
           </div>
           <div>
-            <p className="text-gray-500">Program</p>
+            <p className="text-gray-500">{t("review.program.program")}</p>
             <p id="review-program" className="font-medium text-gray-900">
-              {formData.program || "Not provided"}
+              {formData.program || t("review.notProvided")}
             </p>
           </div>
           <div>
-            <p className="text-gray-500">Study Type</p>
+            <p className="text-gray-500">{t("programInfo.labels.studyType")}</p>
             <p id="review-study-type" className="font-medium text-gray-900 capitalize">
-              {formData.studyType || "Not provided"}
+              {formData.studyType || t("review.notProvided")}
             </p>
           </div>
           <div>
-            <p className="text-gray-500">Study Period</p>
+            <p className="text-gray-500">{t("review.program.studyPeriod")}</p>
             <p id="review-study-period" className="font-medium text-gray-900">
               {formData.studyPeriodStart && formData.studyPeriodEnd
                 ? `${formData.studyPeriodStart} to ${formData.studyPeriodEnd}`
@@ -238,30 +257,30 @@ else if (rawLimits && typeof rawLimits === "object") {
         <div className="flex items-center space-x-2 mb-4">
           <DollarSign className="h-5 w-5 text-brand-dark-blue" />
           <h3 className="text-lg font-semibold text-gray-900">
-            OSAP Information
+            {t("review.sections.osapInfo")}
           </h3>
         </div>
         <div className="grid md:grid-cols-2 gap-4 text-sm">
           <div>
-            <p className="text-gray-500">OSAP Application Type</p>
+            <p className="text-gray-500">{t("osapInfo.labels.applicationType")}</p>
             <p id="review-osap-type" className="font-medium text-gray-900 capitalize">
-              {formData.osapApplication || "Not provided"}
+              {formData.osapApplication || t("review.notProvided")}
             </p>
           </div>
           <div>
-            <p className="text-gray-500">Has OSAP Restrictions</p>
+            <p className="text-gray-500">{t("review.osap.hasRestrictions")}</p>
             <p id="review-has-restrictions" className="font-medium text-gray-900">
-              {formData.hasOSAPRestrictions ? "Yes" : "No"}
+              {formData.hasOSAPRestrictions ? t("common.yes") : t("common.no")}
             </p>
           </div>
           <div>
-            <p className="text-gray-500">Federal Need</p>
+            <p className="text-gray-500">{t("osapInfo.labels.federalNeed")}</p>
             <p id="review-federal-need" className="font-medium text-gray-900">
               ${formData.federalNeed || 0}
             </p>
           </div>
           <div>
-            <p className="text-gray-500">Provincial Need</p>
+            <p className="text-gray-500">{t("osapInfo.labels.provincialNeed")}</p>
             <p id="review-provincial-need" className="font-medium text-gray-900">
               ${formData.provincialNeed || 0}
             </p>
@@ -274,28 +293,28 @@ else if (rawLimits && typeof rawLimits === "object") {
         <div className="flex items-center space-x-2 mb-4">
           <Heart className="h-5 w-5 text-brand-dark-blue" />
           <h3 className="text-lg font-semibold text-gray-900">
-            Disability Information
+            {t("review.sections.disabilityInfo")}
           </h3>
         </div>
         <div className="grid md:grid-cols-2 gap-4 text-sm">
           <div>
-            <p className="text-gray-500">Has Verified Disability</p>
+            <p className="text-gray-500">{t("review.disability.hasVerified")}</p>
             <p id="review-has-disability" className="font-medium text-gray-900">
-              {formData.hasVerifiedDisability ? "Yes" : "No"}
+              {formData.hasVerifiedDisability ? t("common.yes") : t("common.no")}
             </p>
           </div>
           <div>
-            <p className="text-gray-500">Disability Type</p>
+            <p className="text-gray-500">{t("disabilityInfo.labels.disabilityType")}</p>
             <p id="review-disability-type" className="font-medium text-gray-900 capitalize">
-              {formData.disabilityType?.replace(/-/g, " ") || "Not provided"}
+              {formData.disabilityType?.replace(/-/g, " ") || t("review.notProvided")}
             </p>
           </div>
           <div className="md:col-span-2">
-            <p className="text-gray-500">Functional Limitations</p>
+            <p className="text-gray-500">{t("disabilityInfo.labels.functionalLimitations")}</p>
             <p id="review-limitations" className="font-medium text-gray-900">
               {functionalLimitationLabels.length > 0
                 ? functionalLimitationLabels.join(", ")
-                : "Not provided"}
+                : t("review.notProvided")}
             </p>
           </div>
         </div>
@@ -306,7 +325,7 @@ else if (rawLimits && typeof rawLimits === "object") {
         <div className="flex items-center space-x-2 mb-4">
           <FileText className="h-5 w-5 text-brand-dark-blue" />
           <h3 className="text-lg font-semibold text-gray-900">
-            Requested Services & Equipment
+            {t("review.sections.requestedItems")}
           </h3>
         </div>
         {formData.requestedItems && formData.requestedItems.length > 0 ? (
@@ -333,7 +352,7 @@ else if (rawLimits && typeof rawLimits === "object") {
             ))}
           </div>
         ) : (
-          <p className="text-gray-500 text-sm">No items requested</p>
+          <p className="text-gray-500 text-sm">{t("review.noItemsRequested")}</p>
         )}
       </div>
 
@@ -351,23 +370,19 @@ else if (rawLimits && typeof rawLimits === "object") {
             htmlFor="confirmation"
             className="text-sm text-gray-700 cursor-pointer"
           >
-            I confirm that all the information provided in this application is
-            accurate and complete to the best of my knowledge. I understand that
-            providing false or misleading information may result in the denial
-            of my application or cancellation of funding.
+            {t("review.confirmation.text")}
           </label>
         </div>
       </div>
 
       {!isConfirmed && (
         <p className="text-center text-sm text-brand-light-red font-medium">
-          Please confirm the above statement before submitting your application.
+          {t("review.confirmation.required")}
         </p>
       )}
 
       <p className="text-center text-sm text-gray-500 mt-4">
-        After submitting, you can track your application status on the status
-        page.
+        {t("review.afterSubmit")}
       </p>
     </div>
   );

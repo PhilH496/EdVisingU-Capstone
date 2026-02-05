@@ -112,5 +112,180 @@
       "question": "Has the student submitted a completed OSAP Disability Verification Form or other disability documentation while attending another institution?",
       "previousInstitutionLabel": "Previous institution"
     }
+  },
+  "osapInfo": {
+    "sectionHeader": "Section C: OSAP Information",
+    "description": "Confirm your OSAP status, enter assessed needs, and note any restrictions.",
+    "labels": {
+      "applicationType": "OSAP Application Type",
+      "federalNeed": "Federal Financial Need ($)",
+      "provincialNeed": "Provincial Financial Need ($)",
+      "restrictionsCheckbox": "Student has OSAP restrictions",
+      "restrictionType": "Type of Restriction",
+      "eligibilityTitle": "Estimated Eligibility",
+      "federalEligible": "Federal CSG-DSE Eligible",
+      "provincialEligible": "Provincial BSWD Eligible",
+      "combinedMaximum": "Combined Maximum"
+    },
+    "placeholders": {
+      "selectType": "Select type"
+    },
+    "helperText": {
+      "applicationTypeLocked": "Selectable after OSAP application is active & approved.",
+      "pendingManualReview": "Pending manual review until OSAP application submitted.",
+      "restrictionClearance": "Funding may be subject to restriction clearance."
+    },
+    "links": {
+      "viewRestrictionReasons": "View OSAP Restriction Reasons"
+    },
+    "options": {
+      "applicationType": {
+        "none": "Select type",
+        "fullTime": "Full-Time OSAP",
+        "partTime": "Part-Time OSAP"
+      },
+      "restrictionType": {
+        "default": "Default",
+        "overpayment": "Overpayment",
+        "bankruptcy": "Bankruptcy",
+        "falseInfo": "False Information",
+        "loanForgivenessReview": "Loan Forgiveness Review",
+        "other": "Other"
+      }
+    },
+    "values": {
+      "yesUpTo": "Yes (up to ${{amount}})",
+      "no": "No"
+    }
+  },
+  "disabilityInfo": {
+    "sectionHeader": "Section D: Disability Info",
+    "verifiedStatusLabel": "Student has verified disability status with OSAP",
+    "labels": {
+      "verificationDate": "Disability Verification Date",
+      "disabilityType": "Disability Type",
+      "functionalLimitations": "Functional Limitations (optional - check all that apply)"
+    },
+    "placeholders": {
+      "selectDate": "Select date"
+    },
+    "disabilityTypes": {
+      "permanent": "Permanent Disability",
+      "persistentProlonged": "Persistent or Prolonged Disability"
+    },
+    "functionalLimitations": {
+      "mobility": "Mobility",
+      "hearing": "Hearing",
+      "cognitive": "Cognitive",
+      "communication": "Communication",
+      "chronicPain": "Chronic Pain",
+      "vision": "Vision",
+      "learning": "Learning",
+      "mentalHealth": "Mental Health",
+      "dexterity": "Dexterity",
+      "attention": "Attention/Concentration"
+    },
+    "psychoEd": {
+      "checkboxLabel": "Requires Psycho-Educational Assessment for Learning Disability Verification",
+      "emailWarning": "Please enter your email address in Section A (Student Info) before requesting an assessment.",
+      "cardTitle": "Psycho-Educational Assessment Referral",
+      "cardP1": "You will be automatically connected with a qualified assessment provider in your geographical area who has a referral contract with us, or with a provider at your institution at a discounted rate.",
+      "cardP2": "The assessment fee will be reviewed for approval and submitted to your institution's finance office for direct payment via EFT.",
+      "contactEmailLabel": "Contact Email for Assessment Referral",
+      "contactEmailPlaceholder": "Enter your email address",
+      "contactEmailHelp": "We will send assessment provider information and next steps to this email address."
+    },
+    "emailStatus": {
+      "sending": "Sending referral email...",
+      "sent": "Referral email sent successfully to",
+      "failedToSend": "Failed to send referral email. Please contact support."
+    }
+  },
+  "serviceEquipment": {
+    "sectionHeader": "Section F: Services and Equipment",
+    "equipmentHeader": "Disability-Related Equipment",
+    "servicesHeader": "Disability-Related Services",
+    "tabs": {
+      "equipment": "Equipment",
+      "services": "Services"
+    },
+    "labels": {
+      "cap": "Cap",
+      "eligible": "Eligible"
+    },
+    "buttons": {
+      "addAllEquipment": "Add All Equipment",
+      "addAllServices": "Add All Services",
+      "removeItem": "Remove Item",
+      "added": "Added ✓",
+      "addItem": "Add Item",
+      "addService": "Add Service"
+    },
+    "headings": {
+      "equipment": "Disability-Related Equipment",
+      "services": "Disability-Related Services"
+    },
+    "requestedCount": {
+      "prefix": "item(s) currently requested"
+    },
+    "eligibility": {
+      "both": "BSWD & CSG-DSE",
+      "bswd": "BSWD",
+      "csgdse": "CSG-DSE"
+    },
+    "justification": {
+      "equipment": "Equipment requested for disability support",
+      "service": "Service requested for disability support"
+    },
+    "items": {
+      "equipment": {
+        "computerLaptop": "Computer/Laptop",
+        "tablet": "Tablet",
+        "screenReadingSoftware": "Screen Reading Software"
+      },
+      "services": {
+        "noteTakingServices": "Note-taking Services",
+        "tutoringServices": "Tutoring Services",
+        "addAdhdCoaching": "ADD/ADHD Coaching"
+      },
+      "servicesCaps": {
+        "noteTakingServices": "1,500 | per course or $1,000 per license",
+        "tutoringServices": "2,200 | per course, $35/hour max",
+        "addAdhdCoaching": "2,000 | BSWD only, per academic year"
+      }
+    }
+  },
+  "review": {
+    "title": "Review and Submit",
+    "description": "Please review your application information below before submitting.",
+    "notProvided": "Not provided",
+    "to": "to",
+    "sections": {
+      "studentInfo": "Student Information",
+      "programInfo": "Program Information",
+      "osapInfo": "OSAP Information",
+      "disabilityInfo": "Disability Information",
+      "requestedItems": "Requested Services & Equipment"
+    },
+    "student": {
+      "hasOsapApplication": "Has OSAP Application"
+    },
+    "program": {
+      "institution": "Institution",
+      "program": "Program",
+      "studyPeriod": "Study Period"
+    },
+    "osap": {
+      "hasRestrictions": "Has OSAP Restrictions"
+    },
+    "disability": {
+      "hasVerified": "Has Verified Disability"
+    },
+    "noItemsRequested": "No items requested",
+    "confirmation": {
+      "text": "I confirm that all the information provided in this application is accurate and complete to the best of my knowledge. I understand that providing false or misleading information may result in the denial of my application or cancellation of funding.",
+      "required": "Please confirm the above statement before submitting your application."
+    },
+    "afterSubmit": "After submitting, you can track your application status on the status page."
   }
 }
