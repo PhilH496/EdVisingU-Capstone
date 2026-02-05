@@ -10,6 +10,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -42,6 +43,7 @@ import {
 } from "@/lib/admin/adminUtils";
 
 function AdminDashboardPage() {
+  const router = useRouter()
   const [rows, setRows] = useState<Row[]>([]);
   const [bulkStatus, setBulkStatus] = useState<string>("Submitted");
   const [allChecked, setAllChecked] = useState<boolean>(false);
@@ -61,9 +63,8 @@ function AdminDashboardPage() {
   });
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
 
-  // storage I/O
-  useEffect(() => {
-    (async () => {
+    // storage I/O
+    const loadApplications = async () => {
       const summaries = await storeLoadSummaries();
 
       const hydrated: Row[] = await Promise.all(
@@ -93,8 +94,47 @@ function AdminDashboardPage() {
         scoreMap[s.id] = s.confidenceScore ?? 0;
       });
       setDetScores(scoreMap);
-    })();
-  }, []);
+    };
+
+    // Initial load
+    useEffect(() => {
+      loadApplications();
+    }, []);
+
+    // Refetch when navigating back (catches router navigation)
+    useEffect(() => {
+      const handleRouteChange = () => {
+        // Refetch whenever route changes to within admin
+        if (router.pathname === '/admin') {
+          loadApplications();
+        }
+      };
+
+      router.events.on('routeChangeComplete', handleRouteChange);
+      return () => router.events.off('routeChangeComplete', handleRouteChange);
+    }, [router.events, router.pathname]);
+
+    // Refetch when window gains focus (catches browser back button to dashboard)
+    useEffect(() => {
+      const handleFocus = () => {
+        loadApplications();
+      };
+
+      window.addEventListener('focus', handleFocus);
+      return () => window.removeEventListener('focus', handleFocus);
+    }, []);
+
+    // Refetch when component becomes visible after being hidden
+    useEffect(() => {
+      const handleVisibilityChange = () => {
+        if (!document.hidden) {
+          loadApplications();
+        }
+      };
+
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }, []);
 
   // Sorting logic
   const handleSortSelect = (key: SortKey) => {

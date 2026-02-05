@@ -347,7 +347,10 @@ function AdminApplicationDetailPage() {
       if (!ok) return;
       await persistEverywhere(editForm);
       setIsEditMode(false);
-    } finally {
+    } catch (error) { 
+      setError("Failed to save changes. Please try again.");
+    }
+    finally {
       setSaving(false);
     }
   };
