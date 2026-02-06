@@ -15,6 +15,7 @@ import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import StatusBadge from "@/components/admin/StatusBadge";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   AppSummary,
   Row,
@@ -161,6 +162,8 @@ function PaginationControls({
 }
 
 function AdminDashboardPage() {
+  const { profile, user, signOut } = useAuth();
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const [rows, setRows] = useState<Row[]>([]);
   const [bulkStatus, setBulkStatus] = useState<string>("Submitted");
   const [allChecked, setAllChecked] = useState<boolean>(false);
@@ -440,6 +443,39 @@ function AdminDashboardPage() {
       description="Hello Admin! Manage assignments, violations, status, and attachments."
       rightSlot={
         <div className="flex gap-2">
+          <div className="relative">
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100 flex items-center gap-2"
+            >
+              <span>{profile?.full_name || profile?.email || user?.email || 'User'}</span>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {showUserMenu && (
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                <div className="px-4 py-3 border-b border-gray-100">
+                  {profile?.full_name && (
+                    <div className="font-medium text-gray-900 mb-1">{profile.full_name}</div>
+                  )}
+                  <div className="text-sm text-gray-600">{profile?.email || user?.email}</div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    {profile?.role === 'admin' ? 'Administrator' : 'Student'}
+                  </div>
+                </div>
+                <button
+                  onClick={async () => {
+                    setShowUserMenu(false);
+                    await signOut();
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
           <Link
             href="/"
             className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
