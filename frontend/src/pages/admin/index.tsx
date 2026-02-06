@@ -15,7 +15,7 @@ import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import StatusBadge from "@/components/admin/StatusBadge";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { useAuth } from "@/contexts/AuthContext";
+import { PaginationControls } from "@/components/admin/PaginationControls";
 import {
   AppSummary,
   Row,
@@ -26,140 +26,20 @@ import {
   saveApplicationsList as storeSaveApplicationsList,
   saveSnapshotMerge as storeSaveSnapshotMerge,
   attachFiles as storeAttachFiles,
-  downloadAttachmentFromStorage,
-  resetLocalApplications,
   deleteApplication,
 } from "@/lib/adminStore";
-
-const STATUS_OPTIONS = [
-  "Submitted",
-  "In Review",
-  "Approved",
-  "Rejected",
-  "Pending",
-];
-
-const ITEMS_PER_PAGE = 50;
-
-// Sort Options Definition
-type SortKey = "Recent" | "Score" | "Status" | "Name";
-type SortDirection = "asc" | "desc";
-
-const SORT_MENU: { label: string; value: SortKey }[] = [
-  { label: "Most Recent", value: "Recent" },
-  { label: "Confidence Score", value: "Score" },
-  { label: "Application Status", value: "Status" },
-  { label: "Alphabetical (Name)", value: "Name" },
-];
-
-const titleCase = (s: string | undefined) => {
-  if (!s) return "—";
-  return s
-    .toLowerCase()
-    .split(/\s+/)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
-};
-
-const openAttachment = async (att: Attachment) => {
-  try {
-    if (att.supabasePath) {
-      const blob = await downloadAttachmentFromStorage(att.supabasePath);
-      if (!blob) throw new Error("Unable to download from storage");
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank", "noopener,noreferrer");
-      return;
-    }
-    if (!att.dataB64) throw new Error("No data to open");
-    const bin = atob(att.dataB64);
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    const blob = new Blob([bytes], {
-      type: att.mime || "application/octet-stream",
-    });
-    const url = URL.createObjectURL(blob);
-    window.open(url, "_blank", "noopener,noreferrer");
-  } catch {
-    alert("Unable to open file.");
-  }
-};
-
-// Pagination Component, capping 50 applications per page
-function PaginationControls({
-  currentPage,
-  totalPages,
-  startIndex,
-  endIndex,
-  totalItems,
-  onPageChange,
-}: {
-  currentPage: number;
-  totalPages: number;
-  startIndex: number;
-  endIndex: number;
-  totalItems: number;
-  onPageChange: (page: number) => void;
-}) {
-  if (totalPages <= 1) return null;
-
-  const handlePageChange = (newPage: number) => {
-    onPageChange(newPage);
-    
-    // Scroll to top when going to next page
-    try {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (error) {
-      // Fallback for browsers that don't support smooth scrolling
-      window.scrollTo(0, 0);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentPage > 1) {
-      handlePageChange(currentPage - 1);
-    }
-  };
-
-  const handleNext = () => {
-    if (currentPage < totalPages) {
-      handlePageChange(currentPage + 1);
-    }
-  };
-
-  return (
-    <div className="flex items-center justify-between">
-      <div className="text-sm text-gray-600">
-        Showing {startIndex + 1}–{endIndex} of {totalItems} applications
-      </div>
-
-      <div className="flex items-center gap-3">
-        <button
-          onClick={handlePrevious}
-          disabled={currentPage === 1}
-          className="px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          type="button"
-          aria-label="Previous page"
-        >
-          <i className="fa-solid fa-chevron-left" aria-hidden="true"/>
-        </button>
-
-        <span className="text-sm font-medium text-gray-700">
-          Page {currentPage} of {totalPages}
-        </span>
-
-        <button
-          onClick={handleNext}
-          disabled={currentPage === totalPages}
-          className="px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          type="button"
-          aria-label="Next page"
-        >
-          <i className="fa-solid fa-chevron-right" aria-hidden="true"/>
-        </button>
-      </div>
-    </div>
-  );
-}
+import {
+  STATUS_OPTIONS,
+  ITEMS_PER_PAGE,
+  SORT_MENU,
+  SortKey,
+  SortDirection,
+} from "@/lib/admin/constants";
+import {
+  titleCase,
+  openAttachment,
+  getScoreBadgeClasses,
+} from "@/lib/admin/adminUtils";
 
 function AdminDashboardPage() {
   const { profile, user, signOut } = useAuth();
@@ -482,28 +362,13 @@ function AdminDashboardPage() {
           >
             Back to Application
           </Link>
-          {process.env.NODE_ENV !== "production" && (
-            <button
-              onClick={() => {
-                if (confirm("Delete ALL local applications and snapshots?")) {
-                  resetLocalApplications();
-                  setRows([]);
-                  setToolbarMsg("All local application data cleared.");
-                  setTimeout(() => setToolbarMsg(""), 1500);
-                }
-              }}
-              className="px-4 py-2 text-sm rounded-xl border border-red-300 bg-red-50 text-red-700 hover:bg-red-100"
-              title="Clears all locally stored applications (does not touch Supabase)"
-            >
-              Reset Applications
-            </button>
-          )}
         </div>
       }
     >
       {/* Toolbar */}
       <div className="mb-4 flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
         <button
+          id="admin-edit-mode-btn"
           onClick={() => setEditMode((v) => !v)}
           className="px-4 py-2 rounded-lg text-sm border border-gray-200 bg-white hover:bg-gray-100"
           title="Toggle edit mode for bulk and inline status editing"
@@ -511,9 +376,9 @@ function AdminDashboardPage() {
           {editMode ? "Exit Edit Mode" : "Edit"}
         </button>
 
-        <label htmlFor="select-all-checkbox" className="inline-flex items-center gap-2 text-sm">
+        <label htmlFor="admin-select-all" className="inline-flex items-center gap-2 text-sm">
           <input
-            id="select-all-checkbox"
+            id="admin-select-all"
             type="checkbox"
             checked={allChecked}
             onChange={(e) => toggleSelectAll(e.target.checked)}
@@ -542,6 +407,7 @@ function AdminDashboardPage() {
             ))}
           </select>
           <button
+            id="admin-apply-status-btn"
             onClick={applyBulkStatus}
             disabled={!editMode}
             className="px-4 py-2 rounded-lg bg-cyan-800 text-white hover:bg-cyan-700 text-sm disabled:opacity-50"
@@ -549,6 +415,7 @@ function AdminDashboardPage() {
             Apply to Selected
           </button>
           <button
+            id="admin-clear-selection-btn"
             onClick={clearSelection}
             disabled={!editMode}
             className="px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-100 text-sm disabled:opacity-50"
@@ -556,6 +423,7 @@ function AdminDashboardPage() {
             Clear Selection
           </button>
           <button
+            id="admin-delete-selected-btn"
             onClick={async () => {
               const selectedApps = rows.filter((r) => r._selected);
               if (selectedApps.length === 0) {
@@ -609,7 +477,7 @@ function AdminDashboardPage() {
         <div className="ml-auto flex items-center gap-3">
           {/* Feedback Message */}
           {toolbarMsg && (
-            <div className="text-sm text-green-700 font-medium animate-pulse mr-2">
+            <div id="admin-toolbar-msg" className="text-sm text-green-700 font-medium animate-pulse mr-2">
               {toolbarMsg}
             </div>
           )}
@@ -619,6 +487,7 @@ function AdminDashboardPage() {
 
           <div className="relative">
             <button
+              id="admin-sort-by-btn"
               onClick={() => setIsSortMenuOpen(!isSortMenuOpen)}
               className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm text-gray-700 font-medium shadow-sm transition-colors min-w-[160px] justify-between"
             >
@@ -694,14 +563,14 @@ function AdminDashboardPage() {
             const score = detScores[r.id];
 
             return (
-              <div key={r.id} className="flex gap-4 items-stretch">
+              <div key={r.id} className="flex gap-4 items-stretch" data-application-id={r.id}>
                 <div className="flex-1 border rounded-xl bg-white shadow-sm p-5 space-y-4">
                   {/* Header */}
                   <div className="flex items-start justify-between flex-wrap gap-3">
                     <div className="flex items-start gap-3">
                       {editMode && (
                         <input
-                         id={`select-${r.id}`}
+                         id={`admin-select-${r.id}`}
                           type="checkbox"
                           checked={!!r._selected}
                           onChange={(e) =>
@@ -720,7 +589,7 @@ function AdminDashboardPage() {
                         </p>
                         <p className="text-xs text-gray-700">
                           Application ID:{" "}
-                          <span className="font-mono">{r.id}</span>
+                          <span id={`admin-app-id-${r.id}`} className="font-mono">{r.id}</span>
                         </p>
                       </div>
                     </div>
@@ -768,6 +637,7 @@ function AdminDashboardPage() {
                         </Link>
 
                         <button
+                          id={`admin-details-toggle-${r.id}`}
                           type="button"
                           onClick={() => toggleExpanded(r.id)}
                           className="px-3 py-1.5 text-xs rounded-lg border border-gray-300 bg-white hover:bg-gray-50 font-medium"
@@ -1067,6 +937,7 @@ function AdminDashboardPage() {
                           </span>
                         ) : null}
                         <button
+                          id={`admin-save-details-${r.id}`}
                           onClick={() => saveRow(r)}
                           className="px-5 py-2 rounded-lg bg-cyan-800 text-white hover:bg-cyan-700 text-sm"
                         >
@@ -1098,18 +969,6 @@ function AdminDashboardPage() {
     </AdminLayout>
     </div>
   );
-}
-
-// Score bubble UI
-
-function getScoreBadgeClasses(score: number) {
-  if (score >= 90) {
-    return "bg-green-100 text-green-800 border-green-200";
-  }
-  if (score >= 75) {
-    return "bg-blue-100 text-blue-800 border-blue-200";
-  }
-  return "bg-red-100 text-red-800 border-red-200";
 }
 
 export default function AdminDashboardPageWithAuth() {
