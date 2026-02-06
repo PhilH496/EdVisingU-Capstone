@@ -15,6 +15,7 @@ import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import StatusBadge from "@/components/admin/StatusBadge";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
 import { PaginationControls } from "@/components/admin/PaginationControls";
 import {
   AppSummary,
