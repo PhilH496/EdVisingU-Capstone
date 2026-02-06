@@ -404,12 +404,14 @@ function BSWDApplicationPage() {
         description=""
         headerAction={
           <div className="flex items-center gap-3">
-            <Link
-              href="/admin"
-              className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
-            >
-              {t('adminButton')}
-            </Link>
+            {profile?.role === 'admin' && (
+              <Link
+                href="/admin"
+                className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
+              >
+                {t('adminButton')}
+              </Link>
+            )}
             <div className="relative">
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
