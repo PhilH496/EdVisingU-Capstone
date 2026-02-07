@@ -9,14 +9,12 @@ async function login(page: Page) {
   await page.getByLabel('Email address').fill(ADMIN_EMAIL);
   await page.getByLabel('Password').fill(ADMIN_PASSWORD);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await page.waitForURL('**/');
+  await page.waitForURL('**/admin');
 }
 
 test.describe('Admin Tests', () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
-    await page.getByRole('link', { name: 'Admin Portal' }).click();
-    await page.waitForURL('**/admin');
   });
 
   test('delete application', async ({ page }) => {
