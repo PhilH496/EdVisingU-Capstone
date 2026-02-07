@@ -78,10 +78,11 @@ test.describe('Admin Tests', () => {
     const applicationId = await firstRow.getAttribute('data-application-id');
     await page.locator(`#admin-details-toggle-${applicationId}`).click();
 
-    await page.getByRole('textbox', { name: 'Assigned To' }).first().fill('John Admin');
-    await page.getByRole('button', { name: 'Add violation: Insufficient medical evidence' }).click();
-    await page.getByRole('button', { name: 'Add violation: Purchased item/service before approval' }).click();
-    await page.getByRole('textbox', { name: 'Other details (optional)' }).first().fill('test details');
+    const detailsScope = firstRow;
+    await detailsScope.getByRole('textbox', { name: 'Assigned To' }).fill('John Admin');
+    await detailsScope.getByRole('button', { name: 'Add violation: Insufficient medical evidence' }).click();
+    await detailsScope.getByRole('button', { name: 'Add violation: Purchased item/service before approval' }).click();
+    await detailsScope.getByRole('textbox', { name: 'Other details (optional)' }).fill('test details');
     await page.locator(`#admin-save-details-${applicationId}`).click();
 
     await page.locator(`#admin-details-toggle-${applicationId}`).click(); // once to collapse details tab
@@ -91,6 +92,12 @@ test.describe('Admin Tests', () => {
     await expect(page.getByRole('button', { name: 'Remove violation: Insufficient medical evidence' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Remove violation: Purchased item/service before approval' })).toBeVisible();
     await expect(page.locator(`#violation-details-${applicationId}`)).toHaveValue('test details');
+
+    // remove violations so the first application is left in a clean state for other tests
+    await detailsScope.getByRole('button', { name: 'Remove violation: Insufficient medical evidence' }).click();
+    await detailsScope.getByRole('button', { name: 'Remove violation: Purchased item/service before approval' }).click();
+    await detailsScope.getByRole('textbox', { name: 'Other details (optional)' }).clear();
+    await page.locator(`#admin-save-details-${applicationId}`).click();
   });
 });
 
