@@ -9,10 +9,10 @@ from enum import Enum
 from datetime import datetime, timezone
 import json
 import os
-from .chain import get_or_create_chain, chat_with_memory
+from chain import get_or_create_chain, chat_with_memory
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
-from .deterministic_checks import (
+from deterministic_checks import (
     run_deterministic_checks,
     calculate_confidence_score,
     DeterministicCheckResult
