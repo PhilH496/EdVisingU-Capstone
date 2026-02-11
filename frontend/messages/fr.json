@@ -50,6 +50,12 @@
       "postalCode": "A1A 1A1",
       "country": "Canada"
     },
+    "validation": {
+      "studentIdMinDigits": "Le numéro d’étudiant doit contenir au moins 7 chiffres.",
+      "oenExactDigits": "Le numéro OEN doit contenir exactement 9 chiffres.",
+      "sinExactDigits": "Le NAS doit contenir exactement 9 chiffres.",
+      "postalCodeFormat": "Le code postal doit être au format A1A 1A1."
+    },
     "provinces": {
       "ON": "Ontario",
       "AB": "Alberta",
@@ -273,7 +279,7 @@
     "program": {
       "institution": "Établissement",
       "program": "Programme",
-      "studyPeriod": "Période d’ét'étude"
+      "studyPeriod": "Période d’étude"
     },
     "osap": {
       "hasRestrictions": "Restrictions OSAP"

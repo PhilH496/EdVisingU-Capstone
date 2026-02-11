@@ -50,6 +50,12 @@
       "postalCode": "A1A 1A1",
       "country": "Canada"
     },
+    "validation": {
+      "studentIdMinDigits": "Student ID must be at least 7 digits.",
+      "oenExactDigits": "OEN must be exactly 9 digits.",
+      "sinExactDigits": "SIN must be exactly 9 digits.",
+      "postalCodeFormat": "Postal code must be in the format A1A 1A1"
+    },
     "provinces": {
       "ON": "Ontario",
       "AB": "Alberta",
