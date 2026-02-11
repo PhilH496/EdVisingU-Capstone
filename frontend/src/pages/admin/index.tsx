@@ -347,7 +347,6 @@ function AdminDashboardPage() {
                 </div>
                 <button
                   onClick={async () => {
-                    setShowUserMenu(false);
                     await signOut();
                   }}
                   className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
