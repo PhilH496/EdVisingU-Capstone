@@ -16,7 +16,7 @@ async function login(page: Page) {
 
 test.describe('Student Form Tests', () => {
   let userID: string;
-  
+
   test.beforeEach(async () => {
     userID = await signUpTestUser();
   });
@@ -171,7 +171,7 @@ test.describe('Student Form Tests', () => {
     await login(page);
     await page.getByRole('combobox').first().selectOption('fr');
     await expect(page.locator('#studentFormHeader')).toContainText('Formulaire de demande BSWD');
-    await expect(page.getByRole('list')).toContainText('Info étudiant');
+    await expect(page.getByRole('list').first()).toContainText('Info étudiant');
   });
 
   // student chatbot functionality test
