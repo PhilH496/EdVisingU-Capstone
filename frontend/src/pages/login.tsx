@@ -7,6 +7,7 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -35,9 +36,25 @@ export default function LoginPage() {
         return;
       }
 
-      // Login successful - redirect to home page
-      // ProtectedRoute will handle showing the form after auth loads
-      router.push('/');
+      // Login successful - fetch user profile to determine role
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        // Redirect based on role
+        if (profile?.role === 'admin') {
+          router.push('/admin');
+        } else {
+          router.push('/');
+        }
+      } else {
+        router.push('/');
+      }
       
     } catch (err) {
       setError('An unexpected error occurred');
@@ -55,14 +72,6 @@ export default function LoginPage() {
           <p className="mt-2 text-center text-sm text-gray-600">
             EdVisingU Application Portal
           </p>
-          <div className="mt-4 text-center">
-            <Link 
-              href="/admin"
-              className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
-            >
-              Admin Portal
-            </Link>
-          </div>
         </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
