@@ -409,7 +409,7 @@ function AdminApplicationDetailPage() {
             Back to Dashboard
           </Link>
           <Link
-            href="/"
+            href="/application"
             className="px-4 py-2 text-sm rounded-xl bg-brand-dark-blue text-white hover:bg-opacity-90"
           >
             Back to Application
