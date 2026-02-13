@@ -11,7 +11,7 @@ async function login(page: Page) {
   await page.getByLabel('Email').fill(TEST_USER_EMAIL);
   await page.getByLabel('Password').fill(TEST_USER_PASSWORD);
   await page.getByRole('button', { name: 'Sign In' }).click();
-  await page.waitForURL('http://localhost:3000/');
+  await page.waitForURL('http://localhost:3000/application');
 }
 
 test.describe('Student Form Tests', () => {

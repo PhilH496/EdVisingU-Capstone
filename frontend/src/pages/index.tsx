@@ -40,7 +40,7 @@ export default function LandingPage() {
 
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Title Section with Logo */}
+          {/* Title Section */}
           <div className="flex flex-col md:flex-row justify-between items-start mb-6">
             <div className="flex-1">
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
@@ -68,35 +68,25 @@ export default function LandingPage() {
             {/* BSWD Logo */}
             <div className="mt-6 md:mt-0 flex-shrink-0">
               <div className="border-4 border-black px-6 py-4 inline-block relative">
-                <div className="text-3xl font-bold lowercase">bswd</div>
-                <div className="absolute -top-3 -right-3 bg-green-600 rounded-full p-2">
-                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
+                <div className="text-3xl font-bold">BSWD</div>
               </div>
             </div>
           </div>
 
           <hr className="border-t-2 border-gray-300 mb-8" />
 
-          {/* Two Column Layout */}
+          {/* Two Column Layout for general section*/}
           <div className="grid md:grid-cols-3 gap-8 mb-12">
             {/* Left Column - Updates Box */}
             <div className="md:col-span-2">
               <div className="bg-blue-50 border-l-4 border-blue-600 p-6 mb-8">
                 <div className="flex items-start gap-3">
-                  <div className="bg-blue-600 rounded-full p-1 mt-1 flex-shrink-0">
-                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                    </svg>
-                  </div>
                   <div className="flex-1">
                     <h2 className="text-xl font-bold text-gray-900 mb-4">BSWD updates</h2>
                     <ul className="space-y-3 text-sm">
                       <li>
-                        <Link href="/signup" className="text-blue-600 hover:underline font-medium">
-                          2025-2026 BSWD application
+                        <Link href="/login" className="text-blue-600 hover:underline font-medium">
+                          2025-2026 BSWD application 
                         </Link>
                         {' '}open for full-time and part-time students
                       </li>
@@ -104,10 +94,7 @@ export default function LandingPage() {
                         <Link href="/login" className="text-blue-600 hover:underline font-medium">
                           Log in to your BSWD account
                         </Link>
-                        {' '}for a list of approved services and equipment or{' '}
-                        <Link href="/signup" className="text-blue-600 hover:underline">
-                          open list in a new browser window
-                        </Link>
+                        {' '}for a list of approved services and equipment
                       </li>
                       <li>
                         <Link href="#info-module" className="text-blue-600 hover:underline font-medium">
@@ -120,55 +107,53 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* AI-Powered Grant Section */}
+              {/* AI-Powered Infographic Section */}
               <div className="bg-gray-100 border border-gray-300 p-6 mb-8">
-                <h2 className="text-lg font-bold text-gray-900 mb-3">
-                  <Link href="#" className="text-blue-600 hover:underline">
+                <h2 className="text-lg font-bold mb-3">
                     AI-Powered Application Assistance
-                  </Link>
                 </h2>
                 <p className="text-sm text-gray-700">
-                  Get intelligent guidance through your BSWD application with automated document analysis, 
-                  eligibility assessment, and 24/7 chatbot support.
+                  Receive smart support throughout your BSWD application with automated document review, eligibility evaluation, 
+                  quick response times, and 24/7 chatbot assistance.
                 </p>
               </div>
             </div>
 
-            {/* Right Column - Navigation Links */}
+            {/* Right Column - Navigation Links for questions that go straight to original page*/}
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-blue-600 hover:underline mb-2">
-                  <Link href="#learn">Learn about BSWD</Link>
+                  <Link href="https://osap.gov.on.ca/OSAPPortal/en/A-ZListofAid/POCONT1_098083">Learn about BSWD</Link> 
                 </h2>
                 <p className="text-sm text-gray-700">How to qualify</p>
               </div>
 
               <div>
                 <h2 className="text-lg font-bold text-blue-600 hover:underline mb-2">
-                  <Link href="#apply">How to apply for BSWD</Link>
+                  <Link href="https://osap.gov.on.ca/OSAPPortal/en/A-ZListofAid/POCONT1_098083">How to apply for BSWD</Link>
                 </h2>
                 <p className="text-sm text-gray-700">How and when to apply</p>
               </div>
 
               <div>
                 <h2 className="text-lg font-bold text-blue-600 hover:underline mb-2">
-                  <Link href="#after">After you apply</Link>
+                  <Link href="https://osap.gov.on.ca/OSAPPortal/en/A-ZListofAid/POCONT1_098083">After you apply</Link>
                 </h2>
                 <p className="text-sm text-gray-700">How to get the funding and more</p>
               </div>
 
               <div>
                 <h2 className="text-lg font-bold text-blue-600 hover:underline mb-2">
-                  <Link href="#calculator">BSWD eligibility calculator</Link>
+                  <Link href="https://osap.gov.on.ca/OSAPPortal/en/A-ZListofAid/POCONT1_098083">After getting your funding</Link>
                 </h2>
-                <p className="text-sm text-gray-700">Find out how much you could get to help pay for your education</p>
+                <p className="text-sm text-gray-700">Find out what happens next</p>
               </div>
             </div>
           </div>
 
           <hr className="border-t-2 border-gray-300 mb-8" />
 
-          {/* Video Demo Section */}
+          {/* Video Demo Section for future use */}
           <section className="mb-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
               See how the BSWD application works
@@ -176,76 +161,52 @@ export default function LandingPage() {
             
             <div className="bg-gray-800 rounded aspect-video flex items-center justify-center mb-4">
               <div className="text-center text-white">
-                <div className="text-6xl mb-4">▶</div>
                 <p className="text-lg font-medium">VIDEO PLACEHOLDER</p>
-                <p className="text-sm text-gray-300 mt-2">Watch our application walkthrough</p>
               </div>
             </div>
 
             <p className="text-sm text-gray-600">
-              This video explains how to complete your BSWD application with AI assistance, 
-              upload required documents, and track your funding status.
+              This video explains how to complete your BSWD application with AI assistance and track your application status.
             </p>
           </section>
 
-          {/* Two Column Bottom Section */}
+          {/* Column Bottom Section */}
           <div className="grid md:grid-cols-2 gap-12 mb-12">
-            {/* Left Column */}
+            {/* Left Column includes infographic about under-represented learners and resources*/}
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Under-represented learners</h2>
               <ul className="space-y-2">
-                <li><Link href="#" className="text-blue-600 hover:underline text-sm">Indigenous students</Link></li>
-                <li><Link href="#" className="text-blue-600 hover:underline text-sm">First-generation students</Link></li>
-                <li><Link href="#" className="text-blue-600 hover:underline text-sm">Students with disabilities</Link></li>
-                <li><Link href="#" className="text-blue-600 hover:underline text-sm">Students from low-income families</Link></li>
+                <li><Link href="https://www.ontario.ca/page/osap-for-under-represented-learners#section-0" className="text-blue-600 hover:underline text-sm">Indigenous students</Link></li>
+                <li><Link href="https://www.ontario.ca/page/osap-for-under-represented-learners#section-1" className="text-blue-600 hover:underline text-sm">Extended Society Care (current and former Crown wards)</Link></li>
+                <li><Link href="https://www.ontario.ca/page/osap-for-under-represented-learners#section-2" className="text-blue-600 hover:underline text-sm">First-generation students</Link></li>
+                <li><Link href="https://www.ontario.ca/page/osap-for-under-represented-learners#section-3" className="text-blue-600 hover:underline text-sm">Students with disabilities</Link></li>
+                <li><Link href="https://www.ontario.ca/page/osap-for-under-represented-learners#section-4" className="text-blue-600 hover:underline text-sm">Students who are Deaf or have trouble hearing</Link></li>
               </ul>
 
-              <h3 className="text-xl font-bold text-gray-900 mt-8 mb-4">Resources</h3>
-              <ul className="space-y-2">
-                <li><Link href="#" className="text-blue-600 hover:underline text-sm">Approved schools</Link></li>
-                <li><Link href="#" className="text-blue-600 hover:underline text-sm">Forms</Link></li>
-                <li><Link href="#" className="text-blue-600 hover:underline text-sm">BSWD definitions</Link></li>
-                <li><Link href="#" className="text-blue-600 hover:underline text-sm">Maintaining BSWD eligibility</Link></li>
-              </ul>
             </div>
 
-            {/* Right Column */}
+            {/* Right Column includes questions about BSWD*/}
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Questions about BSWD</h2>
               <p className="text-sm text-gray-700 mb-4">
-                <Link href="#" className="text-blue-600 hover:underline">
-                  Students at schools in Ontario: contact your school's Financial Aid Office.
+                <Link href="https://osap.gov.on.ca/OSAPPortal/en/Contacts/ProvinciallyfundedSchoolsinOntario/index.htm" className="text-blue-600 hover:underline">
+                  Contact your school's Financial Aid Office.
                 </Link>
               </p>
               <p className="text-sm text-gray-700 mb-4">
-                <Link href="#" className="text-blue-600 hover:underline">
+                <Link href="https://www.ontario.ca/page/learn-about-osap#section-2" className="text-blue-600 hover:underline">
                   Students on social assistance
                 </Link>
               </p>
 
-              <p className="text-sm text-gray-700 mb-2 font-bold">Find contacts for:</p>
-              <ul className="space-y-2 text-sm list-disc list-inside text-gray-700 ml-2">
-                <li>
-                  <Link href="#" className="text-blue-600 hover:underline">
-                    Accessibility Services
-                  </Link>
-                  {' '}about your application or to update your information
-                </li>
-                <li>
-                  <Link href="#" className="text-blue-600 hover:underline">
-                    BSWD info if you're studying at a school outside of Ontario
-                  </Link>
-                </li>
-              </ul>
-
-              <h3 className="text-xl font-bold text-gray-900 mt-8 mb-4">Beyond BSWD</h3>
-              <p className="text-sm text-gray-700 mb-2">
-                <Link href="#" className="text-blue-600 hover:underline">
+              <p className="text-sm text-gray-700 mb-4">
+                <Link href="https://www.ontario.ca/page/student-loans-grants-scholarships-and-bursaries" className="text-blue-600 hover:underline">
                   Other loans, grants, scholarships and bursaries
                 </Link>
               </p>
-              <p className="text-sm text-gray-700">
-                <Link href="#" className="text-blue-600 hover:underline">
+
+              <p className="text-sm text-gray-700 mb-4">
+                <Link href="https://www.ontario.ca/page/learn-about-colleges-universities-and-indigenous-institutes-ontario" className="text-blue-600 hover:underline">
                   Go to college or university in Ontario
                 </Link>
                 : Admission requirements and application process.
@@ -255,18 +216,15 @@ export default function LandingPage() {
 
           <hr className="border-t-2 border-gray-300 mb-8" />
 
-          {/* Information Module Section */}
+          {/* Information Module Section (PLACE HOLDER, MAYBE/MAYBE NOT IMPLEMENT)*/}
           <section id="info-module" className="mb-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">BSWD information module</h2>
 
-            <p className="text-gray-700 mb-4">
-              You'll need to complete an interactive information module before you start your application if you're a:
-            </p>
 
             <ul className="list-disc list-inside text-gray-700 mb-6 space-y-2 ml-4">
               <li>
                 full-time or part-time student making your first{' '}
-                <Link href="#" className="text-blue-600 hover:underline">
+                <Link href="" className="text-blue-600 hover:underline">
                   BSWD application for the 2024-2025 or 2025-2026 school year
                 </Link>
               </li>
@@ -280,7 +238,6 @@ export default function LandingPage() {
             <ul className="list-disc list-inside text-gray-700 mb-6 space-y-2 ml-4">
               <li>how BSWD works</li>
               <li>your roles and responsibilities if you become a BSWD recipient</li>
-              <li>basic financial information to support you through your postsecondary education (for example, creating a budget, understanding credit and debt)</li>
               <li>how AI tools can help streamline your application process</li>
             </ul>
 
