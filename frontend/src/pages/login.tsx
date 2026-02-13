@@ -50,10 +50,10 @@ export default function LoginPage() {
         if (profile?.role === 'admin') {
           router.push('/admin');
         } else {
-          router.push('/');
+          router.push('/application');
         }
       } else {
-        router.push('/');
+        router.push('/application');
       }
       
     } catch (err) {
@@ -134,6 +134,12 @@ export default function LoginPage() {
               </Link>
             </p>
           </div>
+          <Link 
+            href="/" 
+            className="flex items-center justify-center text-sm text-gray-600 hover:text-gray-900 mb-6"
+          >
+            Back to Home
+          </Link>
         </form>
       </div>
     </div>

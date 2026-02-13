@@ -63,7 +63,7 @@ export default function ThankYouPage() {
         )}
 
         <Link
-          href="/"
+          href="/application"
           className="px-6 py-2.5 text-sm rounded-xl bg-cyan-800 text-white hover:bg-cyan-700"
         >
           Back to Application
