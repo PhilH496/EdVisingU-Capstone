@@ -124,12 +124,6 @@ export default function LandingPage() {
                         </Link>
                         {' '}for a list of approved services and equipment
                       </li>
-                      <li>
-                        <Link href="#info-module" className="text-blue-600 hover:underline font-medium">
-                          BSWD information module
-                        </Link>
-                        {' '}for students making their first application
-                      </li>
                     </ul>
                   </div>
                 </div>
@@ -258,57 +252,9 @@ export default function LandingPage() {
                 <Link href="https://www.ontario.ca/page/learn-about-colleges-universities-and-indigenous-institutes-ontario" className="text-blue-600 hover:underline">
                   Go to college or university in Ontario
                 </Link>
-                : Admission requirements and application process.
               </p>
             </div>
           </div>
-
-          <hr className="border-t-2 border-gray-300 mb-8" />
-
-          {/* Information Module Section (PLACE HOLDER, MAYBE/MAYBE NOT IMPLEMENT)*/}
-          <section id="info-module" className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">BSWD information module</h2>
-
-
-            <ul className="list-disc list-inside text-gray-700 mb-6 space-y-2 ml-4">
-              <li>
-                full-time or part-time student making your first{' '}
-                <Link href="" className="text-blue-600 hover:underline">
-                  BSWD application for the 2025-2026 school year
-                </Link>
-              </li>
-            </ul>
-
-            <p className="text-gray-700 mb-4">
-              If you reapply to BSWD for the 2025-2026 school year, you will not need to complete this module again.
-            </p>
-
-            <h3 className="text-xl font-bold text-gray-900 mb-3">The module will help you understand:</h3>
-            <ul className="list-disc list-inside text-gray-700 mb-6 space-y-2 ml-4">
-              <li>how BSWD works</li>
-              <li>your roles and responsibilities if you become a BSWD recipient</li>
-              <li>how AI tools can help streamline your application process</li>
-            </ul>
-
-            <h3 className="text-xl font-bold text-gray-900 mb-3">How the module works</h3>
-            <p className="text-gray-700 mb-4">
-              The interactive module contains short, self-study sections with information you must read before you start your 
-              BSWD Application. At the end of each section, you will be asked to answer a question about what you've just read.
-            </p>
-
-            <p className="text-gray-700 mb-4">
-              Correct answers let you move to the next section of the module. When you've finished the information module, 
-              your BSWD Application will open.
-            </p>
-
-            <p className="text-gray-700">
-              You can log in and out of the module at any time, and your progress will be saved.
-            </p>
-
-            <p className="text-gray-700 mt-4">
-              If you choose to complete the module in one sitting, it will take you approximately 15 minutes.
-            </p>
-          </section>
         </main>
 
         {/* Footer */}
