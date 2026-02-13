@@ -55,6 +55,7 @@ function AdminDashboardPage() {
   const [expandedApps, setExpandedApps] = useState<Set<string>>(new Set());
   const [detScores, setDetScores] = useState<Record<string, number>>({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   //Sorting State
   const [sortConfig, setSortConfig] = useState<{
@@ -67,7 +68,9 @@ function AdminDashboardPage() {
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
 
     // storage I/O
-    const loadApplications = async () => {
+  const loadApplications = async () => {
+    setIsLoading(true);
+    try {
       const summaries = await storeLoadSummaries();
 
       const hydrated: Row[] = await Promise.all(
@@ -97,7 +100,11 @@ function AdminDashboardPage() {
         scoreMap[s.id] = s.confidenceScore ?? 0;
       });
       setDetScores(scoreMap);
-    };
+    } catch (error) {
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
     // Initial load
     useEffect(() => {
@@ -594,7 +601,9 @@ function AdminDashboardPage() {
         </div>
       )}
 
-      {!hasRows ? (
+      {isLoading ? (
+        <div className="px-5 py-10 text-gray-700">Loading applications...</div>
+      ) : !hasRows ? (
         <div className="px-5 py-10 text-gray-700">No applications found.</div>
       ) : (
         <div className="space-y-6">
