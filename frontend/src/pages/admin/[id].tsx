@@ -5,7 +5,6 @@
  */
 
 import { useRouter } from "next/router";
-
 import {
   useEffect,
   useMemo,
@@ -14,22 +13,16 @@ import {
   Dispatch,
   SetStateAction,
 } from "react";
-import type { ReactNode } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ApplicationAnalysisCard } from "@/components/admin/ApplicationAnalysisCard";
 import ApplicationChatbot from "@/components/admin/AdminChatbot";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
 
 // using app's existing types/steps
 import { FormData } from "@/types/bswd";
-import { StudentInfoStep } from "@/components/bswd/steps/StudentInfoStep";
-import { ProgramInfoStep } from "@/components/bswd/steps/ProgramInfoStep";
-import { OsapInfoStep } from "@/components/bswd/steps/OsapInfoStep";
-import { DisabilityInfoStep } from "@/components/bswd/steps/DisabilityInfoStep";
-import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
-import { ReviewAndSubmit } from "@/components/bswd/steps/SubmitStep";
 import { StudentInfoSchema } from "@/schemas/StudentInfoSchema";
 
 // central store I/O (Supabase + local)
@@ -41,145 +34,48 @@ import {
   saveApplicationsList as storeSaveApplicationsList,
 } from "@/lib/adminStore";
 import { supabase } from "@/lib/supabase";
-import { ApplicationStatus } from "@/components/admin/constants";
+
+import {
+  RequestedItem,
+  DeterministicCheckResult,
+  FinancialAnalysis,
+  AIAnalysisResult,
+  ApplicationAnalysis,
+  ApplicationData,
+  FormDataSetter,
+} from "@/lib/admin/types";
+
+import {
+  prettyDate,
+  toChips,
+  formatMoney,
+  normalizeFunctionalLimitations,
+} from "@/lib/admin/adminUtils";
+
+import {
+  StudentInfoStepShim,
+  ProgramInfoStepShim,
+  OsapInfoStepShim,
+  DisabilityInfoStepShim,
+  ServiceAndEquipShim,
+  ReviewAndSubmitShim,
+} from "@/components/admin/FormShims";
+
+import {
+  Section,
+  Grid,
+  Field,
+} from "@/components/admin/FormDisplay";
 
 // Local UI types mirroring store
 type Summary = StoreSummary;
 type Snapshot = StoreSnapshot;
-type FormDataSetter = Dispatch<SetStateAction<FormData>>;
-type RequestedItem = {
-  category?: string;
-  item?: string;
-  cost?: number | string;
-  justification?: string;
-  fundingSource?: string;
-};
-
-interface DeterministicCheckResult {
-  has_disability: boolean;
-  is_full_time: boolean;
-  has_osap_restrictions: boolean;
-  all_checks_passed: boolean;
-  failed_checks: string[];
-}
-
-interface FinancialAnalysis {
-  total_need: number;
-  total_requested: number;
-  within_cap: boolean;
-}
-
-interface AIAnalysisResult {
-  recommended_status: ApplicationStatus;
-  confidence_score: number; // 0–1 from backend
-  funding_recommendation: number | null;
-  risk_factors: string[];
-  requires_human_review: boolean;
-  reasoning: string;
-}
-
-interface ApplicationAnalysis {
-  application_id: string;
-  deterministic_checks: DeterministicCheckResult;
-  ai_analysis: AIAnalysisResult;
-  financial_analysis: FinancialAnalysis;
-  overall_status: ApplicationStatus;
-  analysis_timestamp: string;
-}
-
-interface ApplicationData {
-  application_id: string;
-  student_id: string;
-  first_name: string;
-  last_name: string;
-  disability_type: string;
-  study_type: string;
-  osap_application: string;
-  has_osap_restrictions: boolean;
-  federal_need: number;
-  provincial_need: number;
-  disability_verification_date?: string;
-  functional_limitations: string[];
-  needs_psycho_ed_assessment: boolean;
-  requested_items: Array<{
-    category: string;
-    item: string;
-    cost: number;
-    funding_source: string;
-  }>;
-  institution: string;
-  program?: string;
-  analysis: {
-    decision: string;
-    confidence: number;
-    reasoning: string;
-    risk_factors: string[];
-    recommended_funding: number;
-  };
-}
-
-const StudentInfoStepShim = ({
-  formData,
-  setFormData,
-}: {
-  formData: FormData;
-  setFormData: FormDataSetter;
-}) => <StudentInfoStep formData={formData} setFormData={setFormData} />;
-
-const ProgramInfoStepShim = ({
-  formData,
-  setFormData,
-}: {
-  formData: FormData;
-  setFormData: FormDataSetter;
-}) => <ProgramInfoStep formData={formData} setFormData={setFormData} />;
-
-const OsapInfoStepShim = ({
-  formData,
-  setFormData,
-}: {
-  formData: FormData;
-  setFormData: FormDataSetter;
-}) => <OsapInfoStep formData={formData} setFormData={setFormData} />;
-
-const DisabilityInfoStepShim = ({
-  formData,
-  setFormData,
-}: {
-  formData: FormData;
-  setFormData: FormDataSetter;
-}) => <DisabilityInfoStep formData={formData} setFormData={setFormData} />;
-
-const ServiceAndEquipShim = ({
-  formData,
-  setFormData,
-}: {
-  formData: FormData;
-  setFormData: FormDataSetter;
-}) => <ServiceAndEquip formData={formData} setFormData={setFormData} />;
-
-const ReviewAndSubmitShim = ({
-  formData,
-  setFormData,
-  isConfirmed,
-  setIsConfirmed,
-}: {
-  formData: FormData;
-  setFormData: FormDataSetter;
-  isConfirmed: boolean;
-  setIsConfirmed: Dispatch<SetStateAction<boolean>>;
-}) => (
-  <ReviewAndSubmit
-    formData={formData}
-    setFormData={setFormData}
-    isConfirmed={isConfirmed}
-    setIsConfirmed={setIsConfirmed}
-  />
-);
 
 function AdminApplicationDetailPage() {
   const router = useRouter();
   const { id } = router.query as { id?: string };
+  const { profile, user, signOut } = useAuth();
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const [data, setData] = useState<Snapshot | null>(null);
 
@@ -330,65 +226,9 @@ function AdminApplicationDetailPage() {
   const form = (data?.formData as FormData) || ({} as FormData);
   const hasForm = useMemo(() => !!data?.formData, [data]);
 
-  const prettyDate = (iso?: string) =>
-    iso ? new Date(iso).toLocaleString() : "—";
-
-  const toChips = (val: unknown): string[] => {
-    if (!val) return [];
-    if (Array.isArray(val)) return val.map(String).filter(Boolean);
-    if (typeof val === "object") {
-      return Object.entries(val)
-        .filter(([_, v]) => !!v)
-        .map(([k]) => k);
-    }
-    if (typeof val === "string") {
-      return val
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-    }
-    return [];
-  };
-
-  const formatMoney = (n: unknown) => {
-    const num = Number(n);
-    if (Number.isNaN(num)) return "—";
-    return num.toLocaleString(undefined, {
-      style: "currency",
-      currency: "CAD",
-    });
-  };
-
   const requestedItems: RequestedItem[] = Array.isArray(form.requestedItems)
     ? (form.requestedItems as RequestedItem[])
     : [];
-
-  // Normalize functionalLimitations for Admin View
-  const normalizeFunctionalLimitations = (raw: unknown): string[] => {
-    if (!raw) return [];
-
-    if (Array.isArray(raw)) {
-      return raw
-        .map((lim) => {
-          if (typeof lim === "string") return lim;
-
-          if (lim && typeof lim === "object") {
-            if (lim.label && lim.checked) return lim.label;
-            if (lim.name && lim.checked) return lim.name;
-          }
-          return null;
-        })
-        .filter(Boolean) as string[];
-    }
-
-    if (typeof raw === "object") {
-      return Object.entries(raw)
-        .filter(([_, val]) => Boolean(val))
-        .map(([key]) => key);
-    }
-
-    return [];
-  };
 
   const adminFunctionalLimits = normalizeFunctionalLimitations(
     form.functionalLimitations
@@ -510,7 +350,10 @@ function AdminApplicationDetailPage() {
       if (!ok) return;
       await persistEverywhere(editForm);
       setIsEditMode(false);
-    } finally {
+    } catch (error) { 
+      setError("Failed to save changes. Please try again.");
+    }
+    finally {
       setSaving(false);
     }
   };
@@ -527,6 +370,38 @@ function AdminApplicationDetailPage() {
       title="Application Details"
       rightSlot={
         <div className="flex gap-2">
+          <div className="relative">
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100 flex items-center gap-2"
+            >
+              <span>{profile?.full_name || profile?.email || user?.email || 'User'}</span>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {showUserMenu && (
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                <div className="px-4 py-3 border-b border-gray-100">
+                  {profile?.full_name && (
+                    <div className="font-medium text-gray-900 mb-1">{profile.full_name}</div>
+                  )}
+                  <div className="text-sm text-gray-600">{profile?.email || user?.email}</div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    {profile?.role === 'admin' ? 'Administrator' : 'Student'}
+                  </div>
+                </div>
+                <button
+                  onClick={async () => {
+                    await signOut();
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
           <Link
             href="/admin"
             className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
@@ -534,7 +409,7 @@ function AdminApplicationDetailPage() {
             Back to Dashboard
           </Link>
           <Link
-            href="/"
+            href="/application"
             className="px-4 py-2 text-sm rounded-xl bg-brand-dark-blue text-white hover:bg-opacity-90"
           >
             Back to Application
@@ -548,6 +423,7 @@ function AdminApplicationDetailPage() {
             <div className="mb-4 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <button
+                  id="admin-enable-edit-mode-btn"
                   type="button"
                   onClick={() => setIsEditMode((v) => !v)}
                   className={`px-4 py-2 text-sm rounded-xl border transition-colors ${
@@ -564,6 +440,7 @@ function AdminApplicationDetailPage() {
                   {isEditMode ? "Editing Enabled" : "Enable Edit Mode"}
                 </button>
                 <button
+                  id="admin-save-changes-btn"
                   type="button"
                   onClick={handleSave}
                   disabled={!isEditMode || !isDirty || saving}
@@ -588,6 +465,7 @@ function AdminApplicationDetailPage() {
                 )}
               </div>
               <button
+                id="admin-run-ai-analysis-btn"
                 onClick={analyzeApplication}
                 disabled={analyzing}
                 className="px-4 py-2 text-sm rounded-xl bg-brand-dark-blue text-white hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
@@ -898,48 +776,6 @@ function AdminApplicationDetailPage() {
         </>
       )}
     </AdminLayout>
-    </div>
-  );
-}
-
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <section className="space-y-3">
-      <h3 className="font-medium">{title}</h3>
-      {children}
-    </section>
-  );
-}
-
-function Grid({ children }: { children: ReactNode }) {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-      {children}
-    </div>
-  );
-}
-
-function Field({
-  label,
-  value,
-  mono,
-}: {
-  label: string;
-  value: ReactNode;
-  mono?: boolean;
-}) {
-  return (
-    <div>
-      <div className="text-gray-500">{label}</div>
-      <div className={`${mono ? "font-mono" : "font-medium"} break-words`}>
-        {value ?? "—"}
-      </div>
     </div>
   );
 }

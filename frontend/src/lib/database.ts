@@ -213,8 +213,8 @@ export const saveSubmission = async (formData: FormData) => {
   // 6. Calculate initial status based on deterministic checks
   const { status: initialStatus, score: initialScore } = await calculateInitialStatus(formData);
 
-  // 7. Create application record for admin dashboard
-  const applicationId = `APP-${studentId}`;
+  // 7. Create application record for admin dashboard (use form value to preserve leading zeros)
+  const applicationId = `APP-${formData.studentId}`;
 
   const applicationPayload = {
     id: applicationId,

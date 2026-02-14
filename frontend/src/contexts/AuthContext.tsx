@@ -83,6 +83,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state change:', event);
+        
         setSession(session);
         setUser(session?.user ?? null);
 
@@ -91,6 +93,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setProfile(userProfile);
         } else {
           setProfile(null);
+        }
+
+        // Handle sign out event explicitly
+        if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setProfile(null);
+          setSession(null);
         }
 
         setLoading(false);
@@ -128,15 +137,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      // Clear local state first
       setUser(null);
       setProfile(null);
       setSession(null);
-      await router.push('/login');
+      
+      // Sign out from Supabase
+      await supabase.auth.signOut();
+      
+      // Use router for navigation if available, otherwise fallback to window.location
+      if (router) {
+        await router.replace('/login');
+      } else {
+        window.location.replace('/login');
+      }
     } catch (error) {
       console.error('Error signing out:', error);
-      // Even if there's an error, still redirect to login
-      await router.push('/login');
+      // Even if there's an error, still clear state and redirect
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+      window.location.replace('/login');
     }
   };
 

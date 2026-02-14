@@ -71,8 +71,6 @@ export const VIOLATION_LIBRARY: string[] = [
 
 /* ==================== Helpers ==================== */
 
-const SNAP_KEY = (id: string) => `applicationDetail:${id}`;
-
 const uuid = () =>
   "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (crypto.getRandomValues(new Uint8Array(1))[0] & 0xf) >> 0;
@@ -133,44 +131,9 @@ export async function loadSummaries(): Promise<AppSummary[]> {
         confidenceScore: r.confidence_score,
       }));
     }
-    // fall through on error to local below
   }
 
-  // — Local fallback —
-  if (typeof window === "undefined") return [];
-  const out: AppSummary[] = [];
-
-  try {
-    const raw = localStorage.getItem("currentApplication");
-    if (raw) {
-      const a = JSON.parse(raw) as AppSummary;
-      if (a?.id) out.push(a);
-    }
-  } catch {}
-
-  try {
-    const raw = localStorage.getItem("applications");
-    if (raw) {
-      const arr = JSON.parse(raw);
-      if (Array.isArray(arr)) {
-        for (const a of arr) if (a?.id) out.push(a as AppSummary);
-      }
-    }
-  } catch {}
-
-  const seen = new Set<string>();
-  const deduped: AppSummary[] = [];
-  for (const a of out) {
-    if (seen.has(a.id)) continue;
-    seen.add(a.id);
-    deduped.push(a);
-  }
-
-  deduped.sort(
-    (a, b) =>
-      new Date(b.submittedDate).getTime() - new Date(a.submittedDate).getTime()
-  );
-  return deduped;
+  return [];
 }
 
 /** Load a full snapshot for a given application id */
@@ -231,16 +194,9 @@ export async function loadSnapshot(id: string): Promise<Snapshot | null> {
       };
       return snapOut;
     }
-    // fall through on error to local below
   }
 
-  // — Local fallback —
-  try {
-    const raw = localStorage.getItem(SNAP_KEY(id));
-    return raw ? (JSON.parse(raw) as Snapshot) : null;
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 //Helper Func: Recalculate status based on form data changes for supabase
@@ -368,40 +324,7 @@ export async function saveSnapshotMerge(
     }
 
     await supabase.from("applications").upsert(summaryPayload);
-    return;
   }
-
-  // — Local fallback —
-  const existingRaw = localStorage.getItem(SNAP_KEY(r.id));
-  const existing = existingRaw
-    ? (JSON.parse(existingRaw) as Snapshot)
-    : ({} as Snapshot);
-
-  const next: Snapshot = {
-    summary: {
-      id: r.id,
-      studentName: r.studentName,
-      studentId: r.studentId,
-      submittedDate: r.submittedDate,
-      status: r.status,
-      program: r.program,
-      institution: r.institution,
-      studyPeriod: r.studyPeriod,
-      statusUpdatedDate: now,
-    },
-    formData: formData ?? existing.formData ?? null,
-    assignee: r.assignee ?? existing.assignee ?? "",
-    violationTags: Array.isArray(r.violationTags)
-      ? r.violationTags
-      : existing.violationTags ?? [],
-    violationDetails: r.violationDetails ?? existing.violationDetails ?? "",
-    attachments: Array.isArray(r.attachments)
-      ? r.attachments
-      : Array.isArray(existing.attachments)
-      ? existing.attachments
-      : [],
-  };
-  localStorage.setItem(SNAP_KEY(r.id), JSON.stringify(next));
 }
 
 /** Save refreshed applications list */
@@ -421,15 +344,7 @@ export async function saveApplicationsList(
       study_period: s.studyPeriod,
       status_updated_date: s.statusUpdatedDate,
     }));
-    const { error } = await supabase.from("applications").upsert(payload);
-    if (!error) return;
-    // fall through to local on error
-  }
-
-  // — Local fallback —
-  localStorage.setItem("applications", JSON.stringify(summaries));
-  if (summaries[0]) {
-    localStorage.setItem("currentApplication", JSON.stringify(summaries[0]));
+    await supabase.from("applications").upsert(payload);
   }
 }
 
@@ -440,7 +355,7 @@ export async function deleteApplication(
   reason?: string
 ): Promise<void> {
   if (isSupabaseReady() && supabase) {
-    const { error } = await supabase
+    await supabase
       .from("applications")
       .update({
         deleted_at: new Date().toISOString(),
@@ -449,30 +364,6 @@ export async function deleteApplication(
         status: "deleted",
       })
       .eq("id", appId);
-
-    if (!error) return;
-  }
-
-  // Local fallback
-  try {
-    const raw = localStorage.getItem("applications");
-    if (raw) {
-      const arr = JSON.parse(raw);
-      if (Array.isArray(arr)) {
-        const filtered = arr.filter((a: AppSummary) => a.id !== appId);
-        localStorage.setItem("applications", JSON.stringify(filtered));
-      }
-    }
-    localStorage.removeItem(SNAP_KEY(appId));
-    const currentRaw = localStorage.getItem("currentApplication");
-    if (currentRaw) {
-      const current = JSON.parse(currentRaw);
-      if (current?.id === appId) {
-        localStorage.removeItem("currentApplication");
-      }
-    }
-  } catch (e) {
-    console.error("Error deleting application:", e);
   }
 }
 
@@ -520,19 +411,7 @@ export async function attachFiles(
     return out;
   }
 
-  // — Local fallback —
-  const b64Atts: Attachment[] = [];
-  for (const f of files) {
-    const b64 = await b64FromFile(f);
-    b64Atts.push({
-      id: uuid(),
-      name: f.name,
-      mime: f.type || "application/octet-stream",
-      size: f.size,
-      dataB64: b64,
-    });
-  }
-  return b64Atts;
+  return [];
 }
 
 /** Download a Supabase storage object as a Blob (used by Open) */
@@ -548,19 +427,4 @@ export async function downloadAttachmentFromStorage(
   const resp = await fetch(signed.signedUrl);
   if (!resp.ok) return null;
   return await resp.blob();
-}
-
-/** Dev-only: clear all local application data */
-export function resetLocalApplications(): void {
-  if (typeof window === "undefined") return;
-  const keys = Object.keys(localStorage);
-  for (const k of keys) {
-    if (
-      k.startsWith("applicationDetail:") ||
-      k === "applications" ||
-      k === "currentApplication"
-    ) {
-      localStorage.removeItem(k);
-    }
-  }
 }
