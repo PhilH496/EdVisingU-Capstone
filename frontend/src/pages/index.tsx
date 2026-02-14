@@ -9,46 +9,90 @@ import Image from 'next/image';
 import { StudentFooter } from '@/components/bswd/StudentFooter';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { ChevronRight } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 export default function LandingPage() {
+  const { t, isLoaded } = useTranslation();
   const [openCard, setOpenCard] = useState<number | null>(null);
-
+  if (!isLoaded) return null;
   const toggleCard = (index: number) => {
     setOpenCard(openCard === index ? null : index);
   };
 
   const infoCards = [
     {
-      title: "Learn about BSWD",
-      brief: "How to qualify",
-      description: "BSWD provides funding for disability-related educational costs. You need OSAP approval, documented disability, and enrollment at an approved institution. Learn about exceptions and special circumstances.",
-      url: "https://osap.gov.on.ca/OSAPPortal/en/A-ZListofAid/POCONT1_098083"
+      title: t('landingPage.infoCards.0.title'),
+      brief: t('landingPage.infoCards.0.brief'),
+      description: t('landingPage.infoCards.0.description'),
+      url: t('landingPage.infoCards.0.url')
     },
     {
-      title: "How to apply for BSWD",
-      brief: "How and when to apply",
-      description: "Apply first for the 2025-2026 school year through your OSAP account. Applications open at the start of the academic year. Then complete the required documentation and assessments with our AI-guided assistance.",
-      url: "https://osap.gov.on.ca/OSAPPortal/en/A-ZListofAid/POCONT1_098083"
+      title: t('landingPage.infoCards.1.title'),
+      brief: t('landingPage.infoCards.1.brief'),
+      description: t('landingPage.infoCards.1.description'),
+      url: t('landingPage.infoCards.1.url')
     },
     {
-      title: "After you apply",
-      brief: "How to get the funding and more",
-      description: "Your application will be reviewed by your school's Financial Aid Office. You'll receive an assessment decision and approved funding amount. Track your application status online and receive notifications about next steps.",
-      url: "https://osap.gov.on.ca/OSAPPortal/en/A-ZListofAid/POCONT1_098083"
+      title: t('landingPage.infoCards.2.title'),
+      brief: t('landingPage.infoCards.2.brief'),
+      description: t('landingPage.infoCards.2.description'),
+      url: t('landingPage.infoCards.2.url')
     },
     {
-      title: "After getting your funding",
-      brief: "Find out what happens next",
-      description: "Purchase approved services and equipment, submit receipts for reimbursement, and maintain enrollment requirements. Keep records of all disability-related expenses and follow reporting guidelines throughout the school year.",
-      url: "https://osap.gov.on.ca/OSAPPortal/en/A-ZListofAid/POCONT1_098083"
+      title: t('landingPage.infoCards.3.title'),
+      brief: t('landingPage.infoCards.3.brief'),
+      description: t('landingPage.infoCards.3.description'),
+      url: t('landingPage.infoCards.3.url')
+    }
+  ];
+
+  const underRepLinks = [
+    {
+      text: t('landingPage.underRep.links.0.text'),
+      url: t('landingPage.underRep.links.0.url')
+    },
+    {
+      text: t('landingPage.underRep.links.1.text'),
+      url: t('landingPage.underRep.links.1.url')
+    },
+    {
+      text: t('landingPage.underRep.links.2.text'),
+      url: t('landingPage.underRep.links.2.url')
+    },
+    {
+      text: t('landingPage.underRep.links.3.text'),
+      url: t('landingPage.underRep.links.3.url')
+    },
+    {
+      text: t('landingPage.underRep.links.4.text'),
+      url: t('landingPage.underRep.links.4.url')
+    }
+  ];
+
+  const questionsLinks = [
+    {
+      text: t('landingPage.questions.links.0.text'),
+      url: t('landingPage.questions.links.0.url')
+    },
+    {
+      text: t('landingPage.questions.links.1.text'),
+      url: t('landingPage.questions.links.1.url')
+    },
+    {
+      text: t('landingPage.questions.links.2.text'),
+      url: t('landingPage.questions.links.2.url')
+    },
+    {
+      text: t('landingPage.questions.links.3.text'),
+      url: t('landingPage.questions.links.3.url')
     }
   ];
 
   return (
     <>
       <Head>
-        <title>BSWD: Bursary for Students with Disabilities</title>
-        <meta name="description" content="Get help paying for disability-related services and equipment when you qualify for BSWD." />
+        <title>{t('landingPage.head.title')}</title>
+        <meta name="description" content={t('landingPage.head.description')} />
       </Head>
 
       <div className="min-h-screen bg-white">
@@ -56,7 +100,7 @@ export default function LandingPage() {
           <div className="mx-auto max-w-7xl px-6 py-3 flex items-center justify-between">
             <Image
               src="/ontario-logo.png"
-              alt="Government of Ontario"
+              alt={t('landingPage.header.ontarioAlt')}
               width={130}
               height={30}
               priority
@@ -72,31 +116,31 @@ export default function LandingPage() {
           <div className="flex flex-col md:flex-row justify-between items-start mb-6">
             <div className="flex-1">
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                BSWD: Bursary for Students with Disabilities
+                {t('landingPage.hero.title')}
               </h1>
               <p className="text-base text-gray-700 mb-4">
-                Get help paying for disability-related services and equipment when you qualify for BSWD.
+                {t('landingPage.hero.subtitle')}
               </p>
               <div className="flex flex-wrap gap-3">
-                <Link 
-                  href="/login" 
+                <Link
+                  href="/login"
                   className="bg-blue-600 text-white px-6 py-2 hover:bg-blue-700 font-medium text-sm inline-flex items-center justify-center"
                 >
-                  Log in
+                  {t('landingPage.hero.login')}
                 </Link>
-                <Link 
-                  href="/signup" 
+                <Link
+                  href="/signup"
                   className="bg-white text-blue-600 border-2 border-blue-600 px-6 py-2 hover:bg-blue-50 font-medium text-sm inline-flex items-center justify-center"
                 >
-                  Register
+                  {t('landingPage.hero.register')}
                 </Link>
               </div>
             </div>
-            
+
             {/* BSWD Logo */}
             <div className="mt-6 md:mt-0 flex-shrink-0">
               <div className="border-4 border-black px-6 py-4 inline-block relative">
-                <div className="text-3xl font-bold">BSWD</div>
+                <div className="text-3xl font-bold">{t('landingPage.hero.bswdLogoText')}</div>
               </div>
             </div>
           </div>
@@ -110,19 +154,23 @@ export default function LandingPage() {
               <div className="bg-blue-50 border-l-4 border-blue-600 p-6 mb-8">
                 <div className="flex items-start gap-3">
                   <div className="flex-1">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">BSWD updates</h2>
+                    <h2 className="text-xl font-bold text-gray-900 mb-4">
+                      {t('landingPage.updates.title')}
+                    </h2>
                     <ul className="space-y-3 text-sm">
                       <li>
                         <Link href="/login" className="text-blue-600 hover:underline font-medium">
-                          2025-2026 BSWD application 
+                          {t('landingPage.updates.item1.linkText')}
                         </Link>
-                        {' '}open for full-time and part-time students
+                        {' '}
+                        {t('landingPage.updates.item1.trailingText')}
                       </li>
                       <li>
                         <Link href="/login" className="text-blue-600 hover:underline font-medium">
-                          Log in to your BSWD account
+                          {t('landingPage.updates.item2.linkText')}
                         </Link>
-                        {' '}for a list of approved services and equipment
+                        {' '}
+                        {t('landingPage.updates.item2.trailingText')}
                       </li>
                     </ul>
                   </div>
@@ -132,11 +180,10 @@ export default function LandingPage() {
               {/* AI-Powered Infographic Section - Now stretches to fill remaining space */}
               <div className="bg-gray-100 border border-gray-300 p-6 flex-1 flex flex-col justify-center">
                 <h2 className="text-lg font-bold mb-5">
-                    AI-Powered Application Assistance
+                  {t('landingPage.ai.title')}
                 </h2>
                 <p className="text-sm text-gray-700">
-                  Receive smart support throughout your BSWD application with automated document review, eligibility evaluation, 
-                  quick response times, and 24/7 chatbot assistance.
+                  {t('landingPage.ai.description')}
                 </p>
               </div>
             </div>
@@ -161,7 +208,7 @@ export default function LandingPage() {
                         </h3>
                         <p className="text-sm text-gray-700">{card.brief}</p>
                       </div>
-                      <ChevronRight 
+                      <ChevronRight
                         className={`w-5 h-5 text-gray-600 flex-shrink-0 transition-transform duration-200`}
                       />
                     </div>
@@ -170,8 +217,8 @@ export default function LandingPage() {
                   {/* Expanded Content - Slides in from the right */}
                   <div
                     className={`absolute left-full top-0 ml-4 w-80 z-20 transition-all duration-300 ease-in-out ${
-                      openCard === index 
-                        ? 'opacity-100 translate-x-0' 
+                      openCard === index
+                        ? 'opacity-100 translate-x-0'
                         : 'opacity-0 translate-x-4 pointer-events-none'
                     }`}
                   >
@@ -184,7 +231,7 @@ export default function LandingPage() {
                         href={card.url}
                         className="inline-flex items-center text-sm font-medium text-blue-600 hover:underline"
                       >
-                        Learn more
+                        {t('landingPage.infoCardsLearnMore')}
                         <ChevronRight className="w-4 h-4 ml-1" />
                       </Link>
                     </div>
@@ -199,17 +246,17 @@ export default function LandingPage() {
           {/* Video Demo Section for future use */}
           <section className="mb-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              See how the BSWD application works
+              {t('landingPage.video.title')}
             </h2>
-            
+
             <div className="bg-gray-800 rounded aspect-video flex items-center justify-center mb-4">
               <div className="text-center text-white">
-                <p className="text-lg font-medium">VIDEO PLACEHOLDER</p>
+                <p className="text-lg font-medium">{t('landingPage.video.placeholder')}</p>
               </div>
             </div>
 
             <p className="text-sm text-gray-600">
-              This video explains how to complete your BSWD application with AI assistance and track your application status.
+              {t('landingPage.video.description')}
             </p>
           </section>
 
@@ -217,42 +264,33 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-12 mb-12">
             {/* Left Column includes infographic about under-represented learners and resources*/}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Under-represented learners</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                {t('landingPage.underRep.title')}
+              </h2>
               <ul className="space-y-2">
-                <li><Link href="https://www.ontario.ca/page/osap-for-under-represented-learners#section-0" className="text-blue-600 hover:underline text-sm">Indigenous students</Link></li>
-                <li><Link href="https://www.ontario.ca/page/osap-for-under-represented-learners#section-1" className="text-blue-600 hover:underline text-sm">Extended Society Care (current and former Crown wards)</Link></li>
-                <li><Link href="https://www.ontario.ca/page/osap-for-under-represented-learners#section-2" className="text-blue-600 hover:underline text-sm">First-generation students</Link></li>
-                <li><Link href="https://www.ontario.ca/page/osap-for-under-represented-learners#section-3" className="text-blue-600 hover:underline text-sm">Students with disabilities</Link></li>
-                <li><Link href="https://www.ontario.ca/page/osap-for-under-represented-learners#section-4" className="text-blue-600 hover:underline text-sm">Students who are Deaf or have trouble hearing</Link></li>
+                {underRepLinks.map((l, i) => (
+                  <li key={i}>
+                    <Link href={l.url} className="text-blue-600 hover:underline text-sm">
+                      {l.text}
+                    </Link>
+                  </li>
+                ))}
               </ul>
-
             </div>
 
             {/* Right Column includes questions about BSWD*/}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Questions about BSWD</h2>
-              <p className="text-sm text-gray-700 mb-4">
-                <Link href="https://osap.gov.on.ca/OSAPPortal/en/Contacts/ProvinciallyfundedSchoolsinOntario/index.htm" className="text-blue-600 hover:underline">
-                  Contact your school's Financial Aid Office.
-                </Link>
-              </p>
-              <p className="text-sm text-gray-700 mb-4">
-                <Link href="https://www.ontario.ca/page/learn-about-osap#section-2" className="text-blue-600 hover:underline">
-                  Students on social assistance
-                </Link>
-              </p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                {t('landingPage.questions.title')}
+              </h2>
 
-              <p className="text-sm text-gray-700 mb-4">
-                <Link href="https://www.ontario.ca/page/student-loans-grants-scholarships-and-bursaries" className="text-blue-600 hover:underline">
-                  Other loans, grants, scholarships and bursaries
-                </Link>
-              </p>
-
-              <p className="text-sm text-gray-700 mb-4">
-                <Link href="https://www.ontario.ca/page/learn-about-colleges-universities-and-indigenous-institutes-ontario" className="text-blue-600 hover:underline">
-                  Go to college or university in Ontario
-                </Link>
-              </p>
+              {questionsLinks.map((l, i) => (
+                <p key={i} className="text-sm text-gray-700 mb-4">
+                  <Link href={l.url} className="text-blue-600 hover:underline">
+                    {l.text}
+                  </Link>
+                </p>
+              ))}
             </div>
           </div>
         </main>
