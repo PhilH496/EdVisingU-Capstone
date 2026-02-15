@@ -1,401 +1,149 @@
 /**
- * BSWDApplicationPage Component
- *
- * Main page component for the BSWD (Bursary for Students with Disabilities) application form.
- * Manages the multi-step form flow and overall form state.
- *
- * Features:
- * - Multi-step form navigation (6 total steps)
- * - Form data state management
- * - Step validation before allowing progression
- * - Saves data to Supabase ONLY on final submission
+ * Landing Page - EdvisingU BSWD Portal
  */
 
-import { useState, useMemo, useEffect, useRef } from "react";
-import { useRouter } from "next/router";
-import Link from "next/link";
-import { FormData } from "@/types/bswd";
-import { FormLayout } from "@/components/bswd/FormLayout";
-import { StudentInfoStep } from "@/components/bswd/steps/StudentInfoStep";
-import { FormNavigation } from "@/components/bswd/navigation/FormNavigation";
-import { ProgramInfoStep } from "@/components/bswd/steps/ProgramInfoStep";
-import { OsapInfoStep } from "@/components/bswd/steps/OsapInfoStep";
-import { DisabilityInfoStep } from "@/components/bswd/steps/DisabilityInfoStep";
-import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
-import { ReviewAndSubmit } from "@/components/bswd/steps/SubmitStep";
-import { saveSubmission } from "@/lib/database";
-import { saveSnapshotMerge, saveApplicationsList } from "@/lib/adminStore";
-import { useTranslation } from "@/lib/i18n";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import { useAuth } from "@/contexts/AuthContext";
-import Head from "next/head";
+import { useState } from 'react';
+import Link from 'next/link';
+import Head from 'next/head';
+import Image from 'next/image';
+import { StudentFooter } from '@/components/bswd/StudentFooter';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { ChevronRight } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
-// Store all form data in a single state object
-// Initial values are set to empty strings, zeros, or false depending on field type
-function BSWDApplicationPage() {
+export default function LandingPage() {
   const { t, isLoaded } = useTranslation();
-  const { signOut, profile, user, loading } = useAuth();
-  const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [maxStep, setMaxStep] = useState(1);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isConfirmed, setIsConfirmed] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [openCard, setOpenCard] = useState<number | null>(null);
+  if (!isLoaded) return null;
+  const toggleCard = (index: number) => {
+    setOpenCard(openCard === index ? null : index);
+  };
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
+  const infoCards = [
+    {
+      title: t('landingPage.infoCards.0.title'),
+      brief: t('landingPage.infoCards.0.brief'),
+      description: t('landingPage.infoCards.0.description'),
+      url: t('landingPage.infoCards.0.url')
+    },
+    {
+      title: t('landingPage.infoCards.1.title'),
+      brief: t('landingPage.infoCards.1.brief'),
+      description: t('landingPage.infoCards.1.description'),
+      url: t('landingPage.infoCards.1.url')
+    },
+    {
+      title: t('landingPage.infoCards.2.title'),
+      brief: t('landingPage.infoCards.2.brief'),
+      description: t('landingPage.infoCards.2.description'),
+      url: t('landingPage.infoCards.2.url')
+    },
+    {
+      title: t('landingPage.infoCards.3.title'),
+      brief: t('landingPage.infoCards.3.brief'),
+      description: t('landingPage.infoCards.3.description'),
+      url: t('landingPage.infoCards.3.url')
     }
-  }, [user, loading, router]);
-
-  const [formData, setFormData] = useState<FormData>({
-    studentId: "",
-    oen: "",
-    firstName: "",
-    lastName: "",
-    dateOfBirth: "",
-    sin: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    province: "",
-    postalCode: "",
-    country: "Canada",
-    hasOsapApplication: undefined,
-    institution: "",
-    institutionType: "",
-    program: "",
-    code: "",
-    studyPeriodStart: "",
-    studyPeriodEnd: "",
-    studyType: "",
-    submittedDisabilityElsewhere: false,
-    previousInstitution: "",
-    osapApplicationStartDate: "Not provided",
-    osapApplication: "full-time",
-    restrictionType: "DEFAULT",
-    queuedForManualReview: false,
-    federalNeed: 0,
-    provincialNeed: 0,
-    hasOSAPRestrictions: false,
-    restrictionDetails: "",
-    osapOnFileStatus: "",
-
-    hasVerifiedDisability: false,
-    disabilityType: "not-verified",
-    disabilityVerificationDate: "",
-    functionalLimitations: [
-      { name: "mobility", label: "Mobility", checked: false },
-      { name: "vision", label: "Vision", checked: false },
-      { name: "hearing", label: "Hearing", checked: false },
-      { name: "learning", label: "Learning", checked: false },
-      { name: "cognitive", label: "Cognitive", checked: false },
-      { name: "mentalHealth", label: "Mental Health", checked: false },
-      { name: "communication", label: "Communication", checked: false },
-      { name: "dexterity", label: "Dexterity", checked: false },
-      { name: "chronicPain", label: "Chronic Pain", checked: false },
-      {
-        name: "attention",
-        label: "Attention/Concentration",
-        checked: false,
-      },
-    ],
-    needsPsychoEdAssessment: false,
-    requestedItems: [],
-  });
-
-  const stepsInfo = [
-    {
-      stepName: t("steps.studentInfo"),
-      stepIconFaClass: "fa-solid fa-user",
-    },
-    {
-      stepName: t("steps.programInfo"),
-      stepIconFaClass: "fa-solid fa-user-graduate",
-    },
-    {
-      stepName: t("steps.osapInfo"),
-      stepIconFaClass: "fa-solid fa-money-check-dollar",
-    },
-    {
-      stepName: t("steps.disabilityInfo"),
-      stepIconFaClass: "fa-solid fa-wheelchair",
-    },
-    {
-      stepName: t("steps.serviceEquipment"),
-      stepIconFaClass: "fa-solid fa-wrench",
-    },
-    {
-      stepName: t("steps.review"),
-      stepIconFaClass: "fa-solid fa-receipt",
-    },
   ];
 
-  const TOTAL_STEPS = stepsInfo.length;
-
-  const isStepComplete = (stepCheck: number): boolean => {
-    switch (stepCheck) {
-      case 1:
-        return Boolean(
-          formData.studentId &&
-            formData.studentId.length >= 7 &&
-            formData.studentId.length <= 8 &&
-            formData.firstName &&
-            formData.lastName &&
-            formData.email &&
-            formData.dateOfBirth &&
-            formData.oen.length === 9 &&
-            formData.sin.replace(/\D/g, "").length === 9 &&
-            formData.address &&
-            formData.city &&
-            formData.province &&
-            formData.postalCode &&
-            formData.postalCode.replace(/\s/g, "").length === 6 &&
-            formData.country &&
-            formData.hasOsapApplication !== undefined
-        );
-
-      case 2: {
-        if (formData.submittedDisabilityElsewhere === true) {
-          formData.previousInstitution;
-          return Boolean(
-            formData.institution &&
-              formData.institutionType &&
-              formData.studyType &&
-              formData.studyPeriodStart &&
-              formData.studyPeriodEnd &&
-              formData.previousInstitution
-          );
-        }
-        return Boolean(
-          formData.institution &&
-            formData.institutionType &&
-            formData.studyType &&
-            formData.studyPeriodStart &&
-            formData.studyPeriodEnd
-        );
-      }
-
-      case 3: {
-        formData.osapOnFileStatus = "APPROVED"; // TEMP WILL EVENTUALLY COME BACK AND REMOVE THIS
-        const hasChosenOnFile =
-          formData.osapOnFileStatus === "APPROVED" ||
-          formData.osapOnFileStatus === "NONE";
-
-        const appTypeOk =
-          formData.osapOnFileStatus === "APPROVED"
-            ? formData.osapApplication !== "none"
-            : true;
-
-        const needsOk =
-          formData.osapOnFileStatus === "APPROVED"
-            ? !Number.isNaN(Number(formData.federalNeed)) &&
-              !Number.isNaN(Number(formData.provincialNeed)) &&
-              Number(formData.federalNeed) >= 0 &&
-              Number(formData.provincialNeed) >= 0
-            : true;
-
-        const restrictionsOk = true;
-
-        return hasChosenOnFile && appTypeOk && needsOk && restrictionsOk;
-      }
-
-      case 4: {
-        if (formData.needsPsychoEdAssessment && !formData.email?.trim()) {
-          return false;
-        }
-        return true;
-      }
-
-      case 5: {
-        return true;
-      }
-
-      case 6: {
-        return isConfirmed;
-      }
-
-      default:
-        return false;
+  const underRepLinks = [
+    {
+      text: t('landingPage.underRep.links.0.text'),
+      url: t('landingPage.underRep.links.0.url')
+    },
+    {
+      text: t('landingPage.underRep.links.1.text'),
+      url: t('landingPage.underRep.links.1.url')
+    },
+    {
+      text: t('landingPage.underRep.links.2.text'),
+      url: t('landingPage.underRep.links.2.url')
+    },
+    {
+      text: t('landingPage.underRep.links.3.text'),
+      url: t('landingPage.underRep.links.3.url')
+    },
+    {
+      text: t('landingPage.underRep.links.4.text'),
+      url: t('landingPage.underRep.links.4.url')
     }
-  };
+  ];
 
-  const canProceed = useMemo(() => {
-    return isStepComplete(currentStep) && !saving;
-  }, [currentStep, formData, isConfirmed, saving]);
-
-  const handleNext = async () => {
-    if (!isStepComplete(currentStep)) return;
-
-    if (currentStep < TOTAL_STEPS) {
-      setCurrentStep((prev) => prev + 1);
-      if (currentStep === maxStep) {
-        setMaxStep((m) => m + 1);
-      }
-    } else {
-      await handleSubmit();
+  const questionsLinks = [
+    {
+      text: t('landingPage.questions.links.0.text'),
+      url: t('landingPage.questions.links.0.url')
+    },
+    {
+      text: t('landingPage.questions.links.1.text'),
+      url: t('landingPage.questions.links.1.url')
+    },
+    {
+      text: t('landingPage.questions.links.2.text'),
+      url: t('landingPage.questions.links.2.url')
+    },
+    {
+      text: t('landingPage.questions.links.3.text'),
+      url: t('landingPage.questions.links.3.url')
     }
-  };
+  ];
 
-  const handlePrevious = () => {
-    if (currentStep > 1) {
-      setCurrentStep((prev) => prev - 1);
-    }
-  };
+  return (
+    <>
+      <Head>
+        <title>{t('landingPage.head.title')}</title>
+        <meta name="description" content={t('landingPage.head.description')} />
+      </Head>
 
-  const handleSubmit = async () => {
-    if (saving) return;
+      <div className="min-h-screen bg-white">
+        <header className="bg-black border-b border-black">
+          <div className="mx-auto max-w-7xl px-6 py-3 flex items-center justify-between">
+            <Image
+              src="/ontario-logo.png"
+              alt={t('landingPage.header.ontarioAlt')}
+              width={130}
+              height={30}
+              priority
+              className="filter invert"
+            />
+            <LanguageSwitcher />
+          </div>
+        </header>
 
-    setSaving(true);
-    setError(null);
-
-    try {
-      const result = await saveSubmission(formData);
-      // Redirect to status page
-      window.location.href = `/ThankYouPage?appId=${result.application_id}`;
-    } catch (err) {
-      // Handle submission errors
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Failed to submit application. Please try again.";
-      setError(errorMessage);
-      setSaving(false);
-      console.error("Submission error:", err);
-    }
-  };
-
-  const handleStepClick = (step: number) => {
-    if (step > maxStep) return;
-    setCurrentStep(step);
-  };
-
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <StudentInfoStep formData={formData} setFormData={setFormData} />
-        );
-      case 2:
-        return (
-          <ProgramInfoStep formData={formData} setFormData={setFormData} />
-        );
-      case 3:
-        return <OsapInfoStep formData={formData} setFormData={setFormData} />;
-      case 4:
-        return (
-          <DisabilityInfoStep formData={formData} setFormData={setFormData} />
-        );
-      case 5:
-        return (
-          <ServiceAndEquip formData={formData} setFormData={setFormData} />
-        );
-      case 6:
-        return (
-          <ReviewAndSubmit
-            formData={formData}
-            setFormData={setFormData}
-            isConfirmed={isConfirmed}
-            setIsConfirmed={setIsConfirmed}
-          />
-        );
-      default:
-        return <div>Step {currentStep} - Coming soon</div>;
-    }
-  };
-
-  function StepBar() {
-    const scrollRef = useRef<HTMLDivElement | null>(null);
-    const stepRefs = useRef<(HTMLButtonElement | null)[]>([]);
-    const prevStepRef = useRef(currentStep);
-
-    useEffect(() => {
-      if (prevStepRef.current !== currentStep) {
-        const el = scrollRef.current;
-        const target = stepRefs.current[currentStep - 1];
-        if (el && target) {
-          target.scrollIntoView({
-            behavior: "smooth",
-            inline: "end",
-            block: "nearest",
-          });
-        }
-        prevStepRef.current = currentStep;
-      }
-    }, [currentStep]);
-
-    return (
-      <nav
-        className="overflow-x-scroll pb-4 dark"
-        id="scrollable_step_bar"
-        ref={scrollRef}
-      >
-        <ul className="flex gap-10 w-max">
-          {stepsInfo.map((stepInfo, index) => (
-            <li key={stepInfo.stepName}>
-              <button
-                onClick={() => handleStepClick(index + 1)}
-                disabled={index + 1 > maxStep}
-                ref={(el) => {
-                  stepRefs.current[index] = el;
-                }}
-                aria-describedby="locked-msg-program"
-                className="flex flex-col items-center"
-              >
-                <span
-                  className={`flex rounded-full  justify-center items-center h-14 w-14 transition-colors font-medium relative ${
-                    currentStep === index + 1
-                      ? "bg-cyan-800 text-white"
-                      : "bg-gray-100 text-black"
-                  } ${
-                    index + 1 > maxStep
-                      ? "cursor-not-allowed"
-                      : "hover:bg-cyan-700 hover:text-white"
-                  }`}
+        {/* Main Content */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Title Section */}
+          <div className="flex flex-col md:flex-row justify-between items-start mb-6">
+            <div className="flex-1">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+                {t('landingPage.hero.title')}
+              </h1>
+              <p className="text-base text-gray-700 mb-4">
+                {t('landingPage.hero.subtitle')}
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href="/login"
+                  className="bg-blue-600 text-white px-6 py-2 hover:bg-blue-700 font-medium text-sm inline-flex items-center justify-center"
                 >
-                  <i className={`${stepInfo.stepIconFaClass} text-[150%]`}></i>
-                  {/* display lock icon */}
-                  {index + 1 > maxStep && (
-                    <i className="fa-solid fa-lock absolute bottom-0 right-0 text-[#757575]"></i>
-                  )}
-                </span>
-                <span className="dark:text-black">{stepInfo.stepName}</span>
-              </button>
-              <span id="locked-msg-program" className="sr-only">
-                Locked. Complete previous step(s) to access.
-              </span>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    );
-  }
+                  {t('landingPage.hero.login')}
+                </Link>
+                <Link
+                  href="/signup"
+                  className="bg-white text-blue-600 border-2 border-blue-600 px-6 py-2 hover:bg-blue-50 font-medium text-sm inline-flex items-center justify-center"
+                >
+                  {t('landingPage.hero.register')}
+                </Link>
+              </div>
+            </div>
 
-  useEffect(() => {
-    if (!isStepComplete(currentStep)) {
-      setMaxStep(currentStep);
-    } else {
-      setMaxStep(currentStep + 1);
-      let stepCheck = currentStep + 1;
-      while (stepCheck <= TOTAL_STEPS && isStepComplete(stepCheck)) {
-        setMaxStep(stepCheck + 1);
-        stepCheck++;
-      }
-    }
-  }, [currentStep, formData, isConfirmed]);
-
-  // Show loading while checking authentication
-  if (loading || !user) {
-    return <div>Loading...</div>;
-  }
-
-  if (!isLoaded) {
-    return <div>Loading...</div>;
-  }
+            {/* BSWD Logo */}
+            <div className="mt-6 md:mt-0 flex-shrink-0">
+              <div className="border-4 border-black px-6 py-4 inline-block relative">
+                <div className="text-3xl font-bold">{t('landingPage.hero.bswdLogoText')}</div>
+              </div>
+            </div>
+          </div>
 
   return (
     <div>
@@ -425,59 +173,130 @@ function BSWDApplicationPage() {
                       {profile?.role === 'admin' ? 'Administrator' : 'Student'}
                     </div>
                   </div>
-                  <button
-                    onClick={async () => {
-                      await signOut();
-                    }}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                  >
-                    {t('logout') || 'Logout'}
-                  </button>
                 </div>
-              )}
+              </div>
+
+              {/* AI-Powered Infographic Section - Now stretches to fill remaining space */}
+              <div className="bg-gray-100 border border-gray-300 p-6 flex-1 flex flex-col justify-center">
+                <h2 className="text-lg font-bold mb-5">
+                  {t('landingPage.ai.title')}
+                </h2>
+                <p className="text-sm text-gray-700">
+                  {t('landingPage.ai.description')}
+                </p>
+              </div>
+            </div>
+
+            {/* Right Column - Expandable Flashcards */}
+            <div className="space-y-3 relative">
+              {infoCards.map((card, index) => (
+                <div key={index} className="relative">
+                  {/* Flashcard */}
+                  <button
+                    onClick={() => toggleCard(index)}
+                    className={`w-full text-left border-2 bg-white p-4 transition-all duration-200 relative z-10 ${
+                      openCard === index
+                        ? 'border-blue-600 shadow-md'
+                        : 'border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-blue-600 mb-1">
+                          {card.title}
+                        </h3>
+                        <p className="text-sm text-gray-700">{card.brief}</p>
+                      </div>
+                      <ChevronRight
+                        className={`w-5 h-5 text-gray-600 flex-shrink-0 transition-transform duration-200`}
+                      />
+                    </div>
+                  </button>
+
+                  {/* Expanded Content - Slides in from the right */}
+                  <div
+                    className={`absolute left-full top-0 ml-4 w-80 z-20 transition-all duration-300 ease-in-out ${
+                      openCard === index
+                        ? 'opacity-100 translate-x-0'
+                        : 'opacity-0 translate-x-4 pointer-events-none'
+                    }`}
+                  >
+                    <div className="border-2 border-blue-600 bg-blue-50 p-5">
+                      <h4 className="font-bold text-gray-900 mb-3">{card.title}</h4>
+                      <p className="text-sm text-gray-800 mb-4">
+                        {card.description}
+                      </p>
+                      <Link
+                        href={card.url}
+                        className="inline-flex items-center text-sm font-medium text-blue-600 hover:underline"
+                      >
+                        {t('landingPage.infoCardsLearnMore')}
+                        <ChevronRight className="w-4 h-4 ml-1" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        }
-      >
-      <LanguageSwitcher />
 
-      <div className="mb-4 p-4 pb-2 py-6 border rounded-md">
-        <StepBar />
+          <hr className="border-t-2 border-gray-300 mb-8" />
+
+          {/* Video Demo Section for future use */}
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              {t('landingPage.video.title')}
+            </h2>
+
+            <div className="bg-gray-800 rounded aspect-video flex items-center justify-center mb-4">
+              <div className="text-center text-white">
+                <p className="text-lg font-medium">{t('landingPage.video.placeholder')}</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-gray-600">
+              {t('landingPage.video.description')}
+            </p>
+          </section>
+
+          {/* Column Bottom Section */}
+          <div className="grid md:grid-cols-2 gap-12 mb-12">
+            {/* Left Column includes infographic about under-represented learners and resources*/}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                {t('landingPage.underRep.title')}
+              </h2>
+              <ul className="space-y-2">
+                {underRepLinks.map((l, i) => (
+                  <li key={i}>
+                    <Link href={l.url} className="text-blue-600 hover:underline text-sm">
+                      {l.text}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Right Column includes questions about BSWD*/}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                {t('landingPage.questions.title')}
+              </h2>
+
+              {questionsLinks.map((l, i) => (
+                <p key={i} className="text-sm text-gray-700 mb-4">
+                  <Link href={l.url} className="text-blue-600 hover:underline">
+                    {l.text}
+                  </Link>
+                </p>
+              ))}
+            </div>
+          </div>
+        </main>
+
+        {/* Footer */}
+        <StudentFooter />
       </div>
-
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-sm text-red-600">{error}</p>
-        </div>
-      )}
-
-      {saving && (
-        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
-          <p className="text-sm text-blue-600">
-            Submitting your application to the database...
-          </p>
-        </div>
-      )}
-
-      {renderStep()}
-
-      <FormNavigation
-        currentStep={currentStep}
-        totalSteps={TOTAL_STEPS}
-        onNext={handleNext}
-        onPrevious={handlePrevious}
-        onSubmit={handleSubmit}
-        canProceed={canProceed}
-      />
-      </FormLayout>
-    </div>
-  );
-}
-
-export default function BSWDApplicationPageWithAuth() {
-  return (
-    <ProtectedRoute>
-      <BSWDApplicationPage />
-    </ProtectedRoute>
+    </>
   );
 }

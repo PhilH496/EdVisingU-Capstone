@@ -292,5 +292,114 @@
       "required": "Veuillez confirmer l’énoncé ci-dessus avant de soumettre votre demande."
     },
     "afterSubmit": "Après la soumission, vous pouvez suivre l’état de votre demande sur la page de statut."
+  },
+  "landingPage": {
+    "head": {
+      "title": "BSWD : Bourse pour étudiants ayant un handicap",
+      "description": "Obtenez de l’aide pour payer des services et de l’équipement liés au handicap lorsque vous êtes admissible à la BSWD."
+    },
+    "header": {
+      "ontarioAlt": "Gouvernement de l’Ontario"
+    },
+    "hero": {
+      "title": "BSWD : Bourse pour étudiants ayant un handicap",
+      "subtitle": "Obtenez de l’aide pour payer des services et de l’équipement liés au handicap lorsque vous êtes admissible à la BSWD.",
+      "login": "Se connecter",
+      "register": "S’inscrire",
+      "bswdLogoText": "BSWD"
+    },
+    "updates": {
+      "title": "Mises à jour BSWD",
+      "item1": {
+        "linkText": "Demande BSWD 2025-2026",
+        "trailingText": "ouverte aux étudiants à temps plein et à temps partiel"
+      },
+      "item2": {
+        "linkText": "Connectez-vous à votre compte BSWD",
+        "trailingText": "pour obtenir la liste des services et de l’équipement approuvés"
+      }
+    },
+    "ai": {
+      "title": "Assistance de demande alimentée par l’IA",
+      "description": "Recevez un soutien intelligent tout au long de votre demande BSWD grâce à la révision automatisée des documents, l’évaluation de l’admissibilité, des délais de réponse rapides et une assistance par chatbot 24/7."
+    },
+    "infoCardsLearnMore": "En savoir plus",
+    "infoCards": {
+      "0": {
+        "title": "En savoir plus sur la BSWD",
+        "brief": "Comment être admissible",
+        "description": "La BSWD offre du financement pour des coûts éducatifs liés au handicap. Vous avez besoin d’une approbation OSAP, d’un handicap documenté et d’une inscription dans un établissement approuvé. Découvrez les exceptions et les circonstances particulières.",
+        "url": "https://osap.gov.on.ca/OSAPPortal/en/A-ZListofAid/POCONT1_098083"
+      },
+      "1": {
+        "title": "Comment faire une demande de BSWD",
+        "brief": "Comment et quand faire une demande",
+        "description": "Faites d’abord une demande pour l’année scolaire 2025-2026 via votre compte OSAP. Les demandes ouvrent au début de l’année scolaire. Ensuite, complétez la documentation et les évaluations requises avec notre assistance guidée par l’IA.",
+        "url": "https://osap.gov.on.ca/OSAPPortal/en/A-ZListofAid/POCONT1_098083"
+      },
+      "2": {
+        "title": "Après avoir fait votre demande",
+        "brief": "Comment obtenir le financement et plus",
+        "description": "Votre demande sera examinée par le bureau d’aide financière de votre établissement. Vous recevrez une décision d’évaluation et le montant du financement approuvé. Suivez l’état de votre demande en ligne et recevez des notifications sur les prochaines étapes.",
+        "url": "https://osap.gov.on.ca/OSAPPortal/en/A-ZListofAid/POCONT1_098083"
+      },
+      "3": {
+        "title": "Après avoir obtenu votre financement",
+        "brief": "Découvrez ce qui se passe ensuite",
+        "description": "Achetez les services et l’équipement approuvés, soumettez les reçus pour remboursement et maintenez les exigences d’inscription. Conservez des dossiers de toutes les dépenses liées au handicap et suivez les directives de déclaration tout au long de l’année scolaire.",
+        "url": "https://osap.gov.on.ca/OSAPPortal/en/A-ZListofAid/POCONT1_098083"
+      }
+    },
+    "video": {
+      "title": "Découvrez comment fonctionne la demande BSWD",
+      "placeholder": "ESPACE RÉSERVÉ À LA VIDÉO",
+      "description": "Cette vidéo explique comment remplir votre demande BSWD avec l’assistance de l’IA et suivre l’état de votre demande."
+    },
+    "underRep": {
+      "title": "Apprenants sous-représentés",
+      "links": {
+        "0": {
+          "text": "Étudiants autochtones",
+          "url": "https://www.ontario.ca/page/osap-for-under-represented-learners#section-0"
+        },
+        "1": {
+          "text": "Soins prolongés (anciens et actuels pupilles de la Couronne)",
+          "url": "https://www.ontario.ca/page/osap-for-under-represented-learners#section-1"
+        },
+        "2": {
+          "text": "Étudiants de première génération",
+          "url": "https://www.ontario.ca/page/osap-for-under-represented-learners#section-2"
+        },
+        "3": {
+          "text": "Étudiants ayant un handicap",
+          "url": "https://www.ontario.ca/page/osap-for-under-represented-learners#section-3"
+        },
+        "4": {
+          "text": "Étudiants sourds ou ayant une déficience auditive",
+          "url": "https://www.ontario.ca/page/osap-for-under-represented-learners#section-4"
+        }
+      }
+    },
+    "questions": {
+      "title": "Questions sur la BSWD",
+      "links": {
+        "0": {
+          "text": "Communiquez avec le bureau d’aide financière de votre établissement.",
+          "url": "https://osap.gov.on.ca/OSAPPortal/en/Contacts/ProvinciallyfundedSchoolsinOntario/index.htm"
+        },
+        "1": {
+          "text": "Étudiants recevant de l’aide sociale",
+          "url": "https://www.ontario.ca/page/learn-about-osap#section-2"
+        },
+        "2": {
+          "text": "Autres prêts, subventions, bourses et aides financières",
+          "url": "https://www.ontario.ca/page/student-loans-grants-scholarships-and-bursaries"
+        },
+        "3": {
+          "text": "Aller au collège ou à l’université en Ontario",
+          "url": "https://www.ontario.ca/page/learn-about-colleges-universities-and-indigenous-institutes-ontario"
+        }
+      }
+    }
   }
 }
