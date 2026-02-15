@@ -11,12 +11,12 @@ async function login(page: Page) {
   await page.getByLabel('Email').fill(TEST_USER_EMAIL);
   await page.getByLabel('Password').fill(TEST_USER_PASSWORD);
   await page.getByRole('button', { name: 'Sign In' }).click();
-  await page.waitForURL('http://localhost:3000/');
+  await page.waitForURL('http://localhost:3000/application');
 }
 
 test.describe('Student Form Tests', () => {
   let userID: string;
-  
+
   test.beforeEach(async () => {
     userID = await signUpTestUser();
   });
@@ -171,7 +171,7 @@ test.describe('Student Form Tests', () => {
     await login(page);
     await page.getByRole('combobox').first().selectOption('fr');
     await expect(page.locator('#studentFormHeader')).toContainText('Formulaire de demande BSWD');
-    await expect(page.getByRole('list')).toContainText('Info étudiant');
+    await expect(page.getByRole('list').first()).toContainText('Info étudiant');
   });
 
   // student chatbot functionality test

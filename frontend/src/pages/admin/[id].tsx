@@ -350,7 +350,10 @@ function AdminApplicationDetailPage() {
       if (!ok) return;
       await persistEverywhere(editForm);
       setIsEditMode(false);
-    } finally {
+    } catch (error) { 
+      setError("Failed to save changes. Please try again.");
+    }
+    finally {
       setSaving(false);
     }
   };
@@ -406,7 +409,7 @@ function AdminApplicationDetailPage() {
             Back to Dashboard
           </Link>
           <Link
-            href="/"
+            href="/application"
             className="px-4 py-2 text-sm rounded-xl bg-brand-dark-blue text-white hover:bg-opacity-90"
           >
             Back to Application

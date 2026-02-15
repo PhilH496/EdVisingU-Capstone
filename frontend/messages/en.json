@@ -1,6 +1,5 @@
 {
   "title": "BSWD Application Form",
-  "adminButton": "Admin Portal",
   "steps": {
     "studentInfo": "Student Info",
     "programInfo": "Program Info",
@@ -49,6 +48,12 @@
       "province": "Select Province/Territory",
       "postalCode": "A1A 1A1",
       "country": "Canada"
+    },
+    "validation": {
+      "studentIdMinDigits": "Student ID must be at least 7 digits.",
+      "oenExactDigits": "OEN must be exactly 9 digits.",
+      "sinExactDigits": "SIN must be exactly 9 digits.",
+      "postalCodeFormat": "Postal code must be in the format A1A 1A1"
     },
     "provinces": {
       "ON": "Ontario",
@@ -287,5 +292,114 @@
       "required": "Please confirm the above statement before submitting your application."
     },
     "afterSubmit": "After submitting, you can track your application status on the status page."
+  },
+  "landingPage": {
+    "head": {
+      "title": "BSWD: Bursary for Students with Disabilities",
+      "description": "Get help paying for disability-related services and equipment when you qualify for BSWD."
+    },
+    "header": {
+      "ontarioAlt": "Government of Ontario"
+    },
+    "hero": {
+      "title": "BSWD: Bursary for Students with Disabilities",
+      "subtitle": "Get help paying for disability-related services and equipment when you qualify for BSWD.",
+      "login": "Log in",
+      "register": "Register",
+      "bswdLogoText": "BSWD"
+    },
+    "updates": {
+      "title": "BSWD updates",
+      "item1": {
+        "linkText": "2025-2026 BSWD application",
+        "trailingText": "open for full-time and part-time students"
+      },
+      "item2": {
+        "linkText": "Log in to your BSWD account",
+        "trailingText": "for a list of approved services and equipment"
+      }
+    },
+    "ai": {
+      "title": "AI-Powered Application Assistance",
+      "description": "Receive smart support throughout your BSWD application with automated document review, eligibility evaluation, quick response times, and 24/7 chatbot assistance."
+    },
+    "infoCardsLearnMore": "Learn more",
+    "infoCards": {
+      "0": {
+        "title": "Learn about BSWD",
+        "brief": "How to qualify",
+        "description": "BSWD provides funding for disability-related educational costs. You need OSAP approval, documented disability, and enrollment at an approved institution. Learn about exceptions and special circumstances.",
+        "url": "https://osap.gov.on.ca/OSAPPortal/en/A-ZListofAid/POCONT1_098083"
+      },
+      "1": {
+        "title": "How to apply for BSWD",
+        "brief": "How and when to apply",
+        "description": "Apply first for the 2025-2026 school year through your OSAP account. Applications open at the start of the academic year. Then complete the required documentation and assessments with our AI-guided assistance.",
+        "url": "https://osap.gov.on.ca/OSAPPortal/en/A-ZListofAid/POCONT1_098083"
+      },
+      "2": {
+        "title": "After you apply",
+        "brief": "How to get the funding and more",
+        "description": "Your application will be reviewed by your school's Financial Aid Office. You'll receive an assessment decision and approved funding amount. Track your application status online and receive notifications about next steps.",
+        "url": "https://osap.gov.on.ca/OSAPPortal/en/A-ZListofAid/POCONT1_098083"
+      },
+      "3": {
+        "title": "After getting your funding",
+        "brief": "Find out what happens next",
+        "description": "Purchase approved services and equipment, submit receipts for reimbursement, and maintain enrollment requirements. Keep records of all disability-related expenses and follow reporting guidelines throughout the school year.",
+        "url": "https://osap.gov.on.ca/OSAPPortal/en/A-ZListofAid/POCONT1_098083"
+      }
+    },
+    "video": {
+      "title": "See how the BSWD application works",
+      "placeholder": "VIDEO PLACEHOLDER",
+      "description": "This video explains how to complete your BSWD application with AI assistance and track your application status."
+    },
+    "underRep": {
+      "title": "Under-represented learners",
+      "links": {
+        "0": {
+          "text": "Indigenous students",
+          "url": "https://www.ontario.ca/page/osap-for-under-represented-learners#section-0"
+        },
+        "1": {
+          "text": "Extended Society Care (current and former Crown wards)",
+          "url": "https://www.ontario.ca/page/osap-for-under-represented-learners#section-1"
+        },
+        "2": {
+          "text": "First-generation students",
+          "url": "https://www.ontario.ca/page/osap-for-under-represented-learners#section-2"
+        },
+        "3": {
+          "text": "Students with disabilities",
+          "url": "https://www.ontario.ca/page/osap-for-under-represented-learners#section-3"
+        },
+        "4": {
+          "text": "Students who are Deaf or have trouble hearing",
+          "url": "https://www.ontario.ca/page/osap-for-under-represented-learners#section-4"
+        }
+      }
+    },
+    "questions": {
+      "title": "Questions about BSWD",
+      "links": {
+        "0": {
+          "text": "Contact your school's Financial Aid Office.",
+          "url": "https://osap.gov.on.ca/OSAPPortal/en/Contacts/ProvinciallyfundedSchoolsinOntario/index.htm"
+        },
+        "1": {
+          "text": "Students on social assistance",
+          "url": "https://www.ontario.ca/page/learn-about-osap#section-2"
+        },
+        "2": {
+          "text": "Other loans, grants, scholarships and bursaries",
+          "url": "https://www.ontario.ca/page/student-loans-grants-scholarships-and-bursaries"
+        },
+        "3": {
+          "text": "Go to college or university in Ontario",
+          "url": "https://www.ontario.ca/page/learn-about-colleges-universities-and-indigenous-institutes-ontario"
+        }
+      }
+    }
   }
 }

@@ -10,6 +10,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -43,6 +44,7 @@ import {
 } from "@/lib/admin/adminUtils";
 
 function AdminDashboardPage() {
+  const router = useRouter()
   const { profile, user, signOut } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [rows, setRows] = useState<Row[]>([]);
@@ -53,6 +55,7 @@ function AdminDashboardPage() {
   const [expandedApps, setExpandedApps] = useState<Set<string>>(new Set());
   const [detScores, setDetScores] = useState<Record<string, number>>({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   //Sorting State
   const [sortConfig, setSortConfig] = useState<{
@@ -64,9 +67,10 @@ function AdminDashboardPage() {
   });
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
 
-  // storage I/O
-  useEffect(() => {
-    (async () => {
+    // storage I/O
+  const loadApplications = async () => {
+    setIsLoading(true);
+    try {
       const summaries = await storeLoadSummaries();
 
       const hydrated: Row[] = await Promise.all(
@@ -96,8 +100,51 @@ function AdminDashboardPage() {
         scoreMap[s.id] = s.confidenceScore ?? 0;
       });
       setDetScores(scoreMap);
-    })();
-  }, []);
+    } catch (error) {
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+    // Initial load
+    useEffect(() => {
+      loadApplications();
+    }, []);
+
+    // Refetch when navigating back (catches router navigation)
+    useEffect(() => {
+      const handleRouteChange = () => {
+        // Refetch whenever route changes to within admin
+        if (router.pathname === '/admin') {
+          loadApplications();
+        }
+      };
+
+      router.events.on('routeChangeComplete', handleRouteChange);
+      return () => router.events.off('routeChangeComplete', handleRouteChange);
+    }, [router.events, router.pathname]);
+
+    // Refetch when window gains focus (catches browser back button to dashboard)
+    useEffect(() => {
+      const handleFocus = () => {
+        loadApplications();
+      };
+
+      window.addEventListener('focus', handleFocus);
+      return () => window.removeEventListener('focus', handleFocus);
+    }, []);
+
+    // Refetch when component becomes visible after being hidden
+    useEffect(() => {
+      const handleVisibilityChange = () => {
+        if (!document.hidden) {
+          loadApplications();
+        }
+      };
+
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }, []);
 
   // Sorting logic
   const handleSortSelect = (key: SortKey) => {
@@ -356,12 +403,6 @@ function AdminDashboardPage() {
               </div>
             )}
           </div>
-          <Link
-            href="/"
-            className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
-          >
-            Back to Application
-          </Link>
         </div>
       }
     >
@@ -554,7 +595,9 @@ function AdminDashboardPage() {
         </div>
       )}
 
-      {!hasRows ? (
+      {isLoading ? (
+        <div className="px-5 py-10 text-gray-700">Loading applications...</div>
+      ) : !hasRows ? (
         <div className="px-5 py-10 text-gray-700">No applications found.</div>
       ) : (
         <div className="space-y-6">
