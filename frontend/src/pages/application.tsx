@@ -433,6 +433,12 @@ function BSWDApplicationPage() {
                       {profile?.role === 'admin' ? 'Administrator' : 'Student'}
                     </div>
                   </div>
+                  <Link
+                    href="/student-dashboard"
+                    className="block w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50"
+                  >
+                    View Application Status
+                  </Link>
                   <button
                     onClick={async () => {
                       await signOut();
