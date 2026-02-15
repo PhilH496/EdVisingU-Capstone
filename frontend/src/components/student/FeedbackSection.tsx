@@ -1,6 +1,6 @@
 /**
  * FeedbackSection Component
- * 显示来自审查团队的反馈和需要学生采取的行动
+ * Displays feedback from the review team and actions required by the student
  */
 
 import { AlertCircle, CheckCircle, Info, Upload, FileText } from 'lucide-react';
