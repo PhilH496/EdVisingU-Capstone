@@ -81,14 +81,14 @@ export function ServiceAndEquip({
 
     // Check if items from this category already exist
     const existingItemsFromCategory = formData.requestedItems.filter(
-      (item) => item.category === itemType
+      (item) => item.category === itemType,
     );
 
     // Check if all items are already added
     const allItemsAlreadyAdded = currentItems.every((currentItem) =>
       existingItemsFromCategory.some(
-        (existing) => existing.item === currentItem.name
-      )
+        (existing) => existing.item === currentItem.name,
+      ),
     );
 
     if (allItemsAlreadyAdded && existingItemsFromCategory.length > 0) {
@@ -101,8 +101,8 @@ export function ServiceAndEquip({
       .filter(
         (item) =>
           !existingItemsFromCategory.some(
-            (existing) => existing.item === item.name
-          )
+            (existing) => existing.item === item.name,
+          ),
       )
       .map((item) => ({
         category: itemType,
@@ -112,10 +112,10 @@ export function ServiceAndEquip({
         fundingSource:
           item.bswdEligible && item.csgdseEligible
             ? "both"
-            : (item.bswdEligible ? "bswd" : "csg-dse") as
+            : ((item.bswdEligible ? "bswd" : "csg-dse") as
                 | "bswd"
                 | "csg-dse"
-                | "both",
+                | "both"),
       }));
 
     setFormData((prev) => {
@@ -133,13 +133,13 @@ export function ServiceAndEquip({
       tabFocus === "equipment" ? availableEquip : availableServies;
     const itemType = tabFocus === "equipment" ? "Equipment" : "Service";
     const existingItemsFromCategory = formData.requestedItems.filter(
-      (item) => item.category === itemType
+      (item) => item.category === itemType,
     );
 
     return currentItems.every((currentItem) =>
       existingItemsFromCategory.some(
-        (existing) => existing.item === currentItem.name
-      )
+        (existing) => existing.item === currentItem.name,
+      ),
     );
   };
 
@@ -302,7 +302,7 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
 
   // Check if this item is already added
   const isAdded = formData.requestedItems.some(
-    (item) => item.category === itemType && item.item === itemInfo.name
+    (item) => item.category === itemType && item.item === itemInfo.name,
   );
 
   const handleAddItem = () => {
@@ -311,7 +311,8 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
       setFormData((prev) => ({
         ...prev,
         requestedItems: prev.requestedItems.filter(
-          (item) => !(item.category === itemType && item.item === itemInfo.name)
+          (item) =>
+            !(item.category === itemType && item.item === itemInfo.name),
         ),
       }));
     } else {
@@ -327,10 +328,10 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
         fundingSource:
           itemInfo.bswdEligible && itemInfo.csgdseEligible
             ? "both"
-            : (itemInfo.bswdEligible ? "bswd" : "csg-dse") as
+            : ((itemInfo.bswdEligible ? "bswd" : "csg-dse") as
                 | "bswd"
                 | "csg-dse"
-                | "both",
+                | "both"),
       };
 
       setFormData((prev) => ({
@@ -356,7 +357,7 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
                 {getEligibility(
                   itemInfo.bswdEligible,
                   itemInfo.csgdseEligible,
-                  t
+                  t,
                 )}
               </span>
             </>
@@ -366,7 +367,7 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
               {getEligibility(
                 itemInfo.bswdEligible,
                 itemInfo.csgdseEligible,
-                t
+                t,
               )}
             </div>
           )}
@@ -387,8 +388,8 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
             ? t("serviceEquipment.buttons.removeItem")
             : t("serviceEquipment.buttons.added")
           : type === "equipment"
-          ? t("serviceEquipment.buttons.addItem")
-          : t("serviceEquipment.buttons.addService")}
+            ? t("serviceEquipment.buttons.addItem")
+            : t("serviceEquipment.buttons.addService")}
       </button>
     </div>
   );
@@ -399,7 +400,7 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
 function getEligibility(
   bswd: boolean,
   csgdse: boolean,
-  t: (key: string) => string
+  t: (key: string) => string,
 ) {
   if (bswd && csgdse) {
     return t("serviceEquipment.eligibility.both");

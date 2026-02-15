@@ -47,7 +47,7 @@ function BSWDApplicationPage() {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!loading && !user) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [user, loading, router]);
 
@@ -142,21 +142,21 @@ function BSWDApplicationPage() {
       case 1:
         return Boolean(
           formData.studentId &&
-            formData.studentId.length >= 7 &&
-            formData.studentId.length <= 8 &&
-            formData.firstName &&
-            formData.lastName &&
-            formData.email &&
-            formData.dateOfBirth &&
-            formData.oen.length === 9 &&
-            formData.sin.replace(/\D/g, "").length === 9 &&
-            formData.address &&
-            formData.city &&
-            formData.province &&
-            formData.postalCode &&
-            formData.postalCode.replace(/\s/g, "").length === 6 &&
-            formData.country &&
-            formData.hasOsapApplication !== undefined
+          formData.studentId.length >= 7 &&
+          formData.studentId.length <= 8 &&
+          formData.firstName &&
+          formData.lastName &&
+          formData.email &&
+          formData.dateOfBirth &&
+          formData.oen.length === 9 &&
+          formData.sin.replace(/\D/g, "").length === 9 &&
+          formData.address &&
+          formData.city &&
+          formData.province &&
+          formData.postalCode &&
+          formData.postalCode.replace(/\s/g, "").length === 6 &&
+          formData.country &&
+          formData.hasOsapApplication !== undefined,
         );
 
       case 2: {
@@ -164,19 +164,19 @@ function BSWDApplicationPage() {
           formData.previousInstitution;
           return Boolean(
             formData.institution &&
-              formData.institutionType &&
-              formData.studyType &&
-              formData.studyPeriodStart &&
-              formData.studyPeriodEnd &&
-              formData.previousInstitution
+            formData.institutionType &&
+            formData.studyType &&
+            formData.studyPeriodStart &&
+            formData.studyPeriodEnd &&
+            formData.previousInstitution,
           );
         }
         return Boolean(
           formData.institution &&
-            formData.institutionType &&
-            formData.studyType &&
-            formData.studyPeriodStart &&
-            formData.studyPeriodEnd
+          formData.institutionType &&
+          formData.studyType &&
+          formData.studyPeriodStart &&
+          formData.studyPeriodEnd,
         );
       }
 
@@ -400,16 +400,16 @@ function BSWDApplicationPage() {
   return (
     <div>
       <FormLayout
-        title={t('title')}
+        title={t("title")}
         description=""
         headerAction={
           <div className="flex items-center gap-3">
-            {profile?.role === 'admin' && (
+            {profile?.role === "admin" && (
               <Link
                 href="/admin"
                 className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
               >
-                {t('adminButton')}
+                {t("adminButton")}
               </Link>
             )}
             <div className="relative">
@@ -417,20 +417,39 @@ function BSWDApplicationPage() {
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100 flex items-center gap-2"
               >
-                <span>{profile?.full_name || profile?.email || user?.email || 'User'}</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <span>
+                  {profile?.full_name ||
+                    profile?.email ||
+                    user?.email ||
+                    "User"}
+                </span>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </button>
               {showUserMenu && (
                 <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                   <div className="px-4 py-3 border-b border-gray-100">
                     {profile?.full_name && (
-                      <div className="font-medium text-gray-900 mb-1">{profile.full_name}</div>
+                      <div className="font-medium text-gray-900 mb-1">
+                        {profile.full_name}
+                      </div>
                     )}
-                    <div className="text-sm text-gray-600">{profile?.email || user?.email}</div>
+                    <div className="text-sm text-gray-600">
+                      {profile?.email || user?.email}
+                    </div>
                     <div className="text-xs text-gray-500 mt-1">
-                      {profile?.role === 'admin' ? 'Administrator' : 'Student'}
+                      {profile?.role === "admin" ? "Administrator" : "Student"}
                     </div>
                   </div>
                   <button
@@ -439,7 +458,7 @@ function BSWDApplicationPage() {
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                   >
-                    {t('logout') || 'Logout'}
+                    {t("logout") || "Logout"}
                   </button>
                 </div>
               )}
@@ -447,36 +466,36 @@ function BSWDApplicationPage() {
           </div>
         }
       >
-      <LanguageSwitcher />
+        <LanguageSwitcher />
 
-      <div className="mb-4 p-4 pb-2 py-6 border rounded-md">
-        <StepBar />
-      </div>
-
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-sm text-red-600">{error}</p>
+        <div className="mb-4 p-4 pb-2 py-6 border rounded-md">
+          <StepBar />
         </div>
-      )}
 
-      {saving && (
-        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
-          <p className="text-sm text-blue-600">
-            Submitting your application to the database...
-          </p>
-        </div>
-      )}
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
 
-      {renderStep()}
+        {saving && (
+          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
+            <p className="text-sm text-blue-600">
+              Submitting your application to the database...
+            </p>
+          </div>
+        )}
 
-      <FormNavigation
-        currentStep={currentStep}
-        totalSteps={TOTAL_STEPS}
-        onNext={handleNext}
-        onPrevious={handlePrevious}
-        onSubmit={handleSubmit}
-        canProceed={canProceed}
-      />
+        {renderStep()}
+
+        <FormNavigation
+          currentStep={currentStep}
+          totalSteps={TOTAL_STEPS}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          onSubmit={handleSubmit}
+          canProceed={canProceed}
+        />
       </FormLayout>
     </div>
   );
