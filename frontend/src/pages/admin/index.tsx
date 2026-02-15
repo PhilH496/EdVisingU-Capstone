@@ -403,12 +403,6 @@ function AdminDashboardPage() {
               </div>
             )}
           </div>
-          <Link
-            href="/application"
-            className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100"
-          >
-            Back to Application
-          </Link>
         </div>
       }
     >

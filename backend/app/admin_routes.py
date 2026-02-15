@@ -5,7 +5,7 @@ Admin Chat Route - Context-aware RAG chatbot
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
-from .chain import get_or_create_chain, chat_with_memory
+from chain import get_or_create_chain, chat_with_memory
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 

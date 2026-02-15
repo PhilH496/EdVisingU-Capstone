@@ -145,34 +145,33 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <hr className="border-t-2 border-gray-300 mb-8" />
-
-          {/* Two Column Layout for general section*/}
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            {/* Left Column - Updates Box */}
-            <div className="md:col-span-2 flex flex-col">
-              <div className="bg-blue-50 border-l-4 border-blue-600 p-6 mb-8">
-                <div className="flex items-start gap-3">
-                  <div className="flex-1">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">
-                      {t('landingPage.updates.title')}
-                    </h2>
-                    <ul className="space-y-3 text-sm">
-                      <li>
-                        <Link href="/login" className="text-blue-600 hover:underline font-medium">
-                          {t('landingPage.updates.item1.linkText')}
-                        </Link>
-                        {' '}
-                        {t('landingPage.updates.item1.trailingText')}
-                      </li>
-                      <li>
-                        <Link href="/login" className="text-blue-600 hover:underline font-medium">
-                          {t('landingPage.updates.item2.linkText')}
-                        </Link>
-                        {' '}
-                        {t('landingPage.updates.item2.trailingText')}
-                      </li>
-                    </ul>
+  return (
+    <div>
+      <FormLayout
+        title={t('title')}
+        description=""
+        headerAction={
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100 flex items-center gap-2"
+              >
+                <span>{profile?.full_name || profile?.email || user?.email || 'User'}</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {showUserMenu && (
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    {profile?.full_name && (
+                      <div className="font-medium text-gray-900 mb-1">{profile.full_name}</div>
+                    )}
+                    <div className="text-sm text-gray-600">{profile?.email || user?.email}</div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {profile?.role === 'admin' ? 'Administrator' : 'Student'}
+                    </div>
                   </div>
                 </div>
               </div>
