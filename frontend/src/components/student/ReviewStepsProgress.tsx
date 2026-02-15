@@ -1,6 +1,6 @@
 /**
  * ReviewStepsProgress Component
- * 显示申请审查流程的各个步骤和当前进度
+ * Displays the steps and current progress of the application review process
  */
 
 import { CheckCircle, Clock, Circle, AlertCircle } from 'lucide-react';
@@ -132,7 +132,7 @@ export function ReviewStepsProgress({
       <div className="space-y-4">
         {steps.map((step, index) => (
           <div key={step.id} className="relative">
-            {/* 连接线 */}
+            {/* Connecting line */}
             {index < steps.length - 1 && (
               <div className="absolute left-[15px] top-[40px] w-[2px] h-[calc(100%+16px)] bg-gray-200" />
             )}

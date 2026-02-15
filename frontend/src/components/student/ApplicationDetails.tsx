@@ -1,6 +1,6 @@
 /**
  * ApplicationDetails Component
- * 显示申请的详细信息，以学生友好的方式展示
+ * Displays detailed application information in a student-friendly format
  */
 
 import { FileText, User, GraduationCap, Calendar, MapPin, Phone, Mail } from 'lucide-react';

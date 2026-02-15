@@ -181,7 +181,7 @@ export default function ApplicationStatusPage() {
                   {statusConfig.label}
                 </h2>
                 <span className="text-sm text-gray-500">
-                  最后更新: {new Date(application.statusUpdatedDate).toLocaleDateString('zh-CN', { 
+                  Last Updated: {new Date(application.statusUpdatedDate).toLocaleDateString('en-US', { 
                     year: 'numeric', month: 'long', day: 'numeric' 
                   })}
                 </span>
