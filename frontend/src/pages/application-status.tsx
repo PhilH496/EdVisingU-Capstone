@@ -6,25 +6,77 @@ import { FeedbackSection } from '@/components/student/FeedbackSection';
 import { StudentFooter } from '@/components/bswd/StudentFooter';
 import { CheckCircle, Clock, FileText, XCircle, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
 
 export default function ApplicationStatusPage() {
   const [application, setApplication] = useState<Application | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
-    const storedData = localStorage.getItem('currentApplication');
-    if (storedData) {
-      try {
-        setApplication(JSON.parse(storedData));
-      } catch (error) {
-        console.error('Error parsing application data:', error);
+    const fetchUserApplication = async () => {
+      if (!user) {
+        setIsLoading(false);
+        return;
       }
-    }
-    setIsLoading(false);
-  }, []);
+
+      try {
+        // First, get the student record by email to find their student_id
+        const { data: studentData, error: studentError } = await supabase
+          .from('student')
+          .select('student_id')
+          .eq('email', user.email)
+          .single();
+
+        if (studentError || !studentData) {
+          console.error('Error fetching student:', studentError);
+          setIsLoading(false);
+          return;
+        }
+
+        // Then fetch the application using the student_id
+        const { data: appData, error: appError } = await supabase
+          .from('applications')
+          .select('*')
+          .eq('student_id', studentData.student_id.toString())
+          .order('submitted_date', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (appError) {
+          console.error('Error fetching application:', appError);
+        } else if (appData) {
+          // Convert snake_case to camelCase for the Application interface
+          const formattedApp: Application = {
+            id: appData.id,
+            studentName: appData.student_name,
+            studentId: appData.student_id,
+            submittedDate: appData.submitted_date,
+            status: appData.status,
+            program: appData.program || 'Not specified',
+            institution: appData.institution || 'Not specified',
+            studyPeriod: appData.study_period || 'Not specified',
+            statusUpdatedDate: appData.status_updated_date
+          };
+          setApplication(formattedApp);
+        }
+      } catch (error) {
+        console.error('Error loading application:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserApplication();
+  }, [user]);
 
   const getStatusConfig = (status: ApplicationStatus) => {
-    switch (status) {
+    // Normalize status to lowercase for comparison
+    const normalizedStatus = status?.toLowerCase();
+    
+    switch (normalizedStatus) {
       case 'submitted':
         return {
           icon: FileText,
@@ -34,7 +86,9 @@ export default function ApplicationStatusPage() {
           label: 'Submitted',
           description: 'Your application has been successfully submitted and is in queue for review.'
         };
+      case 'in review':
       case 'in-review':
+      case 'reviewing':
         return {
           icon: Clock,
           color: 'text-yellow-600',
@@ -44,6 +98,8 @@ export default function ApplicationStatusPage() {
           description: 'Our team is reviewing your application and supporting documents.'
         };
       case 'in-progress':
+      case 'in progress':
+      case 'pending':
         return {
           icon: AlertCircle,
           color: 'text-orange-600',
@@ -53,6 +109,7 @@ export default function ApplicationStatusPage() {
           description: 'Additional information or documents are required to process your application.'
         };
       case 'accepted':
+      case 'approved':
         return {
           icon: CheckCircle,
           color: 'text-green-600',
@@ -62,6 +119,7 @@ export default function ApplicationStatusPage() {
           description: 'Congratulations! Your application has been approved.'
         };
       case 'denied':
+      case 'rejected':
         return {
           icon: XCircle,
           color: 'text-red-600',
@@ -69,6 +127,17 @@ export default function ApplicationStatusPage() {
           borderColor: 'border-red-200',
           label: 'Not Approved',
           description: 'Unfortunately, your application was not approved at this time.'
+        };
+      default:
+        // Default fallback for unknown statuses
+        console.warn('Unknown application status:', status);
+        return {
+          icon: Clock,
+          color: 'text-gray-600',
+          bgColor: 'bg-gray-50',
+          borderColor: 'border-gray-200',
+          label: status || 'Unknown',
+          description: 'Your application is being processed.'
         };
     }
   };
@@ -134,7 +203,15 @@ export default function ApplicationStatusPage() {
               </p>
             </div>
             <div className="text-center py-12">
-              <p className="text-gray-600">No application found.</p>
+              <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">No Application Found</h2>
+              <p className="text-gray-600 mb-6">You have not submitted any applications yet.</p>
+              <Link
+                href="/application"
+                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                Start New Application
+              </Link>
             </div>
           </div>
         </div>

@@ -13,26 +13,86 @@ import { StudentFooter } from '@/components/bswd/StudentFooter';
 import { CheckCircle, Clock, FileText, XCircle, AlertCircle, Download, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function StudentDashboard() {
   const [application, setApplication] = useState<Application | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'details' | 'timeline'>('overview');
+  const { user } = useAuth();
 
   useEffect(() => {
-    const storedData = localStorage.getItem('currentApplication');
-    if (storedData) {
-      try {
-        setApplication(JSON.parse(storedData));
-      } catch (error) {
-        console.error('Error parsing application data:', error);
+    const fetchUserApplication = async () => {
+      if (!user) {
+        console.log('No user logged in');
+        setIsLoading(false);
+        return;
       }
-    }
-    setIsLoading(false);
-  }, []);
+
+      console.log('Fetching application for user:', user.email);
+
+      try {
+        // First, get the student record by email to find their student_id
+        const { data: studentData, error: studentError } = await supabase
+          .from('student')
+          .select('student_id')
+          .eq('email', user.email)
+          .single();
+
+        if (studentError || !studentData) {
+          console.error('Error fetching student:', studentError);
+          console.log('No student found with email:', user.email);
+          setIsLoading(false);
+          return;
+        }
+
+        console.log('Found student_id:', studentData.student_id);
+
+        // Then fetch the application using the student_id
+        const { data: appData, error: appError } = await supabase
+          .from('applications')
+          .select('*')
+          .eq('student_id', studentData.student_id.toString())
+          .order('submitted_date', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (appError) {
+          console.error('Error fetching application:', appError);
+        } else if (appData) {
+          console.log('Found application:', appData);
+          // Convert snake_case to camelCase for the Application interface
+          const formattedApp: Application = {
+            id: appData.id,
+            studentName: appData.student_name,
+            studentId: appData.student_id,
+            submittedDate: appData.submitted_date,
+            status: appData.status,
+            program: appData.program || 'Not specified',
+            institution: appData.institution || 'Not specified',
+            studyPeriod: appData.study_period || 'Not specified',
+            statusUpdatedDate: appData.status_updated_date
+          };
+          setApplication(formattedApp);
+        } else {
+          console.log('No application found for student_id:', studentData.student_id);
+        }
+      } catch (error) {
+        console.error('Error loading application:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserApplication();
+  }, [user]);
 
   const getStatusConfig = (status: Application['status']) => {
-    switch (status) {
+    // Normalize status to lowercase for comparison
+    const normalizedStatus = status?.toLowerCase();
+    
+    switch (normalizedStatus) {
       case 'submitted':
         return {
           icon: FileText,
@@ -42,7 +102,9 @@ export default function StudentDashboard() {
           label: 'Submitted',
           description: 'Your application has been successfully submitted and is awaiting review.'
         };
+      case 'in review':
       case 'in-review':
+      case 'reviewing':
         return {
           icon: Clock,
           color: 'text-yellow-600',
@@ -52,6 +114,8 @@ export default function StudentDashboard() {
           description: 'Our team is reviewing your application and supporting documents.'
         };
       case 'in-progress':
+      case 'in progress':
+      case 'pending':
         return {
           icon: AlertCircle,
           color: 'text-orange-600',
@@ -61,6 +125,7 @@ export default function StudentDashboard() {
           description: 'Additional information or documents are required to complete your application review.'
         };
       case 'accepted':
+      case 'approved':
         return {
           icon: CheckCircle,
           color: 'text-green-600',
@@ -70,6 +135,7 @@ export default function StudentDashboard() {
           description: 'Congratulations! Your application has been approved.'
         };
       case 'denied':
+      case 'rejected':
         return {
           icon: XCircle,
           color: 'text-red-600',
@@ -77,6 +143,17 @@ export default function StudentDashboard() {
           borderColor: 'border-red-200',
           label: 'Not Approved',
           description: 'Unfortunately, your application was not approved at this time.'
+        };
+      default:
+        // Default fallback for unknown statuses
+        console.warn('Unknown application status:', status);
+        return {
+          icon: Clock,
+          color: 'text-gray-600',
+          bgColor: 'bg-gray-50',
+          borderColor: 'border-gray-200',
+          label: status || 'Unknown',
+          description: 'Your application is being processed.'
         };
     }
   };
