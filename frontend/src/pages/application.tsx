@@ -29,6 +29,7 @@ import { useTranslation } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
 import Head from "next/head";
 
 // Store all form data in a single state object
@@ -49,6 +50,42 @@ function BSWDApplicationPage() {
     if (!loading && !user) {
       router.push("/login");
     }
+  }, [user, loading, router]);
+
+  // Redirect to dashboard if student already submitted an application
+  useEffect(() => {
+    const checkExistingSubmission = async () => {
+      if (!loading && user?.email) {
+        try {
+          // Get student_id from email
+          const { data: studentData } = await supabase
+            .from('student')
+            .select('student_id')
+            .eq('email', user.email)
+            .single();
+
+          if (studentData) {
+            // Check if application exists
+            const { data: existingApp } = await supabase
+              .from('applications')
+              .select('id')
+              .eq('student_id', studentData.student_id.toString())
+              .limit(1)
+              .single();
+
+            if (existingApp) {
+              // Student already submitted, redirect to dashboard
+              router.push('/student-dashboard');
+            }
+          }
+        } catch (error) {
+          // Ignore errors - let user stay on form page
+          console.log('No existing submission found, proceeding with form');
+        }
+      }
+    };
+
+    checkExistingSubmission();
   }, [user, loading, router]);
 
   const [formData, setFormData] = useState<FormData>({
@@ -258,14 +295,38 @@ function BSWDApplicationPage() {
       // Redirect to status page
       window.location.href = `/ThankYouPage?appId=${result.application_id}`;
     } catch (err) {
-      // Handle submission errors
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Failed to submit application. Please try again.";
+      // Handle submission errors with detailed information
+      let errorMessage = "Failed to submit application. Please try again.";
+      
+      if (err instanceof Error) {
+        errorMessage = err.message;
+        
+        // Check for specific error patterns
+        if (err.message.includes('Student ID') && err.message.includes('already exists')) {
+          // Student ID or Application already exists - show the full message
+          errorMessage = err.message;
+        } else if (err.message.includes('OEN') && err.message.includes('already in use')) {
+          // OEN already exists - show the full message
+          errorMessage = err.message;
+        } else if (err.message.includes('duplicate key')) {
+          // Generic duplicate error
+          errorMessage = "A record with this information already exists. Please verify your Student ID and OEN.";
+        } else if (err.message.includes('foreign key')) {
+          errorMessage = "Database relationship error. Please contact support with error: " + err.message;
+        } else if (err.message.includes('null value')) {
+          errorMessage = "Required field is missing. Please check all fields are filled correctly.";
+        } else if (err.message.includes('permission')) {
+          errorMessage = "Permission denied. Please make sure you're logged in.";
+        }
+      }
+      
       setError(errorMessage);
       setSaving(false);
-      console.error("Submission error:", err);
+      console.error("Detailed submission error:", err);
+      console.error("Form data at error:", formData);
+      
+      // Scroll to top to show error message
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -452,6 +513,12 @@ function BSWDApplicationPage() {
                       {profile?.role === "admin" ? "Administrator" : "Student"}
                     </div>
                   </div>
+                  <Link
+                    href="/student-dashboard"
+                    className="block w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50"
+                  >
+                    View Application Status
+                  </Link>
                   <button
                     onClick={async () => {
                       await signOut();
