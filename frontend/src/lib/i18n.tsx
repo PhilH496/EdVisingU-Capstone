@@ -79,11 +79,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return typeof value === "string" ? value : key;
   };
 
-  // Type guard to check if a value is a Messages object
-  function isMessages(value: string | Messages): value is Messages {
-    return typeof value === "object" && value != null;
-  }
-
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t, isLoaded }}>
       {children}

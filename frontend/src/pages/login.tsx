@@ -83,7 +83,8 @@ export default function LoginPage() {
       }
       
     } catch (err) {
-      setError('An unexpected error occurred');
+      setError("An unexpected error occurred");
+      console.error("Error logging in:", err);
       setLoading(false);
     }
   };

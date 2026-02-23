@@ -11,7 +11,7 @@
  * - Saves data to Supabase ONLY on final submission
  */
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { FormData } from "@/types/bswd";
@@ -24,7 +24,6 @@ import { DisabilityInfoStep } from "@/components/bswd/steps/DisabilityInfoStep";
 import { ServiceAndEquip } from "@/components/bswd/steps/ServiceAndEquip";
 import { ReviewAndSubmit } from "@/components/bswd/steps/SubmitStep";
 import { saveSubmission } from "@/lib/database";
-import { saveSnapshotMerge, saveApplicationsList } from "@/lib/adminStore";
 import { useTranslation } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -174,7 +173,7 @@ function BSWDApplicationPage() {
 
   const TOTAL_STEPS = stepsInfo.length;
 
-  const isStepComplete = (stepCheck: number): boolean => {
+  const isStepComplete = useCallback((stepCheck: number): boolean => {
     switch (stepCheck) {
       case 1:
         return Boolean(
@@ -198,7 +197,6 @@ function BSWDApplicationPage() {
 
       case 2: {
         if (formData.submittedDisabilityElsewhere === true) {
-          formData.previousInstitution;
           return Boolean(
             formData.institution &&
             formData.institutionType &&
@@ -259,11 +257,11 @@ function BSWDApplicationPage() {
       default:
         return false;
     }
-  };
+  }, [formData, isConfirmed]);
 
   const canProceed = useMemo(() => {
     return isStepComplete(currentStep) && !saving;
-  }, [currentStep, formData, isConfirmed, saving]);
+  }, [currentStep, isStepComplete, saving]);
 
   const handleNext = async () => {
     if (!isStepComplete(currentStep)) return;
@@ -293,7 +291,7 @@ function BSWDApplicationPage() {
     try {
       const result = await saveSubmission(formData);
       // Redirect to status page
-      window.location.href = `/ThankYouPage?appId=${result.application_id}`;
+      window.location.href = `/confirmation?appId=${result.application_id}`;
     } catch (err) {
       // Handle submission errors with detailed information
       let errorMessage = "Failed to submit application. Please try again.";
@@ -387,7 +385,7 @@ function BSWDApplicationPage() {
         }
         prevStepRef.current = currentStep;
       }
-    }, [currentStep]);
+    });
 
     return (
       <nav
@@ -447,7 +445,7 @@ function BSWDApplicationPage() {
         stepCheck++;
       }
     }
-  }, [currentStep, formData, isConfirmed]);
+  }, [currentStep, formData, isConfirmed, TOTAL_STEPS, isStepComplete]);
 
   // Show loading while checking authentication
   if (loading || !user) {
@@ -461,8 +459,7 @@ function BSWDApplicationPage() {
   return (
     <div>
       <FormLayout
-        title={t("title")}
-        description=""
+        title={t('title')}
         headerAction={
           <div className="flex items-center gap-3">
             {profile?.role === "admin" && (

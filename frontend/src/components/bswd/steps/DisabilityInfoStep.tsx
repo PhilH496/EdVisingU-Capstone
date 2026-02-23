@@ -86,6 +86,7 @@ export function DisabilityInfoStep({
           });
         }
       } catch (error) {
+        console.error("Error sending psycho-educational assessment email:", error);
         setEmailStatus({
           sending: false,
           sent: false,

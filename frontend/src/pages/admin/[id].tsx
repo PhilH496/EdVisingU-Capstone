@@ -10,8 +10,6 @@ import {
   useMemo,
   useRef,
   useState,
-  Dispatch,
-  SetStateAction,
 } from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -37,9 +35,6 @@ import { supabase } from "@/lib/supabase";
 
 import {
   RequestedItem,
-  DeterministicCheckResult,
-  FinancialAnalysis,
-  AIAnalysisResult,
   ApplicationAnalysis,
   ApplicationData,
   FormDataSetter,
@@ -352,6 +347,7 @@ function AdminApplicationDetailPage() {
       setIsEditMode(false);
     } catch (error) { 
       setError("Failed to save changes. Please try again.");
+      console.error("Failed to save changes:", error);
     }
     finally {
       setSaving(false);
