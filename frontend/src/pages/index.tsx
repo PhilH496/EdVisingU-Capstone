@@ -145,16 +145,47 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Two Column Section: AI Infographic and Flashcards */}
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
-            {/* Left Column - AI-Powered Infographic Section */}
-            <div className="bg-gray-100 border border-gray-300 p-6 flex flex-col justify-center">
-              <h2 className="text-lg font-bold mb-5">
-                {t('landingPage.ai.title')}
-              </h2>
-              <p className="text-sm text-gray-700">
-                {t('landingPage.ai.description')}
-              </p>
+          <hr className="border-t-2 border-gray-300 mb-8" />
+
+          {/* Two Column Layout for general section*/}
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            {/* Left Column - Updates Box */}
+            <div className="md:col-span-2 flex flex-col">
+              <div className="bg-blue-50 border-l-4 border-blue-600 p-6 mb-8">
+                <div className="flex items-start gap-3">
+                  <div className="flex-1">
+                    <h2 className="text-xl font-bold text-gray-900 mb-4">
+                      {t('landingPage.updates.title')}
+                    </h2>
+                    <ul className="space-y-3 text-sm">
+                      <li>
+                        <Link href="/login" className="text-blue-600 hover:underline font-medium">
+                          {t('landingPage.updates.item1.linkText')}
+                        </Link>
+                        {' '}
+                        {t('landingPage.updates.item1.trailingText')}
+                      </li>
+                      <li>
+                        <Link href="/login" className="text-blue-600 hover:underline font-medium">
+                          {t('landingPage.updates.item2.linkText')}
+                        </Link>
+                        {' '}
+                        {t('landingPage.updates.item2.trailingText')}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* AI-Powered Infographic Section - Now stretches to fill remaining space */}
+              <div className="bg-gray-100 border border-gray-300 p-6 flex-1 flex flex-col justify-center">
+                <h2 className="text-lg font-bold mb-5">
+                  {t('landingPage.ai.title')}
+                </h2>
+                <p className="text-sm text-gray-700">
+                  {t('landingPage.ai.description')}
+                </p>
+              </div>
             </div>
 
             {/* Right Column - Expandable Flashcards */}

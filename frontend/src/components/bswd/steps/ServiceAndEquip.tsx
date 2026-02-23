@@ -7,7 +7,8 @@
 import { FormData } from "@/types/bswd";
 import { useState } from "react";
 import { useTranslation } from "@/lib/i18n"; // translation import
-
+import { ItemDisplay } from "@/types/bswd";
+import { getItemsWithSuggestion } from "@/lib/item-suggestion/itemSuggestion";
 interface ServiceAndEquipProps {
   formData: FormData;
   setFormData: (data: FormData | ((prev: FormData) => FormData)) => void;
@@ -24,14 +25,28 @@ export function ServiceAndEquip({
 
   if (!isLoaded) return null;
 
+  const functionalLimitations = formData.functionalLimitations
+    .filter((limit) => limit.checked)
+    .map((limit) => limit.label.toLowerCase());
+  console.log(functionalLimitations);
+  // const functionalLimitations = ["learning", "mental health"];
+
   // Database mock up
-  const availableEquip = [
+  const availableEquip: ItemDisplay[] = [
     {
       id: 1,
       name: t("serviceEquipment.items.equipment.computerLaptop"),
       cap: 3500,
       bswdEligible: true,
       csgdseEligible: true,
+      suggestionTags: [
+        "communication",
+        "learning",
+        "dexterity",
+        "mobility",
+        "vision",
+        "hearing",
+      ],
     },
     {
       id: 2,
@@ -39,6 +54,14 @@ export function ServiceAndEquip({
       cap: 800,
       bswdEligible: true,
       csgdseEligible: true,
+      suggestionTags: [
+        "learning",
+        "communication",
+        "dexterity",
+        "mobility",
+        "vision",
+        "hearing",
+      ],
     },
     {
       id: 3,
@@ -46,17 +69,19 @@ export function ServiceAndEquip({
       cap: 2600,
       bswdEligible: true,
       csgdseEligible: true,
+      suggestionTags: ["vision", "learning", "cognitive", "dexterity"],
     },
   ];
 
   // Database mock up
-  const availableServies = [
+  const availableServies: ItemDisplay[] = [
     {
       id: 1,
       name: t("serviceEquipment.items.services.noteTakingServices"),
       cap: t("serviceEquipment.items.servicesCaps.noteTakingServices"),
       bswdEligible: true,
       csgdseEligible: true,
+      suggestionTags: ["learning", "attention/concentration", "dexterity"],
     },
     {
       id: 2,
@@ -64,6 +89,14 @@ export function ServiceAndEquip({
       cap: t("serviceEquipment.items.servicesCaps.tutoringServices"),
       bswdEligible: true,
       csgdseEligible: true,
+      suggestionTags: [
+        "learning",
+        "cognitive",
+        "attention/concentration",
+        "mental health",
+        "dexterity",
+        "communication",
+      ],
     },
     {
       id: 3,
@@ -71,8 +104,24 @@ export function ServiceAndEquip({
       cap: t("serviceEquipment.items.servicesCaps.addAdhdCoaching"),
       bswdEligible: true,
       csgdseEligible: false,
+      suggestionTags: [
+        "learning",
+        "cognitive",
+        "attention/concentration",
+        "mental health",
+      ],
     },
   ];
+
+  const equipmentWithSuggestion = getItemsWithSuggestion(
+    functionalLimitations,
+    availableEquip,
+  );
+
+  const servicesWithSuggestion = getItemsWithSuggestion(
+    functionalLimitations,
+    availableServies,
+  );
 
   const handleAddAll = () => {
     const currentItems =
@@ -81,14 +130,14 @@ export function ServiceAndEquip({
 
     // Check if items from this category already exist
     const existingItemsFromCategory = formData.requestedItems.filter(
-      (item) => item.category === itemType
+      (item) => item.category === itemType,
     );
 
     // Check if all items are already added
     const allItemsAlreadyAdded = currentItems.every((currentItem) =>
       existingItemsFromCategory.some(
-        (existing) => existing.item === currentItem.name
-      )
+        (existing) => existing.item === currentItem.name,
+      ),
     );
 
     if (allItemsAlreadyAdded && existingItemsFromCategory.length > 0) {
@@ -101,8 +150,8 @@ export function ServiceAndEquip({
       .filter(
         (item) =>
           !existingItemsFromCategory.some(
-            (existing) => existing.item === item.name
-          )
+            (existing) => existing.item === item.name,
+          ),
       )
       .map((item) => ({
         category: itemType,
@@ -112,10 +161,10 @@ export function ServiceAndEquip({
         fundingSource:
           item.bswdEligible && item.csgdseEligible
             ? "both"
-            : (item.bswdEligible ? "bswd" : "csg-dse") as
+            : ((item.bswdEligible ? "bswd" : "csg-dse") as
                 | "bswd"
                 | "csg-dse"
-                | "both",
+                | "both"),
       }));
 
     setFormData((prev) => {
@@ -133,13 +182,13 @@ export function ServiceAndEquip({
       tabFocus === "equipment" ? availableEquip : availableServies;
     const itemType = tabFocus === "equipment" ? "Equipment" : "Service";
     const existingItemsFromCategory = formData.requestedItems.filter(
-      (item) => item.category === itemType
+      (item) => item.category === itemType,
     );
 
     return currentItems.every((currentItem) =>
       existingItemsFromCategory.some(
-        (existing) => existing.item === currentItem.name
-      )
+        (existing) => existing.item === currentItem.name,
+      ),
     );
   };
 
@@ -189,7 +238,7 @@ export function ServiceAndEquip({
               {t("serviceEquipment.buttons.addAllEquipment")}
             </button>
           </div>
-          {availableEquip.map((equip) => {
+          {equipmentWithSuggestion.map((equip) => {
             return (
               <Item
                 key={equip.id}
@@ -219,11 +268,11 @@ export function ServiceAndEquip({
               {t("serviceEquipment.buttons.addAllServices")}
             </button>
           </div>
-          {availableServies.map((equip) => {
+          {servicesWithSuggestion.map((service) => {
             return (
               <Item
-                key={equip.id}
-                itemInfo={equip}
+                key={service.id}
+                itemInfo={service}
                 type={tabFocus}
                 formData={formData}
                 setFormData={setFormData}
@@ -283,7 +332,7 @@ interface ItemInfo {
 }
 
 interface ItemProps {
-  itemInfo: ItemInfo;
+  itemInfo: ItemDisplay;
   type: string;
   formData: FormData;
   setFormData: (data: FormData | ((prev: FormData) => FormData)) => void;
@@ -302,7 +351,7 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
 
   // Check if this item is already added
   const isAdded = formData.requestedItems.some(
-    (item) => item.category === itemType && item.item === itemInfo.name
+    (item) => item.category === itemType && item.item === itemInfo.name,
   );
 
   const handleAddItem = () => {
@@ -311,7 +360,8 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
       setFormData((prev) => ({
         ...prev,
         requestedItems: prev.requestedItems.filter(
-          (item) => !(item.category === itemType && item.item === itemInfo.name)
+          (item) =>
+            !(item.category === itemType && item.item === itemInfo.name),
         ),
       }));
     } else {
@@ -327,10 +377,10 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
         fundingSource:
           itemInfo.bswdEligible && itemInfo.csgdseEligible
             ? "both"
-            : (itemInfo.bswdEligible ? "bswd" : "csg-dse") as
+            : ((itemInfo.bswdEligible ? "bswd" : "csg-dse") as
                 | "bswd"
                 | "csg-dse"
-                | "both",
+                | "both"),
       };
 
       setFormData((prev) => ({
@@ -343,7 +393,14 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
   return (
     <div className="border rounded-lg p-4 flex justify-between items-center">
       <div>
-        <h4 className="font-semibold">{itemInfo.name}</h4>
+        <h4 className="font-semibold">
+          {itemInfo.name}{" "}
+          {itemInfo.isSuggested && (
+            <span className="rounded-full p-1 bg-yellow-500 ml-2">
+              <i className="fa-solid fa-thumbs-up text-white"></i>
+            </span>
+          )}
+        </h4>
         <p>
           <span>
             {t("serviceEquipment.labels.cap")}: ${itemInfo.cap}
@@ -356,7 +413,7 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
                 {getEligibility(
                   itemInfo.bswdEligible,
                   itemInfo.csgdseEligible,
-                  t
+                  t,
                 )}
               </span>
             </>
@@ -366,7 +423,7 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
               {getEligibility(
                 itemInfo.bswdEligible,
                 itemInfo.csgdseEligible,
-                t
+                t,
               )}
             </div>
           )}
@@ -387,8 +444,8 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
             ? t("serviceEquipment.buttons.removeItem")
             : t("serviceEquipment.buttons.added")
           : type === "equipment"
-          ? t("serviceEquipment.buttons.addItem")
-          : t("serviceEquipment.buttons.addService")}
+            ? t("serviceEquipment.buttons.addItem")
+            : t("serviceEquipment.buttons.addService")}
       </button>
     </div>
   );
@@ -399,7 +456,7 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
 function getEligibility(
   bswd: boolean,
   csgdse: boolean,
-  t: (key: string) => string
+  t: (key: string) => string,
 ) {
   if (bswd && csgdse) {
     return t("serviceEquipment.eligibility.both");

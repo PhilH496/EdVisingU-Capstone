@@ -50,7 +50,33 @@ export default function LoginPage() {
         if (profile?.role === 'admin') {
           router.push('/admin');
         } else {
-          router.push('/application');
+          // For students, check if they already submitted an application
+          const { data: studentData } = await supabase
+            .from('student')
+            .select('student_id')
+            .eq('email', user.email)
+            .single();
+
+          if (studentData) {
+            // Check if student has any submitted applications
+            const { data: existingApp } = await supabase
+              .from('applications')
+              .select('id')
+              .eq('student_id', studentData.student_id.toString())
+              .limit(1)
+              .single();
+
+            if (existingApp) {
+              // Student has already submitted, go to dashboard
+              router.push('/student-dashboard');
+            } else {
+              // No submission yet, go to application form
+              router.push('/application');
+            }
+          } else {
+            // New student, go to application form
+            router.push('/application');
+          }
         }
       } else {
         router.push('/application');
