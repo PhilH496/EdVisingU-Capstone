@@ -232,7 +232,11 @@ function AdminDashboardPage() {
       prev.map((r: Row) => {
         if (r.id !== id) return r;
         const set = new Set(r.violationTags || []);
-        set.has(tag) ? set.delete(tag) : set.add(tag);
+        if (set.has(tag)) {
+          set.delete(tag);
+        } else {
+          set.add(tag);
+        }
         return { ...r, violationTags: Array.from(set) };
       })
     );
@@ -267,7 +271,11 @@ function AdminDashboardPage() {
   const toggleExpanded = (id: string) => {
     setExpandedApps((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
   };
