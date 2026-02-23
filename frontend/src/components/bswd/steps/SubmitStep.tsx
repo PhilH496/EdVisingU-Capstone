@@ -7,7 +7,6 @@
 import { FormData } from "@/types/bswd";
 import { FileText, User, GraduationCap, DollarSign, Heart } from "lucide-react";
 import { useTranslation } from "@/lib/i18n"; // translation
-import { use, useTransition } from "react";
 
 interface ReviewAndSubmitProps {
   formData: FormData;
@@ -47,7 +46,7 @@ if (Array.isArray(rawLimits)) {
 // 2) If it's an object (backend or admin wrote it like {mobility:true})
 else if (rawLimits && typeof rawLimits === "object") {
   functionalLimitationLabels = Object.entries(rawLimits)
-    .filter(([_, v]) => Boolean(v))
+    .filter(([, v]) => Boolean(v))
     .map(([key]) => key);
 }
 

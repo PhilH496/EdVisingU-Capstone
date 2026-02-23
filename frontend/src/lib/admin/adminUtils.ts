@@ -56,7 +56,7 @@ export const toChips = (val: unknown): string[] => {
   if (Array.isArray(val)) return val.map(String).filter(Boolean);
   if (typeof val === "object") {
     return Object.entries(val)
-      .filter(([_, v]) => !!v)
+      .filter(([, v]) => !!v)
       .map(([k]) => k);
   }
   if (typeof val === "string") {
@@ -97,7 +97,7 @@ export const normalizeFunctionalLimitations = (raw: unknown): string[] => {
 
   if (typeof raw === "object") {
     return Object.entries(raw)
-      .filter(([_, val]) => Boolean(val))
+      .filter(([, val]) => Boolean(val))
       .map(([key]) => key);
   }
 
