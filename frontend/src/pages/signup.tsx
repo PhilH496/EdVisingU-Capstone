@@ -86,7 +86,8 @@ export default function SignupPage() {
         router.push('/login');
       }, 2000);
     } catch (err) {
-      setError('An unexpected error occurred');
+      setError("An unexpected error occurred");
+      console.error("Error signing up:", err);
       setLoading(false);
     }
   };

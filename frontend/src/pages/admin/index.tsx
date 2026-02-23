@@ -101,6 +101,7 @@ function AdminDashboardPage() {
       });
       setDetScores(scoreMap);
     } catch (error) {
+      console.error("Error loading applications:", error);
     } finally {
       setIsLoading(false);
     }
