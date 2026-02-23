@@ -145,46 +145,16 @@ export default function LandingPage() {
             </div>
           </div>
 
-  return (
-    <div>
-      <FormLayout
-        title={t('title')}
-        description=""
-        headerAction={
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <button
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-100 flex items-center gap-2"
-              >
-                <span>{profile?.full_name || profile?.email || user?.email || 'User'}</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                  <div className="px-4 py-3 border-b border-gray-100">
-                    {profile?.full_name && (
-                      <div className="font-medium text-gray-900 mb-1">{profile.full_name}</div>
-                    )}
-                    <div className="text-sm text-gray-600">{profile?.email || user?.email}</div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {profile?.role === 'admin' ? 'Administrator' : 'Student'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* AI-Powered Infographic Section - Now stretches to fill remaining space */}
-              <div className="bg-gray-100 border border-gray-300 p-6 flex-1 flex flex-col justify-center">
-                <h2 className="text-lg font-bold mb-5">
-                  {t('landingPage.ai.title')}
-                </h2>
-                <p className="text-sm text-gray-700">
-                  {t('landingPage.ai.description')}
-                </p>
-              </div>
+          {/* Two Column Section: AI Infographic and Flashcards */}
+          <div className="grid md:grid-cols-2 gap-8 mb-12">
+            {/* Left Column - AI-Powered Infographic Section */}
+            <div className="bg-gray-100 border border-gray-300 p-6 flex flex-col justify-center">
+              <h2 className="text-lg font-bold mb-5">
+                {t('landingPage.ai.title')}
+              </h2>
+              <p className="text-sm text-gray-700">
+                {t('landingPage.ai.description')}
+              </p>
             </div>
 
             {/* Right Column - Expandable Flashcards */}
