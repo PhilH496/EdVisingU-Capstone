@@ -11,7 +11,7 @@
  * - Saves data to Supabase ONLY on final submission
  */
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { FormData } from "@/types/bswd";
@@ -135,7 +135,7 @@ function BSWDApplicationPage() {
 
   const TOTAL_STEPS = stepsInfo.length;
 
-  const isStepComplete = (stepCheck: number): boolean => {
+  const isStepComplete = useCallback((stepCheck: number): boolean => {
     switch (stepCheck) {
       case 1:
         return Boolean(
@@ -159,7 +159,6 @@ function BSWDApplicationPage() {
 
       case 2: {
         if (formData.submittedDisabilityElsewhere === true) {
-          formData.previousInstitution;
           return Boolean(
             formData.institution &&
               formData.institutionType &&
@@ -220,11 +219,11 @@ function BSWDApplicationPage() {
       default:
         return false;
     }
-  };
+  }, [formData, isConfirmed]);
 
   const canProceed = useMemo(() => {
     return isStepComplete(currentStep) && !saving;
-  }, [currentStep, formData, isConfirmed, saving]);
+  }, [currentStep, isStepComplete, saving]);
 
   const handleNext = async () => {
     if (!isStepComplete(currentStep)) return;
@@ -254,7 +253,7 @@ function BSWDApplicationPage() {
     try {
       const result = await saveSubmission(formData);
       // Redirect to status page
-      window.location.href = `/ThankYouPage?appId=${result.application_id}`;
+      window.location.href = `/confirmation?appId=${result.application_id}`;
     } catch (err) {
       // Handle submission errors
       const errorMessage =
@@ -324,7 +323,7 @@ function BSWDApplicationPage() {
         }
         prevStepRef.current = currentStep;
       }
-    }, [currentStep]);
+    });
 
     return (
       <nav
@@ -384,7 +383,7 @@ function BSWDApplicationPage() {
         stepCheck++;
       }
     }
-  }, [currentStep, formData, isConfirmed]);
+  }, [currentStep, formData, isConfirmed, TOTAL_STEPS, isStepComplete]);
 
   // Show loading while checking authentication
   if (loading || !user) {
@@ -399,7 +398,6 @@ function BSWDApplicationPage() {
     <div>
       <FormLayout
         title={t('title')}
-        description=""
         headerAction={
           <div className="flex items-center gap-3">
             {profile?.role === 'admin' && (
