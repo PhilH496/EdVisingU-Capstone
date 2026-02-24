@@ -15,12 +15,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/router';
 
 export default function StudentDashboard() {
   const [application, setApplication] = useState<Application | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'details' | 'timeline'>('overview');
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUserApplication = async () => {
@@ -239,13 +241,16 @@ export default function StudentDashboard() {
             priority
             className="filter invert"
           />
-          <Link
-            href="/"
+          <button
+            onClick={async () => {
+              await signOut();
+              router.push('/');
+            }}
             className="flex items-center text-white hover:text-gray-300 transition-colors text-sm"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to Home
-          </Link>
+            Log out
+          </button>
         </div>
       </header>
 
