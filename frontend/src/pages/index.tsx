@@ -231,8 +231,9 @@ export default function LandingPage() {
                         href={card.url}
                         className="inline-flex items-center text-sm font-medium text-blue-600 hover:underline"
                       >
-                        {t('landingPage.infoCardsLearnMore')}
-                        <ChevronRight className="w-4 h-4 ml-1" />
+                        <span aria-hidden="true">{t('landingPage.infoCardsLearnMore')}</span>
+                        <span className="sr-only">{`${t('landingPage.infoCardsLearnMore')} ${card.title}`}</span>
+                        <ChevronRight className="w-4 h-4 ml-1" aria-hidden="true" />
                       </Link>
                     </div>
                   </div>

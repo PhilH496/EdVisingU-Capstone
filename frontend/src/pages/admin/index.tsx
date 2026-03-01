@@ -18,6 +18,7 @@ import StatusBadge from "@/components/admin/StatusBadge";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { PaginationControls } from "@/components/admin/PaginationControls";
+import { ChevronUp, ChevronDown } from 'lucide-react';
 import {
   AppSummary,
   Row,
@@ -56,6 +57,7 @@ function AdminDashboardPage() {
   const [detScores, setDetScores] = useState<Record<string, number>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hideAccepted, setHideAccepted] = useState<boolean>(false);
 
   //Sorting State
   const [sortConfig, setSortConfig] = useState<{
@@ -195,13 +197,25 @@ function AdminDashboardPage() {
     }
   }, [rows, sortConfig, detScores]);
 
+  //Filter approved application
+  const filteredRows = useMemo(() => {
+    if (!hideAccepted) return sortedRows;
+    return sortedRows.filter((r) => r.status !== "Approved");
+  }, [sortedRows, hideAccepted]);
+
+  //Count for hide approved label
+  const acceptedCount = useMemo(
+    () => rows.filter((r) => r.status === "Approved").length,
+    [rows]
+  );
+
   // Pagination logic
   const pagination = useMemo(() => {
-    const totalItems = sortedRows.length;
+    const totalItems = filteredRows.length;
     const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
-    const paginatedRows = sortedRows.slice(startIndex, endIndex);
+    const paginatedRows = filteredRows.slice(startIndex, endIndex);
 
     return {
       totalPages,
@@ -211,14 +225,14 @@ function AdminDashboardPage() {
       paginatedRows,
       hasPagination: totalPages > 1,
     };
-  }, [sortedRows, currentPage]);
+  }, [filteredRows, currentPage]);
 
   // Reset to page 1 when sorting changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [sortConfig.key, sortConfig.direction]);
+  }, [sortConfig.key, sortConfig.direction, hideAccepted]);
 
-  const hasRows = useMemo(() => sortedRows.length > 0, [sortedRows]);
+  const hasRows = useMemo(() => filteredRows.length > 0, [filteredRows]);
 
   // ---------- state mutations ----------
   const updateRow = (id: string, patch: Partial<Row>) => {
@@ -426,6 +440,85 @@ function AdminDashboardPage() {
           {editMode ? "Exit Edit Mode" : "Edit"}
         </button>
 
+        <button
+          id="admin-hide-accepted-btn"
+          onClick={() => setHideAccepted((v) => !v)}
+          className={`px-4 py-2 rounded-lg text-sm border ${
+            hideAccepted
+              ? "bg-cyan-800 text-white border-cyan-800 hover:bg-cyan-700"
+              : "border-gray-200 bg-white hover:bg-gray-100"
+          }`}
+        >
+          {hideAccepted ? `Show Approved (${acceptedCount})` : `Hide Approved (${acceptedCount})`}
+        </button>
+
+        <div className="ml-auto flex items-center gap-3">
+          {toolbarMsg && (
+            <div id="admin-toolbar-msg" className="text-sm text-green-700 font-medium animate-pulse mr-2">
+              {toolbarMsg}
+            </div>
+          )}
+
+          <span className="text-sm text-gray-700 font-medium">Sort By</span>
+
+          <div className="relative">
+            <button
+              id="admin-sort-by-btn"
+              onClick={() => setIsSortMenuOpen(!isSortMenuOpen)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm text-gray-700 font-medium shadow-sm transition-colors min-w-[160px] justify-between"
+            >
+              <span className="truncate mr-2">
+                {SORT_MENU.find((x) => x.value === sortConfig.key)?.label}
+              </span>
+              <span className="text-gray-600 text-xs">
+                {sortConfig.direction === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </span>
+            </button>
+
+            {/* Dropdown Menu */}
+            {isSortMenuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-10 cursor-default"
+                  onClick={() => setIsSortMenuOpen(false)}
+                />
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 z-20 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                  <div className="px-4 py-2 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Order By
+                  </div>
+                  {SORT_MENU.map((opt) => {
+                    const isActive = sortConfig.key === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        onClick={() => handleSortSelect(opt.value)}
+                        className={`w-full text-left px-4 py-2.5 text-sm flex items-center justify-between group ${
+                          isActive
+                            ? "bg-cyan-50 text-cyan-900 font-medium"
+                            : "text-gray-700 hover:bg-gray-50"
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                        {isActive && (
+                          <span className="text-brand-light-red text-xs font-bold">
+                            {sortConfig.direction === "asc"
+                              ? "Asc (A-Z)"
+                              : "Desc (Z-A)"}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+    {/* Next Toolbar Row - bulk edit controls, only shown in edit mode */}
+    {editMode && (
+      <div className="mb-4 flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
         <label htmlFor="admin-select-all" className="inline-flex items-center gap-2 text-sm">
           <input
             id="admin-select-all"
@@ -522,73 +615,8 @@ function AdminDashboardPage() {
             Delete ({selectedCount})
           </button>
         </div>
-
-        {/* Toolbar Msg + Sorting */}
-        <div className="ml-auto flex items-center gap-3">
-          {/* Feedback Message */}
-          {toolbarMsg && (
-            <div id="admin-toolbar-msg" className="text-sm text-green-700 font-medium animate-pulse mr-2">
-              {toolbarMsg}
-            </div>
-          )}
-
-          {/* Custom Sort Control */}
-          <span className="text-sm text-gray-700 font-medium">Sort By</span>
-
-          <div className="relative">
-            <button
-              id="admin-sort-by-btn"
-              onClick={() => setIsSortMenuOpen(!isSortMenuOpen)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm text-gray-700 font-medium shadow-sm transition-colors min-w-[160px] justify-between"
-            >
-              <span className="truncate mr-2">
-                {SORT_MENU.find((x) => x.value === sortConfig.key)?.label}
-              </span>
-              <span className="text-gray-600 text-xs">
-                {sortConfig.direction === "asc" ? "▲" : "▼"}
-              </span>
-            </button>
-
-            {/* Dropdown Menu */}
-            {isSortMenuOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-10 cursor-default"
-                  onClick={() => setIsSortMenuOpen(false)}
-                />
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 z-20 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-                  <div className="px-4 py-2 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Order By
-                  </div>
-                  {SORT_MENU.map((opt) => {
-                    const isActive = sortConfig.key === opt.value;
-                    return (
-                      <button
-                        key={opt.value}
-                        onClick={() => handleSortSelect(opt.value)}
-                        className={`w-full text-left px-4 py-2.5 text-sm flex items-center justify-between group ${
-                          isActive
-                            ? "bg-cyan-50 text-cyan-900 font-medium"
-                            : "text-gray-700 hover:bg-gray-50"
-                        }`}
-                      >
-                        <span>{opt.label}</span>
-                        {isActive && (
-                          <span className="text-brand-light-red text-xs font-bold">
-                            {sortConfig.direction === "asc"
-                              ? "Asc (A-Z)"
-                              : "Desc (Z-A)"}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
       </div>
+    )}
 
       {/* Top Pagination */}
       {pagination.hasPagination && (

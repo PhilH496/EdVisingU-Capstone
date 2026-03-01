@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import Head from 'next/head';
 import { Application } from '@/types/bswd';
 import { ReviewStepsProgress } from '@/components/student/ReviewStepsProgress';
 import { ApplicationDetails } from '@/components/student/ApplicationDetails';
@@ -96,7 +97,7 @@ export default function StudentDashboard() {
       case 'submitted':
         return {
           icon: FileText,
-          color: 'text-blue-600',
+          color: 'text-blue-700',
           bgColor: 'bg-blue-50',
           borderColor: 'border-blue-200',
           label: 'Submitted',
@@ -107,7 +108,7 @@ export default function StudentDashboard() {
       case 'reviewing':
         return {
           icon: Clock,
-          color: 'text-yellow-600',
+          color: 'text-yellow-700',
           bgColor: 'bg-yellow-50',
           borderColor: 'border-yellow-200',
           label: 'In Review',
@@ -118,7 +119,7 @@ export default function StudentDashboard() {
       case 'pending':
         return {
           icon: AlertCircle,
-          color: 'text-orange-600',
+          color: 'text-orange-700',
           bgColor: 'bg-orange-50',
           borderColor: 'border-orange-200',
           label: 'In Progress',
@@ -128,7 +129,7 @@ export default function StudentDashboard() {
       case 'approved':
         return {
           icon: CheckCircle,
-          color: 'text-green-600',
+          color: 'text-green-700',
           bgColor: 'bg-green-50',
           borderColor: 'border-green-200',
           label: 'Approved',
@@ -138,7 +139,7 @@ export default function StudentDashboard() {
       case 'rejected':
         return {
           icon: XCircle,
-          color: 'text-red-600',
+          color: 'text-red-700',
           bgColor: 'bg-red-50',
           borderColor: 'border-red-200',
           label: 'Not Approved',
@@ -149,7 +150,7 @@ export default function StudentDashboard() {
         console.warn('Unknown application status:', status);
         return {
           icon: Clock,
-          color: 'text-gray-600',
+          color: 'text-gray-700',
           bgColor: 'bg-gray-50',
           borderColor: 'border-gray-200',
           label: status || 'Unknown',
@@ -160,6 +161,11 @@ export default function StudentDashboard() {
 
   if (isLoading) {
     return (
+    <>
+      <Head>
+        <title>Application Status Dashboard</title>
+        <meta name="description" content="View your BSWD/CSG-DSE funding application status, review progress, and detailed feedback." />
+      </Head>
       <div className="min-h-screen bg-gray-50">
         <header className="bg-black border-b border-black">
           <div className="mx-auto max-w-7xl px-6 py-3 flex items-center">
@@ -174,22 +180,28 @@ export default function StudentDashboard() {
           </div>
         </header>
 
-        <div className="py-8 px-4 sm:px-6 lg:px-8">
+        <main className="py-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-center items-center h-64">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading application status...</p>
+                <p className="text-gray-700">Loading application status...</p>
               </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
+    </>
     );
   }
 
   if (!application) {
     return (
+    <>
+      <Head>
+        <title>Application Status Dashboard</title>
+        <meta name="description" content="View your BSWD/CSG-DSE funding application status, review progress, and detailed feedback." />
+      </Head>
       <div className="min-h-screen bg-gray-50">
         <header className="bg-black border-b border-black">
           <div className="mx-auto max-w-7xl px-6 py-3 flex items-center">
@@ -204,12 +216,12 @@ export default function StudentDashboard() {
           </div>
         </header>
 
-        <div className="py-8 px-4 sm:px-6 lg:px-8">
+        <main className="py-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="text-center py-12">
               <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
               <h2 className="text-2xl font-semibold text-gray-900 mb-2">No Application Found</h2>
-              <p className="text-gray-600 mb-6">You have not submitted any applications yet.</p>
+              <p className="text-gray-700 mb-6">You have not submitted any applications yet.</p>
               <Link
                 href="/application"
                 className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
@@ -218,8 +230,9 @@ export default function StudentDashboard() {
               </Link>
             </div>
           </div>
+        </main>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -227,6 +240,11 @@ export default function StudentDashboard() {
   const StatusIcon = statusConfig.icon;
 
   return (
+  <>
+    <Head>
+      <title>Application Status Dashboard</title>
+      <meta name="description" content="View your BSWD/CSG-DSE funding application status, review progress, and detailed feedback." />
+    </Head>
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-black border-b border-black">
@@ -249,12 +267,12 @@ export default function StudentDashboard() {
         </div>
       </header>
 
-      <div className="py-8 px-4 sm:px-6 lg:px-8">
+      <main className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Page Title */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Application Status Dashboard</h1>
-            <p className="mt-2 text-gray-600">
+            <p className="mt-2 text-gray-700">
               View detailed status and progress of your BSWD/CSG-DSE funding application
             </p>
           </div>
@@ -270,7 +288,7 @@ export default function StudentDashboard() {
                   <h2 className={`text-2xl font-bold ${statusConfig.color}`}>
                     {statusConfig.label}
                   </h2>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-700">
                     Last Updated: {new Date(application.statusUpdatedDate).toLocaleDateString('en-US', { 
                       year: 'numeric', month: 'long', day: 'numeric' 
                     })}
@@ -311,8 +329,8 @@ export default function StudentDashboard() {
                 onClick={() => setActiveTab('overview')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === 'overview'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-600 text-blue-700'
+                    : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300'
                 }`}
               >
                 Overview
@@ -321,8 +339,8 @@ export default function StudentDashboard() {
                 onClick={() => setActiveTab('details')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === 'details'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-600 text-blue-700'
+                    : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300'
                 }`}
               >
                 Details
@@ -331,8 +349,8 @@ export default function StudentDashboard() {
                 onClick={() => setActiveTab('timeline')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === 'timeline'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-600 text-blue-700'
+                    : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300'
                 }`}
               >
                 Review Progress
@@ -375,9 +393,10 @@ export default function StudentDashboard() {
             )}
           </div>
         </div>
-      </div>
+      </main>
 
       <StudentFooter />
     </div>
+  </>
   );
 }

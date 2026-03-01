@@ -6,6 +6,7 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Head from 'next/head';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
@@ -90,7 +91,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <>
+    <Head>
+      <title>Sign In</title>
+      <meta name="description" content="Sign in to your EdvisingU account to access the BSWD application portal." />
+    </Head>
+    
+    <main className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -169,6 +176,7 @@ export default function LoginPage() {
           </Link>
         </form>
       </div>
-    </div>
+    </main>
+    </>
   );
 }

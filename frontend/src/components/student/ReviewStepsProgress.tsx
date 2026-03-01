@@ -148,17 +148,17 @@ export function ReviewStepsProgress({
                     {step.title}
                   </h4>
                   {step.status === 'in-progress' && (
-                    <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                    <span className="text-xs font-medium text-blue-800 bg-blue-100 px-2 py-1 rounded">
                       In Progress
                     </span>
                   )}
                   {step.status === 'completed' && (
-                    <span className="text-xs font-medium text-green-600 bg-green-100 px-2 py-1 rounded">
+                    <span className="text-xs font-medium text-green-800 bg-green-100 px-2 py-1 rounded">
                       Completed
                     </span>
                   )}
                   {step.status === 'attention-needed' && (
-                    <span className="text-xs font-medium text-orange-600 bg-orange-100 px-2 py-1 rounded">
+                    <span className="text-xs font-medium text-orange-800 bg-orange-100 px-2 py-1 rounded">
                       Attention Needed
                     </span>
                   )}
