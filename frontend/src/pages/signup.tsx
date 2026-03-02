@@ -6,6 +6,7 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Head from 'next/head';
 import { useAuth } from '@/contexts/AuthContext';
 import { CheckCircle2, XCircle } from 'lucide-react';
 
@@ -94,7 +95,13 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <>
+      <Head>
+        <title>Account Creation</title>
+        <meta name="description" content="Your account has been created successfully." />
+      </Head>
+
+      <main className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full">
           <div className="rounded-md bg-green-50 p-4">
             <h3 className="text-sm font-medium text-green-800">
@@ -105,12 +112,19 @@ export default function SignupPage() {
             </p>
           </div>
         </div>
-      </div>
+      </main>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <>
+    <Head>
+      <title>Create Account</title>
+      <meta name="description" content="Create your account." />
+    </Head>
+
+    <main className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -243,6 +257,7 @@ export default function SignupPage() {
           </div>
         </form>
       </div>
-    </div>
+    </main>
+    </>
   );
 }
