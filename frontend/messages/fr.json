@@ -208,8 +208,8 @@
   },
   "serviceEquipment": {
     "sectionHeader": "Section E : Service et équipement",
-    "equipmentHeader": "Équipement",
-    "servicesHeader": "Services",
+    "equipmentHeader": "Équipement lié au handicap",
+    "servicesHeader": "Services liés au handicap",
     "tabs": {
       "equipment": "Équipement",
       "services": "Services"
@@ -227,10 +227,10 @@
       "addService": "Ajouter le service"
     },
     "requestedCount": {
-      "prefix": "articles demandés"
+      "prefix": "élément(s) actuellement demandés"
     },
     "eligibility": {
-      "both": "BSWD + CSG-DSE",
+      "both": "BSWD et CSG-DSE",
       "bswd": "BSWD",
       "csgdse": "CSG-DSE"
     },
@@ -250,9 +250,9 @@
         "addAdhdCoaching": "Coaching TDAH"
       },
       "servicesCaps": {
-        "noteTakingServices": "$3,500",
-        "tutoringServices": "$3,500",
-        "addAdhdCoaching": "$2,000"
+        "noteTakingServices": "$1,500 | par cours ou 1000 $ par licence",
+        "tutoringServices": "$2,200 | par cours, 35 $/heure max",
+        "addAdhdCoaching": "$2,000 | BSWD seulement, par année scolaire"
       }
     },
     "affiliate": {
