@@ -6,6 +6,7 @@
 
 import { FormData } from "@/types/bswd";
 import { format } from "date-fns";
+import { syncDatePicker } from "../util";
 import { Calendar } from "@/components/ui/calendar";
 import { ChevronDownIcon } from "lucide-react";
 import {
@@ -17,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useDateRange } from "@/hooks/UseDateRange";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useState, useEffect } from "react";
 import { sendNoOsapEmail } from "@/lib/notify";
 import { useTranslation } from "@/lib/i18n"; // translation import
 
@@ -38,6 +39,19 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
   const [showEmailInput, setShowEmailInput] = useState(false);
   const [notificationEmail, setNotificationEmail] = useState("");
   const { t, isLoaded } = useTranslation(); // translation hook
+  
+  // needed to properly show email prompt
+  useEffect(() => {
+    if (formData.hasOsapApplication === false) {
+      setShowEmailInput(true);
+    }
+  }, []); // Only run on first load
+
+  useEffect(() => {
+    syncDatePicker(formData.dateOfBirth, dob);
+    syncDatePicker(formData.osapApplicationStartDate, osapStartDate);
+  }, [formData.dateOfBirth, formData.osapApplicationStartDate]);
+  
   if (!isLoaded) return null; // wait until translations load
 
   // Function to send No OSAP email using Edge Function

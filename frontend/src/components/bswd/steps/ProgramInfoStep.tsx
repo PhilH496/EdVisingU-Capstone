@@ -5,7 +5,7 @@
  */
 
 // Base React imports
-import { useState } from "react";
+import { useState, useEffect } from "react";
 // shadcn UI components
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
@@ -36,6 +36,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CheckIcon, ChevronsUpDownIcon, ChevronDownIcon } from "lucide-react";
 // Utilities, types and hooks
 import { format } from "date-fns";
+import { syncDatePicker } from "../util";
 import { cn } from "@/lib/utils";
 import { FormData } from "@/types/bswd";
 import { useDateRange } from "@/hooks/UseDateRange";
@@ -81,6 +82,11 @@ export function ProgramInfoStep({
   const start = useDateRange();
   const end = useDateRange();
   const { t, isLoaded } = useTranslation();
+
+  useEffect(() => {
+    syncDatePicker(formData.studyPeriodStart, start);
+    syncDatePicker(formData.studyPeriodEnd, end);
+  }, [formData.studyPeriodStart, formData.studyPeriodEnd]);
 
   if (!isLoaded) return null;
 

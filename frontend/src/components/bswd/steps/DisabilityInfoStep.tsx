@@ -14,8 +14,9 @@ import {
 import { useDateRange } from "@/hooks/UseDateRange";
 import { Calendar } from "@/components/ui/calendar";
 import { ChevronDownIcon, TriangleAlertIcon } from "lucide-react";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useState, useEffect } from "react";
 import { format } from "date-fns";
+import { syncDatePicker } from "../util";
 import { FormData } from "@/types/bswd";
 import { sendPsychoEdReferral } from "@/lib/notify";
 import { useTranslation } from "@/lib/i18n"; // translation
@@ -47,6 +48,11 @@ export function DisabilityInfoStep({
     sent: false,
     error: null,
   });
+
+  // Sync date picker state with form data
+  useEffect(() => {
+    syncDatePicker(formData.disabilityVerificationDate, verificationDate);
+  }, [formData.disabilityVerificationDate]);
 
   if (!isLoaded) return null;
 
