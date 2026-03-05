@@ -9,6 +9,7 @@
  */
 
 import { useState, useRef, useEffect, FormEvent } from 'react';
+import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import { useDraggable } from '@/hooks/useDraggable';
 
@@ -171,10 +172,12 @@ export function ChatbotWidget() {
           <div className="h-96 overflow-y-auto p-4 bg-gray-100">
             {/* Welcome Message */}
             <div className="flex items-start space-x-3 mb-4">
-              <img
+              <Image
                 src="/custom-ontario-logo.png"
                 alt="Ontario Logo"
-                className="w-10 h-10 object-contain flex-shrink-0"
+                width={40}
+                height={40}
+                className="object-contain flex-shrink-0"
               />
               <div className="bg-white rounded-lg rounded-tl-none px-4 py-3 shadow-sm max-w-[85%]">
                 <p className="text-base text-gray-800">
@@ -192,10 +195,12 @@ export function ChatbotWidget() {
                 }`}
               >
                 {msg.role === "assistant" && (
-                  <img
+                  <Image
                     src="/custom-ontario-logo.png"
                     alt="Ontario Logo"
-                    className="w-10 h-10 object-contain flex-shrink-0"
+                    width={40}
+                    height={40}
+                    className="object-contain flex-shrink-0"
                   />
                 )}
                 <div
@@ -210,13 +215,13 @@ export function ChatbotWidget() {
                     <div className="text-base max-w-none">
                       <ReactMarkdown
                         components={{
-                          p: ({ node, ...props }) => (
+                          p: (props) => (
                             <p className="mb-2" {...props} />
                           ),
-                          ul: ({ node, ...props }) => (
+                          ul: (props) => (
                             <ul className="space-y-1 my-2 pl-0" {...props} />
                           ),
-                          li: ({ node, children, ...props }) => (
+                          li: ({ children, ...props }) => (
                             <li className="flex" {...props}>
                               <span className="mr-2 font-bold text-brand-black flex-shrink-0">
                                 •
@@ -241,10 +246,12 @@ export function ChatbotWidget() {
             {/* Loading Indicator */}
             {isLoading && (
               <div className="flex items-start space-x-3 mb-4">
-                <img
+                <Image
                   src="/custom-ontario-logo.png"
                   alt="Ontario Logo"
-                  className="w-10 h-10 object-contain flex-shrink-0"
+                  width={40}
+                  height={40}
+                  className="object-contain flex-shrink-0"
                 />
                 <div className="bg-white rounded-lg rounded-tl-none px-4 py-3 shadow-sm">
                   <i className="fa-solid fa-spinner fa-spin text-[#0066A1]"></i>

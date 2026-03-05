@@ -70,6 +70,17 @@ export interface FormData {
   requestedItems: RequestedItem[];
 }
 
+export interface ItemDisplay {
+  id: number;
+  name: string;
+  cap: number | string;
+  bswdEligible: boolean;
+  csgdseEligible: boolean;
+  suggestionTags: string[];
+  isSuggested?: boolean;
+  suggestionScore?: number;
+}
+
 export interface RequestedItem {
   category: string;
   item: string;

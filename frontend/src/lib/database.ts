@@ -96,6 +96,51 @@ const calculateInitialStatus = async (formData: FormData): Promise<{ status: str
  * @throws Error if any insert operation fails
  */
 export const saveSubmission = async (formData: FormData) => {
+  // Check if student already exists (by Student ID or OEN)
+  const { data: existingByStudentId } = await supabase
+    .from("student")
+    .select("student_id, first_name, last_name")
+    .eq("student_id", +formData.studentId)
+    .single();
+
+  if (existingByStudentId) {
+    throw new Error(
+      `A student with Student ID ${formData.studentId} already exists in the system. ` +
+      `Name: ${existingByStudentId.first_name} ${existingByStudentId.last_name}. ` +
+      `If this is you, please check if you already have an application.`
+    );
+  }
+
+  const { data: existingByOEN } = await supabase
+    .from("student")
+    .select("student_id, oen, first_name, last_name")
+    .eq("oen", parseInt(formData.oen))
+    .single();
+
+  if (existingByOEN) {
+    throw new Error(
+      `A student with OEN ${formData.oen} already exists in the system. ` +
+      `(Student ID: ${existingByOEN.student_id}, Name: ${existingByOEN.first_name} ${existingByOEN.last_name}). ` +
+      `Each OEN can only be used once. Please verify your information.`
+    );
+  }
+
+  // Check if application already exists
+  const applicationId = `APP-${formData.studentId}`;
+  const { data: existingApp } = await supabase
+    .from("applications")
+    .select("id, student_name, submitted_date")
+    .eq("id", applicationId)
+    .single();
+
+  if (existingApp) {
+    throw new Error(
+      `An application with ID ${applicationId} already exists. ` +
+      `Submitted by: ${existingApp.student_name} on ${new Date(existingApp.submitted_date).toLocaleDateString()}. ` +
+      `You cannot submit multiple applications with the same Student ID.`
+    );
+  }
+
   // 1. Insert into student table
   const studentPayload: StudentInsert = {
     has_osap_application: formData.hasOsapApplication ?? false,
@@ -119,7 +164,18 @@ export const saveSubmission = async (formData: FormData) => {
     .select()
     .single();
 
-  if (studentError) throw studentError;
+  if (studentError) {
+    console.error("Student insert error:", studentError);
+    
+    // Provide specific error messages for common issues
+    if (studentError.message.includes('student_id_key')) {
+      throw new Error(`Student ID ${formData.studentId} is already in use.`);
+    } else if (studentError.message.includes('student_oen_key')) {
+      throw new Error(`OEN ${formData.oen} is already in use.`);
+    } else {
+      throw new Error(`Failed to save student information: ${studentError.message}`);
+    }
+  }
   const studentId = studentData.student_id;
 
   // 2. Insert into program_info table
@@ -144,7 +200,10 @@ export const saveSubmission = async (formData: FormData) => {
     .from("program_info")
     .insert(programPayload);
 
-  if (programError) throw programError;
+  if (programError) {
+    console.error("Program info insert error:", programError);
+    throw new Error(`Failed to save program information: ${programError.message}`);
+  }
 
   // 3. Insert into osap_info table
   const osapPayload: OsapInfoInsert = {
@@ -160,7 +219,10 @@ export const saveSubmission = async (formData: FormData) => {
     .from("osap_info")
     .insert(osapPayload);
 
-  if (osapError) throw osapError;
+  if (osapError) {
+    console.error("OSAP info insert error:", osapError);
+    throw new Error(`Failed to save OSAP information: ${osapError.message}`);
+  }
 
   // 4. Insert into disability_info table
   const disabilityPayload: DisabilityInfoInsert = {
@@ -191,7 +253,10 @@ export const saveSubmission = async (formData: FormData) => {
     .from("disability_info")
     .insert(disabilityPayload);
 
-  if (disabilityError) throw disabilityError;
+  if (disabilityError) {
+    console.error("Disability info insert error:", disabilityError);
+    throw new Error(`Failed to save disability information: ${disabilityError.message}`);
+  }
 
   // 5. Insert requested items (if any)
   if (formData.requestedItems && formData.requestedItems.length > 0) {
@@ -207,15 +272,16 @@ export const saveSubmission = async (formData: FormData) => {
       .from("requested_items")
       .insert(requestedItemsPayload);
 
-    if (itemsError) throw itemsError;
+    if (itemsError) {
+      console.error("Requested items insert error:", itemsError);
+      throw new Error(`Failed to save requested items: ${itemsError.message}`);
+    }
   }
 
   // 6. Calculate initial status based on deterministic checks
   const { status: initialStatus, score: initialScore } = await calculateInitialStatus(formData);
 
-  // 7. Create application record for admin dashboard (use form value to preserve leading zeros)
-  const applicationId = `APP-${formData.studentId}`;
-
+  // 7. Create application record for admin dashboard (applicationId already declared above)
   const applicationPayload = {
     id: applicationId,
     student_name: `${formData.firstName} ${formData.lastName}`,
@@ -233,7 +299,10 @@ export const saveSubmission = async (formData: FormData) => {
     .from("applications")
     .insert(applicationPayload);
 
-  if (appError) throw appError;
+  if (appError) {
+    console.error("Application record insert error:", appError);
+    throw new Error(`Failed to create application record: ${appError.message}`);
+  }
 
   // 8. Create snapshot record with full form data
   const snapshotPayload = {
@@ -248,7 +317,10 @@ export const saveSubmission = async (formData: FormData) => {
     .from("snapshots")
     .insert(snapshotPayload);
 
-  if (snapError) throw snapError;
+  if (snapError) {
+    console.error("Snapshot insert error:", snapError);
+    throw new Error(`Failed to create application snapshot: ${snapError.message}`);
+  }
 
   return { student_id: studentId, application_id: applicationId };
 };

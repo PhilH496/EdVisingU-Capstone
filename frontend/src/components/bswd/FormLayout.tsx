@@ -23,14 +23,13 @@ import { StudentFooter } from "@/components/bswd/StudentFooter";
 interface FormLayoutProps {
   children: ReactNode;
   title: string;
-  description: string;
+  description?: string;
   headerAction: ReactNode;
 }
 
 export function FormLayout({
   children,
   title,
-  description,
   headerAction,
 }: FormLayoutProps) {
   return (

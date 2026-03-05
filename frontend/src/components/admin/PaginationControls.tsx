@@ -29,6 +29,7 @@ export function PaginationControls({
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       // Fallback for browsers that don't support smooth scrolling
+      console.error("Error scrolling to top:", error);
       window.scrollTo(0, 0);
     }
   };

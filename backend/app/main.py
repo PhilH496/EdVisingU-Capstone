@@ -11,13 +11,14 @@ from typing import List, Optional
 from contextlib import asynccontextmanager
 import sys
 import os
+from mangum import Mangum
 
 # Add the app directory to the path so we can import chain
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from chain import get_or_create_chain, chat_with_memory, chat_with_memory_stream
-from .analysis_routes import router as analysis_router
-from .admin_routes import router as admin_router
+from analysis_routes import router as analysis_router
+from admin_routes import router as admin_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -42,11 +43,7 @@ app = FastAPI(
 # Configure CORS for Next.js frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",  # Next.js default
-        "http://localhost:3001",
-        "http://127.0.0.1:3000",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -170,3 +167,5 @@ app.include_router(admin_router)
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+handler = Mangum(app)

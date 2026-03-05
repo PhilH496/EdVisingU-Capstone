@@ -6,6 +6,7 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Head from 'next/head';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
@@ -50,20 +51,53 @@ export default function LoginPage() {
         if (profile?.role === 'admin') {
           router.push('/admin');
         } else {
-          router.push('/application');
+          // For students, check if they already submitted an application
+          const { data: studentData } = await supabase
+            .from('student')
+            .select('student_id')
+            .eq('email', user.email)
+            .single();
+
+          if (studentData) {
+            // Check if student has any submitted applications
+            const { data: existingApp } = await supabase
+              .from('applications')
+              .select('id')
+              .eq('student_id', studentData.student_id.toString())
+              .limit(1)
+              .single();
+
+            if (existingApp) {
+              // Student has already submitted, go to dashboard
+              router.push('/student-dashboard');
+            } else {
+              // No submission yet, go to application form
+              router.push('/application');
+            }
+          } else {
+            // New student, go to application form
+            router.push('/application');
+          }
         }
       } else {
         router.push('/application');
       }
       
     } catch (err) {
-      setError('An unexpected error occurred');
+      setError("An unexpected error occurred");
+      console.error("Error logging in:", err);
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <>
+    <Head>
+      <title>Sign In</title>
+      <meta name="description" content="Sign in to your EdvisingU account to access the BSWD application portal." />
+    </Head>
+    
+    <main className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -142,6 +176,7 @@ export default function LoginPage() {
           </Link>
         </form>
       </div>
-    </div>
+    </main>
+    </>
   );
 }

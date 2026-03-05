@@ -9,3 +9,4 @@ langchain-pinecone>=0.2.0,<0.3.0
 pinecone-client>=3.2.0,<4.0.0
 pypdf>=3.17.0,<4.0.0
 python-dotenv>=1.0.0,<2.0.0
+mangum==0.21.0

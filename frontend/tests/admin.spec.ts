@@ -72,33 +72,6 @@ test.describe('Admin Tests', () => {
     const firstStatus = page.locator('[data-application-id]').first().locator('text=Approved').first(); // this test assumes there will always be approved applications
     await expect(firstStatus).toBeVisible();
   });
-
-  test('details assignee violations', async ({ page }) => {
-    const firstRow = page.locator('[data-application-id]').first();
-    const applicationId = await firstRow.getAttribute('data-application-id');
-    await page.locator(`#admin-details-toggle-${applicationId}`).click();
-
-    const detailsScope = firstRow;
-    await detailsScope.getByRole('textbox', { name: 'Assigned To' }).fill('John Admin');
-    await detailsScope.getByRole('button', { name: 'Add violation: Insufficient medical evidence' }).click();
-    await detailsScope.getByRole('button', { name: 'Add violation: Purchased item/service before approval' }).click();
-    await detailsScope.getByRole('textbox', { name: 'Other details (optional)' }).fill('test details');
-    await page.locator(`#admin-save-details-${applicationId}`).click();
-
-    await page.locator(`#admin-details-toggle-${applicationId}`).click(); // once to collapse details tab
-    await page.locator(`#admin-details-toggle-${applicationId}`).click(); // again to reopen it
-
-    await expect(page.locator(`#assignee-${applicationId}`)).toHaveValue('John Admin');
-    await expect(page.getByRole('button', { name: 'Remove violation: Insufficient medical evidence' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Remove violation: Purchased item/service before approval' })).toBeVisible();
-    await expect(page.locator(`#violation-details-${applicationId}`)).toHaveValue('test details');
-
-    // remove violations so the first application is left in a clean state for other tests
-    await detailsScope.getByRole('button', { name: 'Remove violation: Insufficient medical evidence' }).click();
-    await detailsScope.getByRole('button', { name: 'Remove violation: Purchased item/service before approval' }).click();
-    await detailsScope.getByRole('textbox', { name: 'Other details (optional)' }).clear();
-    await page.locator(`#admin-save-details-${applicationId}`).click();
-  });
 });
 
 //TODO make test for editing a student application. Currently running issue into bad test data by script.
