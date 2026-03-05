@@ -207,9 +207,9 @@
     }
   },
   "serviceEquipment": {
-    "sectionHeader": "Section F: Services and Equipment",
-    "equipmentHeader": "Disability-Related Equipment",
-    "servicesHeader": "Disability-Related Services",
+    "sectionHeader": "Section E: Service & Equipment",
+    "equipmentHeader": "Equipment",
+    "servicesHeader": "Services",
     "tabs": {
       "equipment": "Equipment",
       "services": "Services"
@@ -219,45 +219,48 @@
       "eligible": "Eligible"
     },
     "buttons": {
-      "addAllEquipment": "Add All Equipment",
-      "addAllServices": "Add All Services",
-      "removeItem": "Remove Item",
-      "added": "Added ✓",
-      "addItem": "Add Item",
-      "addService": "Add Service"
-    },
-    "headings": {
-      "equipment": "Disability-Related Equipment",
-      "services": "Disability-Related Services"
+      "addAllEquipment": "Add all equipment",
+      "addAllServices": "Add all services",
+      "removeItem": "Remove",
+      "added": "Added",
+      "addItem": "Add item",
+      "addService": "Add service"
     },
     "requestedCount": {
-      "prefix": "item(s) currently requested"
+      "prefix": "items requested"
     },
     "eligibility": {
-      "both": "BSWD & CSG-DSE",
+      "both": "BSWD + CSG-DSE",
       "bswd": "BSWD",
       "csgdse": "CSG-DSE"
     },
     "justification": {
-      "equipment": "Equipment requested for disability support",
-      "service": "Service requested for disability support"
+      "equipment": "Equipment requested for disability-related academic support.",
+      "service": "Service requested for disability-related academic support."
     },
     "items": {
       "equipment": {
-        "computerLaptop": "Computer/Laptop",
+        "computerLaptop": "Computer / Laptop",
         "tablet": "Tablet",
-        "screenReadingSoftware": "Screen Reading Software"
+        "screenReadingSoftware": "Screen reading software"
       },
       "services": {
-        "noteTakingServices": "Note-taking Services",
-        "tutoringServices": "Tutoring Services",
-        "addAdhdCoaching": "ADD/ADHD Coaching"
+        "noteTakingServices": "Note-taking services",
+        "tutoringServices": "Tutoring services",
+        "addAdhdCoaching": "ADHD coaching"
       },
       "servicesCaps": {
-        "noteTakingServices": "1,500 | per course or $1,000 per license",
-        "tutoringServices": "2,200 | per course, $35/hour max",
-        "addAdhdCoaching": "2,000 | BSWD only, per academic year"
+        "noteTakingServices": "$3,500",
+        "tutoringServices": "$3,500",
+        "addAdhdCoaching": "$2,000"
       }
+    },
+    "affiliate": {
+      "title": "Recommended options",
+      "note": "These links may help you find eligible items/services faster.",
+      "openFirstOption": "Open first option",
+      "disclaimer": "Links open in a new tab. Availability and pricing may change. Please confirm eligibility with your school/OSAP.",
+      "osapContactsLabel": "OSAP contacts"
     }
   },
   "review": {
@@ -400,6 +403,204 @@
           "url": "https://www.ontario.ca/page/learn-about-colleges-universities-and-indigenous-institutes-ontario"
         }
       }
+    }
+  },
+  "studentDashboard": {
+    "loading": "Loading your application...",
+    "header": {
+      "backToHome": "Back to Home",
+      "pageTitle": "My Application Status",
+      "dashboardDescription": "View detailed status and progress of your BSWD/CSG-DSE funding application"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "details": "Application Details",
+      "timeline": "Review Timeline"
+    },
+    "actions": {
+      "downloadPdf": "Download PDF",
+      "submitRequiredDocuments": "Submit Required Documents",
+      "downloadApprovalLetter": "Download Approval Letter"
+    },
+    "status": {
+      "lastUpdated": "Last updated:",
+      "submitted": {
+        "label": "Submitted",
+        "description": "Your application has been received and is queued for review."
+      },
+      "inReview": {
+        "label": "In Review",
+        "description": "Your application is currently being reviewed by our team."
+      },
+      "inProgress": {
+        "label": "Action Required",
+        "description": "We need additional information or documents to continue processing your application."
+      },
+      "accepted": {
+        "label": "Approved",
+        "description": "Your application has been approved. Watch for your approval letter and next steps."
+      },
+      "denied": {
+        "label": "Not Approved",
+        "description": "Your application was not approved. Check your email for details and appeal options."
+      },
+      "unknown": {
+        "label": "Status Unknown",
+        "description": "We couldn't determine your current application status. Please check back later or contact support."
+      }
+    },
+    "noApplication": {
+      "title": "No Application Found",
+      "message": "We couldn’t find a submitted application for your account.",
+      "startNew": "Start New Application"
+    }
+  },
+  "reviewStepsProgress": {
+    "title": "Review Progress",
+    "steps": {
+      "submission": {
+        "title": "Application Submitted",
+        "description": "Your application has been successfully submitted to the system."
+      },
+      "initialReview": {
+        "title": "Initial Review",
+        "description": "Verifying application completeness and basic eligibility."
+      },
+      "documentVerification": {
+        "title": "Document Verification",
+        "description": "Verifying disability documentation and supporting files."
+      },
+      "financialAssessment": {
+        "title": "Financial Assessment",
+        "description": "Assessing funding needs and available assistance."
+      },
+      "finalDecision": {
+        "title": "Final Decision",
+        "description": "Review team makes a final decision on your application."
+      }
+    },
+    "statusLabels": {
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "attentionNeeded": "Attention Needed",
+      "pending": "Pending"
+    },
+    "timestamps": {
+      "completed": "Completed:",
+      "started": "Started:"
+    },
+    "estimate": {
+      "label": "Estimated Review Time:",
+      "message": "The complete review process typically takes 2–3 weeks. We will notify you by email when there are important updates."
+    }
+  },
+  "feedbackSection": {
+    "title": "Notifications & Feedback",
+    "actionRequiredBadge": "Action Required",
+    "needHelp": {
+      "title": "Need Help?",
+      "messagePrefix": "If you have any questions, please contact your school's disability services office, or email us at",
+      "supportEmail": "support@edvisingu.ca"
+    },
+    "defaults": {
+      "submitted": {
+        "0": {
+          "title": "Application Received",
+          "message": "Your application has been successfully submitted and we will begin the review process soon.",
+          "type": "success",
+          "actionable": false
+        },
+        "1": {
+          "title": "Next Steps",
+          "message": "Please keep your email accessible as we will contact you by email. Expected review time is 2–3 weeks.",
+          "type": "info",
+          "actionable": false
+        }
+      },
+      "inReview": {
+        "0": {
+          "title": "Review In Progress",
+          "message": "Our team is carefully reviewing your application materials and supporting documents. We will contact you promptly if additional information is needed.",
+          "type": "info",
+          "actionable": false
+        }
+      },
+      "inProgress": {
+        "0": {
+          "title": "Additional Information Required",
+          "message": "To continue processing your application, we need some additional information or documents. Please review the specific requirements below.",
+          "type": "warning",
+          "actionable": true
+        },
+        "1": {
+          "title": "Action Required",
+          "message": "Please provide the required materials within 10 business days to avoid processing delays. You can submit documents through your school's disability services office.",
+          "type": "action-required",
+          "actionable": true
+        }
+      },
+      "accepted": {
+        "0": {
+          "title": "Application Approved!",
+          "message": "Congratulations! Your application has been approved. You will receive a formal approval letter within 3–5 business days.",
+          "type": "success",
+          "actionable": false
+        },
+        "1": {
+          "title": "Funding Disbursement",
+          "message": "Funds will be disbursed according to the schedule outlined in the approval letter. Please carefully review the terms and conditions in the approval letter.",
+          "type": "info",
+          "actionable": false
+        }
+      },
+      "denied": {
+        "0": {
+          "title": "Application Not Approved",
+          "message": "Unfortunately, your application was not approved at this time. You will receive an email with detailed reasoning.",
+          "type": "warning",
+          "actionable": false
+        },
+        "1": {
+          "title": "Appeal Rights",
+          "message": "If you believe the decision was in error or have additional information to provide, you have the right to appeal within 30 days of receiving the decision.",
+          "type": "info",
+          "actionable": true
+        }
+      }
+    }
+  },
+  "applicationDetails": {
+    "title": "Application Details",
+    "sections": {
+      "applicationInfo": {
+        "title": "Application Information",
+        "labels": {
+          "applicationId": "Application ID",
+          "submittedDate": "Submitted Date",
+          "lastUpdated": "Last Updated"
+        }
+      },
+      "studentInfo": {
+        "title": "Student Information",
+        "labels": {
+          "name": "Name",
+          "studentId": "Student ID"
+        }
+      },
+      "academicInfo": {
+        "title": "Academic Information",
+        "labels": {
+          "institution": "Institution",
+          "program": "Program",
+          "studyPeriod": "Study Period"
+        }
+      }
+    },
+    "summary": {
+      "title": "Application Summary",
+      "p1Prefix": "You submitted your BSWD/CSG-DSE funding application on",
+      "p1Middle": "Your application ID is",
+      "p1Suffix": "We will notify you by email at key points during the review process."
     }
   }
 }
