@@ -207,9 +207,9 @@
     }
   },
   "serviceEquipment": {
-    "sectionHeader": "Section F : Services et équipement",
-    "equipmentHeader": "Équipement lié au handicap",
-    "servicesHeader": "Services liés au handicap",
+    "sectionHeader": "Section E : Service et équipement",
+    "equipmentHeader": "Équipement",
+    "servicesHeader": "Services",
     "tabs": {
       "equipment": "Équipement",
       "services": "Services"
@@ -221,43 +221,46 @@
     "buttons": {
       "addAllEquipment": "Ajouter tout l’équipement",
       "addAllServices": "Ajouter tous les services",
-      "removeItem": "Retirer l’élément",
-      "added": "Ajouté ✓",
-      "addItem": "Ajouter un élément",
-      "addService": "Ajouter un service"
-    },
-    "headings": {
-      "equipment": "Équipement lié au handicap",
-      "services": "Services liés au handicap"
+      "removeItem": "Retirer",
+      "added": "Ajouté",
+      "addItem": "Ajouter",
+      "addService": "Ajouter le service"
     },
     "requestedCount": {
-      "prefix": "élément(s) actuellement demandés"
+      "prefix": "articles demandés"
     },
     "eligibility": {
-      "both": "BSWD et CSG-DSE",
+      "both": "BSWD + CSG-DSE",
       "bswd": "BSWD",
       "csgdse": "CSG-DSE"
     },
     "justification": {
-      "equipment": "Équipement demandé pour le soutien lié au handicap",
-      "service": "Service demandé pour le soutien lié au handicap"
+      "equipment": "Équipement demandé pour un soutien académique lié au handicap.",
+      "service": "Service demandé pour un soutien académique lié au handicap."
     },
     "items": {
       "equipment": {
-        "computerLaptop": "Ordinateur/portable",
+        "computerLaptop": "Ordinateur / Portable",
         "tablet": "Tablette",
         "screenReadingSoftware": "Logiciel de lecture d’écran"
       },
       "services": {
         "noteTakingServices": "Services de prise de notes",
         "tutoringServices": "Services de tutorat",
-        "addAdhdCoaching": "Coaching TDA/TDAH"
+        "addAdhdCoaching": "Coaching TDAH"
       },
       "servicesCaps": {
-        "noteTakingServices": "1 500 | par cours ou 1 000 $ par licence",
-        "tutoringServices": "2 200 | par cours, 35 $/heure max",
-        "addAdhdCoaching": "2 000 | BSWD seulement, par année scolaire"
+        "noteTakingServices": "$3,500",
+        "tutoringServices": "$3,500",
+        "addAdhdCoaching": "$2,000"
       }
+    },
+    "affiliate": {
+      "title": "Options recommandées",
+      "note": "Ces liens peuvent vous aider à trouver des articles/services admissibles plus rapidement.",
+      "openFirstOption": "Ouvrir la première option",
+      "disclaimer": "Les liens s’ouvrent dans un nouvel onglet. La disponibilité et les prix peuvent changer. Veuillez confirmer l’admissibilité avec votre établissement/OSAP.",
+      "osapContactsLabel": "Contacts OSAP"
     }
   },
   "review": {
@@ -400,6 +403,204 @@
           "url": "https://www.ontario.ca/page/learn-about-colleges-universities-and-indigenous-institutes-ontario"
         }
       }
+    }
+  },
+  "studentDashboard": {
+    "loading": "Chargement de votre demande...",
+    "header": {
+      "backToHome": "Retour à l’accueil",
+      "pageTitle": "État de ma demande",
+      "dashboardDescription": "Consultez l’état détaillé et la progression de votre demande de financement BSWD/CSG-DSE"
+    },
+    "tabs": {
+      "overview": "Aperçu",
+      "details": "Détails de la demande",
+      "timeline": "Chronologie d’examen"
+    },
+    "actions": {
+      "downloadPdf": "Télécharger le PDF",
+      "submitRequiredDocuments": "Soumettre les documents requis",
+      "downloadApprovalLetter": "Télécharger la lettre d’approbation"
+    },
+    "status": {
+      "lastUpdated": "Dernière mise à jour :",
+      "submitted": {
+        "label": "Soumise",
+        "description": "Votre demande a été reçue et est en attente d’examen."
+      },
+      "inReview": {
+        "label": "En examen",
+        "description": "Votre demande est actuellement examinée par notre équipe."
+      },
+      "inProgress": {
+        "label": "Action requise",
+        "description": "Nous avons besoin d’informations ou de documents supplémentaires pour poursuivre le traitement de votre demande."
+      },
+      "accepted": {
+        "label": "Approuvée",
+        "description": "Votre demande a été approuvée. Surveillez votre lettre d’approbation et les prochaines étapes."
+      },
+      "denied": {
+        "label": "Non approuvée",
+        "description": "Votre demande n’a pas été approuvée. Consultez votre courriel pour les détails et les options d’appel."
+      },
+      "unknown": {
+        "label": "Statut inconnu",
+        "description": "Nous n’avons pas pu déterminer le statut actuel de votre demande. Veuillez réessayer plus tard ou contacter le support."
+      }
+    },
+    "noApplication": {
+      "title": "Aucune demande trouvée",
+      "message": "Nous n’avons trouvé aucune demande soumise pour votre compte.",
+      "startNew": "Commencer une nouvelle demande"
+    }
+  },
+  "reviewStepsProgress": {
+    "title": "Progression de l’examen",
+    "steps": {
+      "submission": {
+        "title": "Demande soumise",
+        "description": "Votre demande a été soumise avec succès au système."
+      },
+      "initialReview": {
+        "title": "Examen initial",
+        "description": "Vérification de l’exhaustivité de la demande et de l’admissibilité de base."
+      },
+      "documentVerification": {
+        "title": "Vérification des documents",
+        "description": "Vérification de la documentation relative au handicap et des pièces justificatives."
+      },
+      "financialAssessment": {
+        "title": "Évaluation financière",
+        "description": "Évaluation des besoins de financement et de l’aide disponible."
+      },
+      "finalDecision": {
+        "title": "Décision finale",
+        "description": "L’équipe d’examen rend une décision finale sur votre demande."
+      }
+    },
+    "statusLabels": {
+      "completed": "Terminé",
+      "inProgress": "En cours",
+      "attentionNeeded": "Attention requise",
+      "pending": "En attente"
+    },
+    "timestamps": {
+      "completed": "Terminé :",
+      "started": "Commencé :"
+    },
+    "estimate": {
+      "label": "Délai estimé d’examen :",
+      "message": "Le processus d’examen complet prend généralement de 2 à 3 semaines. Nous vous aviserons par courriel lorsqu’il y aura des mises à jour importantes."
+    }
+  },
+  "feedbackSection": {
+    "title": "Notifications et rétroaction",
+    "actionRequiredBadge": "Action requise",
+    "needHelp": {
+      "title": "Besoin d’aide ?",
+      "messagePrefix": "Si vous avez des questions, veuillez contacter le bureau des services aux étudiants en situation de handicap de votre établissement, ou écrivez-nous à",
+      "supportEmail": "support@edvisingu.ca"
+    },
+    "defaults": {
+      "submitted": {
+        "0": {
+          "title": "Demande reçue",
+          "message": "Votre demande a été soumise avec succès et nous commencerons bientôt le processus d’examen.",
+          "type": "success",
+          "actionable": false
+        },
+        "1": {
+          "title": "Prochaines étapes",
+          "message": "Veuillez garder un accès à votre courriel, car nous vous contacterons par courriel. Le délai d’examen prévu est de 2 à 3 semaines.",
+          "type": "info",
+          "actionable": false
+        }
+      },
+      "inReview": {
+        "0": {
+          "title": "Examen en cours",
+          "message": "Notre équipe examine attentivement votre demande et vos documents justificatifs. Nous vous contacterons rapidement si des informations supplémentaires sont nécessaires.",
+          "type": "info",
+          "actionable": false
+        }
+      },
+      "inProgress": {
+        "0": {
+          "title": "Informations supplémentaires requises",
+          "message": "Pour poursuivre le traitement de votre demande, nous avons besoin d’informations ou de documents supplémentaires. Veuillez consulter les exigences ci-dessous.",
+          "type": "warning",
+          "actionable": true
+        },
+        "1": {
+          "title": "Action requise",
+          "message": "Veuillez fournir les documents requis dans les 10 jours ouvrables afin d’éviter des retards. Vous pouvez soumettre les documents par l’intermédiaire du bureau des services aux étudiants en situation de handicap de votre établissement.",
+          "type": "action-required",
+          "actionable": true
+        }
+      },
+      "accepted": {
+        "0": {
+          "title": "Demande approuvée !",
+          "message": "Félicitations ! Votre demande a été approuvée. Vous recevrez une lettre d’approbation officielle dans un délai de 3 à 5 jours ouvrables.",
+          "type": "success",
+          "actionable": false
+        },
+        "1": {
+          "title": "Versement du financement",
+          "message": "Les fonds seront versés selon l’échéancier indiqué dans la lettre d’approbation. Veuillez lire attentivement les modalités et conditions de la lettre d’approbation.",
+          "type": "info",
+          "actionable": false
+        }
+      },
+      "denied": {
+        "0": {
+          "title": "Demande non approuvée",
+          "message": "Malheureusement, votre demande n’a pas été approuvée pour le moment. Vous recevrez un courriel contenant les raisons détaillées.",
+          "type": "warning",
+          "actionable": false
+        },
+        "1": {
+          "title": "Droit d’appel",
+          "message": "Si vous croyez que la décision est erronée ou si vous avez des informations supplémentaires à fournir, vous avez le droit de faire appel dans les 30 jours suivant la réception de la décision.",
+          "type": "info",
+          "actionable": true
+        }
+      }
+    }
+  },
+  "applicationDetails": {
+    "title": "Détails de la demande",
+    "sections": {
+      "applicationInfo": {
+        "title": "Informations sur la demande",
+        "labels": {
+          "applicationId": "ID de demande",
+          "submittedDate": "Date de soumission",
+          "lastUpdated": "Dernière mise à jour"
+        }
+      },
+      "studentInfo": {
+        "title": "Informations sur l’étudiant",
+        "labels": {
+          "name": "Nom",
+          "studentId": "Numéro d’étudiant"
+        }
+      },
+      "academicInfo": {
+        "title": "Informations scolaires",
+        "labels": {
+          "institution": "Établissement",
+          "program": "Programme",
+          "studyPeriod": "Période d’étude"
+        }
+      }
+    },
+    "summary": {
+      "title": "Résumé de la demande",
+      "p1Prefix": "Vous avez soumis votre demande de financement BSWD/CSG-DSE le",
+      "p1Middle": "L’ID de votre demande est",
+      "p1Suffix": "Nous vous aviserons par courriel aux étapes clés du processus d’examen."
     }
   }
 }
