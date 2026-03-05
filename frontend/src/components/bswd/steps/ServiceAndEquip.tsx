@@ -70,7 +70,7 @@ export function ServiceAndEquip({ formData, setFormData }: ServiceAndEquipProps)
     {
       id: 1,
       name: t("serviceEquipment.items.services.noteTakingServices"),
-      cap: t("serviceEquipment.items.servicesCaps.noteTakingServices"),
+      cap: t("serviceEquipment.servicesCaps.noteTakingServices"),
       bswdEligible: true,
       csgdseEligible: true,
       suggestionTags: ["learning", "attention/concentration", "dexterity"],
@@ -78,7 +78,7 @@ export function ServiceAndEquip({ formData, setFormData }: ServiceAndEquipProps)
     {
       id: 2,
       name: t("serviceEquipment.items.services.tutoringServices"),
-      cap: t("serviceEquipment.items.servicesCaps.tutoringServices"),
+      cap: t("serviceEquipment.servicesCaps.tutoringServices"),
       bswdEligible: true,
       csgdseEligible: true,
       suggestionTags: [
@@ -93,7 +93,7 @@ export function ServiceAndEquip({ formData, setFormData }: ServiceAndEquipProps)
     {
       id: 3,
       name: t("serviceEquipment.items.services.addAdhdCoaching"),
-      cap: t("serviceEquipment.items.servicesCaps.addAdhdCoaching"),
+      cap: t("serviceEquipment.servicesCaps.addAdhdCoaching"),
       bswdEligible: true,
       csgdseEligible: false,
       suggestionTags: [
