@@ -41,7 +41,7 @@ import { FormData } from "@/types/bswd";
 import { useDateRange } from "@/hooks/UseDateRange";
 import { useTranslation } from "@/lib/i18n";
 
-const institutions = [
+export const institutions = [
   { value: "algoma", label: "Algoma University" },
   { value: "nipissing", label: "Nipissing University" },
   { value: "metro", label: "Toronto Metropolitan University" },

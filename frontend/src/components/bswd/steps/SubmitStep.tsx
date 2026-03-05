@@ -7,6 +7,7 @@
 import { FormData } from "@/types/bswd";
 import { FileText, User, GraduationCap, DollarSign, Heart } from "lucide-react";
 import { useTranslation } from "@/lib/i18n"; // translation
+import { institutions } from "./ProgramInfoStep";
 
 interface ReviewAndSubmitProps {
   formData: FormData;
@@ -54,6 +55,12 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
   if (value === true) return t("common.yes");
   if (value === false) return t("common.no");
   return t("review.notProvided");
+};
+
+const getInstitutionLabel = (institutionValue: string | undefined): string => {
+  if (!institutionValue) return t("review.notProvided");
+  const institution = institutions.find((inst) => inst.value === institutionValue);
+  return institution?.label || institutionValue;
 };
 
   return (
@@ -225,7 +232,7 @@ const formatYesNoNotProvided = (value: boolean | undefined | null) => { // trans
           <div>
             <p className="text-gray-500">{t("review.program.institution")}</p>
             <p id="review-institution" className="font-medium text-gray-900">
-              {formData.institution || t("review.notProvided")}
+              {getInstitutionLabel(formData.institution)}
             </p>
           </div>
           <div>
