@@ -5,6 +5,7 @@
 
 import { CheckCircle, Clock, Circle, AlertCircle } from 'lucide-react';
 import { ApplicationStatus } from '@/types/bswd';
+import { useTranslation } from "@/lib/i18n"; // translation import
 
 interface ReviewStep {
   id: string;
@@ -24,38 +25,39 @@ export function ReviewStepsProgress({
   submittedDate,
   statusUpdatedDate 
 }: ReviewStepsProgressProps) {
+  const { t, isLoaded } = useTranslation(); // translation helper
   
   // Determine step status based on application status
   const getSteps = (): ReviewStep[] => {
     const baseSteps: ReviewStep[] = [
       {
         id: 'submission',
-        title: 'Application Submitted',
-        description: 'Your application has been successfully submitted to the system',
+        title: t("reviewStepsProgress.steps.submission.title"),
+        description: t("reviewStepsProgress.steps.submission.description"),
         status: 'completed'
       },
       {
         id: 'initial-review',
-        title: 'Initial Review',
-        description: 'Verifying application completeness and basic eligibility',
+        title: t("reviewStepsProgress.steps.initialReview.title"),
+        description: t("reviewStepsProgress.steps.initialReview.description"),
         status: 'pending'
       },
       {
         id: 'document-verification',
-        title: 'Document Verification',
-        description: 'Verifying disability documentation and supporting files',
+        title: t("reviewStepsProgress.steps.documentVerification.title"),
+        description: t("reviewStepsProgress.steps.documentVerification.description"),
         status: 'pending'
       },
       {
         id: 'financial-assessment',
-        title: 'Financial Assessment',
-        description: 'Assessing funding needs and available assistance',
+        title: t("reviewStepsProgress.steps.financialAssessment.title"),
+        description: t("reviewStepsProgress.steps.financialAssessment.description"),
         status: 'pending'
       },
       {
         id: 'final-decision',
-        title: 'Final Decision',
-        description: 'Review team making final decision',
+        title: t("reviewStepsProgress.steps.finalDecision.title"),
+        description: t("reviewStepsProgress.steps.finalDecision.description"),
         status: 'pending'
       }
     ];
@@ -125,9 +127,35 @@ export function ReviewStepsProgress({
     }
   };
 
+  const getStatusLabel = (status: ReviewStep['status']) => {
+    switch (status) {
+      case 'completed':
+        return t("reviewStepsProgress.statusLabels.completed");
+      case 'in-progress':
+        return t("reviewStepsProgress.statusLabels.inProgress");
+      case 'attention-needed':
+        return t("reviewStepsProgress.statusLabels.attentionNeeded");
+      case 'pending':
+        return t("reviewStepsProgress.statusLabels.pending");
+    }
+  };
+
+  const getStatusPillClasses = (status: ReviewStep['status']) => {
+    switch (status) {
+      case 'in-progress':
+        return 'text-xs font-medium text-blue-800 bg-blue-100 px-2 py-1 rounded';
+      case 'completed':
+        return 'text-xs font-medium text-green-800 bg-green-100 px-2 py-1 rounded';
+      case 'attention-needed':
+        return 'text-xs font-medium text-orange-800 bg-orange-100 px-2 py-1 rounded';
+      case 'pending':
+        return 'text-xs font-medium text-gray-700 bg-gray-100 px-2 py-1 rounded';
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-xl font-semibold text-gray-900 mb-6">Review Progress</h3>
+      <h3 className="text-xl font-semibold text-gray-900 mb-6">{t("reviewStepsProgress.title")}</h3>
       
       <div className="space-y-4">
         {steps.map((step, index) => (
@@ -147,22 +175,14 @@ export function ReviewStepsProgress({
                   <h4 className="text-base font-semibold text-gray-900">
                     {step.title}
                   </h4>
-                  {step.status === 'in-progress' && (
-                    <span className="text-xs font-medium text-blue-800 bg-blue-100 px-2 py-1 rounded">
-                      In Progress
-                    </span>
-                  )}
-                  {step.status === 'completed' && (
-                    <span className="text-xs font-medium text-green-800 bg-green-100 px-2 py-1 rounded">
-                      Completed
-                    </span>
-                  )}
-                  {step.status === 'attention-needed' && (
-                    <span className="text-xs font-medium text-orange-800 bg-orange-100 px-2 py-1 rounded">
-                      Attention Needed
+
+                  {(step.status === 'in-progress' || step.status === 'completed' || step.status === 'attention-needed' || step.status === 'pending') && (
+                    <span className={getStatusPillClasses(step.status)}>
+                      {getStatusLabel(step.status)}
                     </span>
                   )}
                 </div>
+
                 <p className="mt-1 text-sm text-gray-600">
                   {step.description}
                 </p>
@@ -170,13 +190,13 @@ export function ReviewStepsProgress({
                 {/* Display timestamps */}
                 {step.status === 'completed' && step.id === 'submission' && (
                   <p className="mt-2 text-xs text-gray-500">
-                    Completed: {new Date(submittedDate).toLocaleDateString()} {new Date(submittedDate).toLocaleTimeString()}
+                    {t("reviewStepsProgress.timestamps.completed")} {new Date(submittedDate).toLocaleDateString()} {new Date(submittedDate).toLocaleTimeString()}
                   </p>
                 )}
                 
                 {step.status === 'in-progress' && (
                   <p className="mt-2 text-xs text-gray-500">
-                    Started: {new Date(statusUpdatedDate).toLocaleDateString()} {new Date(statusUpdatedDate).toLocaleTimeString()}
+                    {t("reviewStepsProgress.timestamps.started")} {new Date(statusUpdatedDate).toLocaleDateString()} {new Date(statusUpdatedDate).toLocaleTimeString()}
                   </p>
                 )}
               </div>
@@ -189,7 +209,7 @@ export function ReviewStepsProgress({
       {(applicationStatus === 'submitted' || applicationStatus === 'in-review') && (
         <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-800">
-            <strong>Estimated Review Time:</strong> The complete review process typically takes 2-3 weeks. We will notify you by email when there are important updates.
+            <strong>{t("reviewStepsProgress.estimate.label")}</strong> {t("reviewStepsProgress.estimate.message")}
           </p>
         </div>
       )}
