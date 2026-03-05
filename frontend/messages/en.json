@@ -208,8 +208,8 @@
   },
   "serviceEquipment": {
     "sectionHeader": "Section E: Service & Equipment",
-    "equipmentHeader": "Equipment",
-    "servicesHeader": "Services",
+    "equipmentHeader": "Disability-Related Equipment",
+    "servicesHeader": "Disability-Related Services",
     "tabs": {
       "equipment": "Equipment",
       "services": "Services"
@@ -227,10 +227,10 @@
       "addService": "Add service"
     },
     "requestedCount": {
-      "prefix": "items requested"
+      "prefix": "item(s) requested"
     },
     "eligibility": {
-      "both": "BSWD + CSG-DSE",
+      "both": "BSWD & CSG-DSE",
       "bswd": "BSWD",
       "csgdse": "CSG-DSE"
     },
@@ -242,17 +242,17 @@
       "equipment": {
         "computerLaptop": "Computer / Laptop",
         "tablet": "Tablet",
-        "screenReadingSoftware": "Screen reading software"
+        "screenReadingSoftware": "Screen Reading Software"
       },
       "services": {
-        "noteTakingServices": "Note-taking services",
-        "tutoringServices": "Tutoring services",
-        "addAdhdCoaching": "ADHD coaching"
+        "noteTakingServices": "Note-taking Services",
+        "tutoringServices": "Tutoring Services",
+        "addAdhdCoaching": "ADD/ADHD coaching"
       },
       "servicesCaps": {
-        "noteTakingServices": "$3,500",
-        "tutoringServices": "$3,500",
-        "addAdhdCoaching": "$2,000"
+        "noteTakingServices": "$1,500 | per course or $1,000 per license",
+        "tutoringServices": "$2,200 | per course, $35/hour max",
+        "addAdhdCoaching": "$2,000 | BSWD only, per academic year"
       }
     },
     "affiliate": {
