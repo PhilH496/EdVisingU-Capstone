@@ -5,6 +5,7 @@
 
 import { AlertCircle, CheckCircle, Info, Upload, FileText } from 'lucide-react';
 import { ApplicationStatus } from '@/types/bswd';
+import { useTranslation } from "@/lib/i18n"; // translation import
 
 interface FeedbackItem {
   id: string;
@@ -21,6 +22,7 @@ interface FeedbackSectionProps {
 }
 
 export function FeedbackSection({ status, feedbackItems }: FeedbackSectionProps) {
+  const { t, isLoaded } = useTranslation(); // translation helper
   
   // Generate default feedback based on status
   const getDefaultFeedback = (): FeedbackItem[] => {
@@ -29,78 +31,78 @@ export function FeedbackSection({ status, feedbackItems }: FeedbackSectionProps)
     switch (status) {
       case 'submitted':
         feedback.push({
-          id: 'submitted-1',
+          id: 'submitted-0',
           type: 'success',
-          title: 'Application Received',
-          message: 'Your application has been successfully submitted and we will begin the review process soon.',
+          title: t("feedbackSection.defaults.submitted.0.title"),
+          message: t("feedbackSection.defaults.submitted.0.message"),
           actionable: false
         });
         feedback.push({
-          id: 'submitted-2',
+          id: 'submitted-1',
           type: 'info',
-          title: 'Next Steps',
-          message: 'Please keep your email accessible as we will contact you by email. Expected review time is 2-3 weeks.',
+          title: t("feedbackSection.defaults.submitted.1.title"),
+          message: t("feedbackSection.defaults.submitted.1.message"),
           actionable: false
         });
         break;
 
       case 'in-review':
         feedback.push({
-          id: 'review-1',
+          id: 'inReview-0',
           type: 'info',
-          title: 'Review In Progress',
-          message: 'Our team is carefully reviewing your application materials and supporting documents. We will contact you promptly if additional information is needed.',
+          title: t("feedbackSection.defaults.inReview.0.title"),
+          message: t("feedbackSection.defaults.inReview.0.message"),
           actionable: false
         });
         break;
 
       case 'in-progress':
         feedback.push({
-          id: 'progress-1',
+          id: 'inProgress-0',
           type: 'warning',
-          title: 'Additional Information Required',
-          message: 'To continue processing your application, we need some additional information or documents. Please review the specific requirements below.',
+          title: t("feedbackSection.defaults.inProgress.0.title"),
+          message: t("feedbackSection.defaults.inProgress.0.message"),
           actionable: true
         });
         feedback.push({
-          id: 'progress-2',
+          id: 'inProgress-1',
           type: 'action-required',
-          title: 'Action Required',
-          message: 'Please provide the required materials within 10 business days to avoid processing delays. You can submit documents through your school\'s disability services office.',
+          title: t("feedbackSection.defaults.inProgress.1.title"),
+          message: t("feedbackSection.defaults.inProgress.1.message"),
           actionable: true
         });
         break;
 
       case 'accepted':
         feedback.push({
-          id: 'accepted-1',
+          id: 'accepted-0',
           type: 'success',
-          title: 'Application Approved!',
-          message: 'Congratulations! Your application has been approved. You will receive a formal approval letter within 3-5 business days.',
+          title: t("feedbackSection.defaults.accepted.0.title"),
+          message: t("feedbackSection.defaults.accepted.0.message"),
           actionable: false
         });
         feedback.push({
-          id: 'accepted-2',
+          id: 'accepted-1',
           type: 'info',
-          title: 'Funding Disbursement',
-          message: 'Funds will be disbursed according to the schedule outlined in the approval letter. Please carefully review the terms and conditions in the approval letter.',
+          title: t("feedbackSection.defaults.accepted.1.title"),
+          message: t("feedbackSection.defaults.accepted.1.message"),
           actionable: false
         });
         break;
 
       case 'denied':
         feedback.push({
-          id: 'denied-1',
+          id: 'denied-0',
           type: 'warning',
-          title: 'Application Not Approved',
-          message: 'Unfortunately, your application was not approved at this time. You will receive an email with detailed reasoning.',
+          title: t("feedbackSection.defaults.denied.0.title"),
+          message: t("feedbackSection.defaults.denied.0.message"),
           actionable: false
         });
         feedback.push({
-          id: 'denied-2',
+          id: 'denied-1',
           type: 'info',
-          title: 'Appeal Rights',
-          message: 'If you believe the decision was in error or have additional information to provide, you have the right to appeal within 30 days of receiving the decision.',
+          title: t("feedbackSection.defaults.denied.1.title"),
+          message: t("feedbackSection.defaults.denied.1.message"),
           actionable: true
         });
         break;
@@ -145,7 +147,7 @@ export function FeedbackSection({ status, feedbackItems }: FeedbackSectionProps)
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-xl font-semibold text-gray-900 mb-6">Notifications & Feedback</h3>
+      <h3 className="text-xl font-semibold text-gray-900 mb-6">{t("feedbackSection.title")}</h3>
       
       <div className="space-y-4">
         {allFeedback.map((item) => (
@@ -165,7 +167,7 @@ export function FeedbackSection({ status, feedbackItems }: FeedbackSectionProps)
                   </h4>
                   {item.actionable && (
                     <span className="ml-2 text-xs font-medium text-red-600 bg-red-100 px-2 py-1 rounded">
-                      Action Required
+                      {t("feedbackSection.actionRequiredBadge")}
                     </span>
                   )}
                 </div>
@@ -189,12 +191,12 @@ export function FeedbackSection({ status, feedbackItems }: FeedbackSectionProps)
       <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
         <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
           <FileText className="h-4 w-4 mr-2" />
-          Need Help?
+          {t("feedbackSection.needHelp.title")}
         </h4>
         <p className="text-sm text-gray-600">
-          If you have any questions, please contact your school's disability services office, or email us at
+          {t("feedbackSection.needHelp.messagePrefix")}
           <a href="mailto:support@edvisingu.ca" className="text-blue-600 hover:underline ml-1">
-            support@edvisingu.ca
+            {t("feedbackSection.needHelp.supportEmail")}
           </a>
         </p>
       </div>

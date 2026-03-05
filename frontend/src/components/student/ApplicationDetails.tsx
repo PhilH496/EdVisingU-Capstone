@@ -5,6 +5,7 @@
 
 import { FileText, User, GraduationCap, Calendar, MapPin, Phone, Mail } from 'lucide-react';
 import { Application } from '@/types/bswd';
+import { useTranslation } from "@/lib/i18n"; // translation import
 
 interface ApplicationDetailsProps {
   application: Application;
@@ -17,39 +18,40 @@ interface DetailSection {
 }
 
 export function ApplicationDetails({ application }: ApplicationDetailsProps) {
+  const { t, isLoaded } = useTranslation(); // translation helper
   
   const sections: DetailSection[] = [
     {
       icon: FileText,
-      title: 'Application Information',
+      title: t("applicationDetails.sections.applicationInfo.title"),
       items: [
-        { label: 'Application ID', value: application.id },
-        { label: 'Submitted Date', value: new Date(application.submittedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) },
-        { label: 'Last Updated', value: new Date(application.statusUpdatedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) }
+        { label: t("applicationDetails.sections.applicationInfo.labels.applicationId"), value: application.id },
+        { label: t("applicationDetails.sections.applicationInfo.labels.submittedDate"), value: new Date(application.submittedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) },
+        { label: t("applicationDetails.sections.applicationInfo.labels.lastUpdated"), value: new Date(application.statusUpdatedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) }
       ]
     },
     {
       icon: User,
-      title: 'Student Information',
+      title: t("applicationDetails.sections.studentInfo.title"),
       items: [
-        { label: 'Name', value: application.studentName },
-        { label: 'Student ID', value: application.studentId }
+        { label: t("applicationDetails.sections.studentInfo.labels.name"), value: application.studentName },
+        { label: t("applicationDetails.sections.studentInfo.labels.studentId"), value: application.studentId }
       ]
     },
     {
       icon: GraduationCap,
-      title: 'Academic Information',
+      title: t("applicationDetails.sections.academicInfo.title"),
       items: [
-        { label: 'Institution', value: application.institution },
-        { label: 'Program', value: application.program },
-        { label: 'Study Period', value: application.studyPeriod }
+        { label: t("applicationDetails.sections.academicInfo.labels.institution"), value: application.institution },
+        { label: t("applicationDetails.sections.academicInfo.labels.program"), value: application.program },
+        { label: t("applicationDetails.sections.academicInfo.labels.studyPeriod"), value: application.studyPeriod }
       ]
     }
   ];
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-xl font-semibold text-gray-900 mb-6">Application Details</h3>
+      <h3 className="text-xl font-semibold text-gray-900 mb-6">{t("applicationDetails.title")}</h3>
       
       <div className="space-y-6">
         {sections.map((section, sectionIndex) => {
@@ -76,11 +78,15 @@ export function ApplicationDetails({ application }: ApplicationDetailsProps) {
 
       {/* Application summary card */}
       <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-        <h4 className="text-sm font-semibold text-gray-700 mb-2">Application Summary</h4>
+        <h4 className="text-sm font-semibold text-gray-700 mb-2">{t("applicationDetails.summary.title")}</h4>
         <p className="text-sm text-gray-600">
-          You submitted your BSWD/CSG-DSE funding application on <strong>{new Date(application.submittedDate).toLocaleDateString('en-US')}</strong>.
-          Your application ID is <strong className="font-mono">{application.id}</strong>.
-          We will notify you by email at key points during the review process.
+          {t("applicationDetails.summary.p1Prefix")}{" "}
+          <strong>{new Date(application.submittedDate).toLocaleDateString('en-US')}</strong>.
+          {" "}
+          {t("applicationDetails.summary.p1Middle")}{" "}
+          <strong className="font-mono">{application.id}</strong>.
+          {" "}
+          {t("applicationDetails.summary.p1Suffix")}
         </p>
       </div>
     </div>

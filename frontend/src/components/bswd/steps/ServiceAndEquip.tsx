@@ -6,21 +6,17 @@
 
 import { FormData } from "@/types/bswd";
 import { useState } from "react";
-import { useTranslation } from "@/lib/i18n"; // translation import
+import { useTranslation } from "@/lib/i18n";
 import { ItemDisplay } from "@/types/bswd";
 import { getItemsWithSuggestion } from "@/lib/item-suggestion/itemSuggestion";
+
 interface ServiceAndEquipProps {
   formData: FormData;
   setFormData: (data: FormData | ((prev: FormData) => FormData)) => void;
 }
 
-// Main component
-export function ServiceAndEquip({
-  formData,
-  setFormData,
-}: ServiceAndEquipProps) {
-  const { t, isLoaded } = useTranslation(); // translation handling
-
+export function ServiceAndEquip({ formData, setFormData }: ServiceAndEquipProps) {
+  const { t, isLoaded } = useTranslation();
   const [tabFocus, setTabFocus] = useState("equipment");
 
   if (!isLoaded) return null;
@@ -28,10 +24,7 @@ export function ServiceAndEquip({
   const functionalLimitations = formData.functionalLimitations
     .filter((limit) => limit.checked)
     .map((limit) => limit.label.toLowerCase());
-  console.log(functionalLimitations);
-  // const functionalLimitations = ["learning", "mental health"];
 
-  // Database mock up
   const availableEquip: ItemDisplay[] = [
     {
       id: 1,
@@ -73,12 +66,11 @@ export function ServiceAndEquip({
     },
   ];
 
-  // Database mock up
   const availableServies: ItemDisplay[] = [
     {
       id: 1,
       name: t("serviceEquipment.items.services.noteTakingServices"),
-      cap: t("serviceEquipment.items.servicesCaps.noteTakingServices"),
+      cap: t("serviceEquipment.servicesCaps.noteTakingServices"),
       bswdEligible: true,
       csgdseEligible: true,
       suggestionTags: ["learning", "attention/concentration", "dexterity"],
@@ -86,7 +78,7 @@ export function ServiceAndEquip({
     {
       id: 2,
       name: t("serviceEquipment.items.services.tutoringServices"),
-      cap: t("serviceEquipment.items.servicesCaps.tutoringServices"),
+      cap: t("serviceEquipment.servicesCaps.tutoringServices"),
       bswdEligible: true,
       csgdseEligible: true,
       suggestionTags: [
@@ -101,7 +93,7 @@ export function ServiceAndEquip({
     {
       id: 3,
       name: t("serviceEquipment.items.services.addAdhdCoaching"),
-      cap: t("serviceEquipment.items.servicesCaps.addAdhdCoaching"),
+      cap: t("serviceEquipment.servicesCaps.addAdhdCoaching"),
       bswdEligible: true,
       csgdseEligible: false,
       suggestionTags: [
@@ -128,24 +120,18 @@ export function ServiceAndEquip({
       tabFocus === "equipment" ? availableEquip : availableServies;
     const itemType = tabFocus === "equipment" ? "Equipment" : "Service";
 
-    // Check if items from this category already exist
     const existingItemsFromCategory = formData.requestedItems.filter(
       (item) => item.category === itemType,
     );
 
-    // Check if all items are already added
     const allItemsAlreadyAdded = currentItems.every((currentItem) =>
       existingItemsFromCategory.some(
         (existing) => existing.item === currentItem.name,
       ),
     );
 
-    if (allItemsAlreadyAdded && existingItemsFromCategory.length > 0) {
-      // All items already added for this category — nothing to do
-      return;
-    }
+    if (allItemsAlreadyAdded && existingItemsFromCategory.length > 0) return;
 
-    // Create RequestedItem objects for items that don't exist yet
     const newItems = currentItems
       .filter(
         (item) =>
@@ -167,16 +153,12 @@ export function ServiceAndEquip({
                 | "both"),
       }));
 
-    setFormData((prev) => {
-      const updated = {
-        ...prev,
-        requestedItems: [...prev.requestedItems, ...newItems],
-      };
-      return updated;
-    });
+    setFormData((prev) => ({
+      ...prev,
+      requestedItems: [...prev.requestedItems, ...newItems],
+    }));
   };
 
-  // Check if all items in current tab are added
   const areAllItemsAdded = () => {
     const currentItems =
       tabFocus === "equipment" ? availableEquip : availableServies;
@@ -192,20 +174,12 @@ export function ServiceAndEquip({
     );
   };
 
-  // Handle tab change
-  const handleTabChange = (newTab: string) => {
-    setTabFocus(newTab);
-  };
-
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold mb-4">
         {t("serviceEquipment.sectionHeader")}
       </h2>
 
-      {/* duplicate warning removed — condition is unreachable */}
-
-      {/* Display current requested items count */}
       {formData.requestedItems && formData.requestedItems.length > 0 && (
         <div className="bg-green-50 border border-green-200 rounded-md p-3 mb-4">
           <p className="text-base text-green-800">
@@ -215,11 +189,8 @@ export function ServiceAndEquip({
         </div>
       )}
 
-      {/* 
-        Display TabBar component based on focus status
-        < Focusing on Equipment or Services > 
-      */}
-      {<TabBar tabFocus={tabFocus} setTabFocus={handleTabChange} />}
+      <TabBar tabFocus={tabFocus} setTabFocus={setTabFocus} />
+
       {tabFocus === "equipment" ? (
         <>
           <div className="flex justify-between items-center mb-4">
@@ -238,17 +209,16 @@ export function ServiceAndEquip({
               {t("serviceEquipment.buttons.addAllEquipment")}
             </button>
           </div>
-          {equipmentWithSuggestion.map((equip) => {
-            return (
-              <Item
-                key={equip.id}
-                itemInfo={equip}
-                type={tabFocus}
-                formData={formData}
-                setFormData={setFormData}
-              />
-            );
-          })}
+
+          {equipmentWithSuggestion.map((equip) => (
+            <Item
+              key={equip.id}
+              itemInfo={equip}
+              type="equipment"
+              formData={formData}
+              setFormData={setFormData}
+            />
+          ))}
         </>
       ) : (
         <>
@@ -268,17 +238,16 @@ export function ServiceAndEquip({
               {t("serviceEquipment.buttons.addAllServices")}
             </button>
           </div>
-          {servicesWithSuggestion.map((service) => {
-            return (
-              <Item
-                key={service.id}
-                itemInfo={service}
-                type={tabFocus}
-                formData={formData}
-                setFormData={setFormData}
-              />
-            );
-          })}
+
+          {servicesWithSuggestion.map((service) => (
+            <Item
+              key={service.id}
+              itemInfo={service}
+              type="services"
+              formData={formData}
+              setFormData={setFormData}
+            />
+          ))}
         </>
       )}
     </div>
@@ -290,9 +259,8 @@ interface TabFocusProps {
   setTabFocus: (data: string) => void;
 }
 
-// TabBar compoennt
 const TabBar = ({ tabFocus, setTabFocus }: TabFocusProps) => {
-  const { t, isLoaded } = useTranslation(); // translation handling
+  const { t, isLoaded } = useTranslation();
   if (!isLoaded) return null;
 
   return (
@@ -302,9 +270,7 @@ const TabBar = ({ tabFocus, setTabFocus }: TabFocusProps) => {
           "m-1 py-0.5 rounded-md " +
           (tabFocus === "equipment" ? "bg-white" : "bg-transparent")
         }
-        onClick={() => {
-          setTabFocus("equipment");
-        }}
+        onClick={() => setTabFocus("equipment")}
       >
         {t("serviceEquipment.tabs.equipment")}
       </button>
@@ -313,9 +279,7 @@ const TabBar = ({ tabFocus, setTabFocus }: TabFocusProps) => {
           "m-1 py-0.5 rounded-md " +
           (tabFocus === "services" ? "bg-white" : "bg-transparent")
         }
-        onClick={() => {
-          setTabFocus("services");
-        }}
+        onClick={() => setTabFocus("services")}
       >
         {t("serviceEquipment.tabs.services")}
       </button>
@@ -323,40 +287,27 @@ const TabBar = ({ tabFocus, setTabFocus }: TabFocusProps) => {
   );
 };
 
-interface ItemInfo {
-  id: number;
-  name: string;
-  cap: number | string;
-  bswdEligible: boolean;
-  csgdseEligible: boolean;
-}
-
 interface ItemProps {
   itemInfo: ItemDisplay;
-  type: string;
+  type: "equipment" | "services";
   formData: FormData;
   setFormData: (data: FormData | ((prev: FormData) => FormData)) => void;
 }
 
-// Create equipment item / service item component
 const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
-  const { t, isLoaded } = useTranslation(); // translation handling
-
-  // Hover state to change text to 'Remove Item' when hovering an already-added item
+  const { t, isLoaded, language } = useTranslation();
   const [hovered, setHovered] = useState(false);
 
   if (!isLoaded) return null;
 
   const itemType = type === "equipment" ? "Equipment" : "Service";
 
-  // Check if this item is already added
   const isAdded = formData.requestedItems.some(
     (item) => item.category === itemType && item.item === itemInfo.name,
   );
 
   const handleAddItem = () => {
     if (isAdded) {
-      // Remove item if already added
       setFormData((prev) => ({
         ...prev,
         requestedItems: prev.requestedItems.filter(
@@ -364,107 +315,186 @@ const Item = ({ itemInfo, type, formData, setFormData }: ItemProps) => {
             !(item.category === itemType && item.item === itemInfo.name),
         ),
       }));
-    } else {
-      // Add new item
-      const newItem = {
-        category: itemType,
-        item: itemInfo.name,
-        cost: typeof itemInfo.cap === "number" ? itemInfo.cap : 0,
-        justification:
-          itemType === "Equipment"
-            ? t("serviceEquipment.justification.equipment")
-            : t("serviceEquipment.justification.service"),
-        fundingSource:
-          itemInfo.bswdEligible && itemInfo.csgdseEligible
-            ? "both"
-            : ((itemInfo.bswdEligible ? "bswd" : "csg-dse") as
-                | "bswd"
-                | "csg-dse"
-                | "both"),
-      };
-
-      setFormData((prev) => ({
-        ...prev,
-        requestedItems: [...prev.requestedItems, newItem],
-      }));
+      return;
     }
+
+    const newItem = {
+      category: itemType,
+      item: itemInfo.name,
+      cost: typeof itemInfo.cap === "number" ? itemInfo.cap : 0,
+      justification:
+        itemType === "Equipment"
+          ? t("serviceEquipment.justification.equipment")
+          : t("serviceEquipment.justification.service"),
+      fundingSource:
+        itemInfo.bswdEligible && itemInfo.csgdseEligible
+          ? "both"
+          : ((itemInfo.bswdEligible ? "bswd" : "csg-dse") as
+              | "bswd"
+              | "csg-dse"
+              | "both"),
+    };
+
+    setFormData((prev) => ({
+      ...prev,
+      requestedItems: [...prev.requestedItems, newItem],
+    }));
   };
 
+  const buildSearchUrl = (base: string, params: Record<string, string>) => {
+    const qs = new URLSearchParams(params);
+    return `${base}${base.includes("?") ? "&" : "?"}${qs.toString()}`;
+  };
+
+  const equipmentLinks = [
+    {
+      label: "Amazon.ca",
+      href: buildSearchUrl("https://www.amazon.ca/s", { k: itemInfo.name }),
+    },
+    {
+      label: "BestBuy.ca",
+      href: buildSearchUrl("https://www.bestbuy.ca/en-ca/search", { search: itemInfo.name }),
+    },
+    {
+      label: "Staples.ca",
+      href: buildSearchUrl("https://www.staples.ca/search", { q: itemInfo.name }),
+    },
+  ];
+
+  const serviceLinks = [
+    {
+      label: "EdVisingU",
+      href: "https://edvisingu.com/",
+    },
+    {
+      label: t("serviceEquipment.affiliate.osapContactsLabel"),
+      href: "https://osap.gov.on.ca/OSAPPortal/en/Contacts/ProvinciallyfundedSchoolsinOntario/index.htm",
+    },
+    {
+      label: "Ontario.ca",
+      href: "https://www.ontario.ca/page/osap-for-under-represented-learners#section-3",
+    },
+  ];
+
+  const links = type === "equipment" ? equipmentLinks : serviceLinks;
+
   return (
-    <div className="border rounded-lg p-4 flex justify-between items-center">
-      <div>
-        <h4 className="font-semibold">
-          {itemInfo.name}{" "}
-          {itemInfo.isSuggested && (
-            <span className="rounded-full p-1 bg-yellow-500 ml-2">
-              <i className="fa-solid fa-thumbs-up text-white"></i>
-            </span>
-          )}
-        </h4>
-        <p>
-          <span>
-            {t("serviceEquipment.labels.cap")}: ${itemInfo.cap}
-          </span>
-          {type === "equipment" ? (
-            <>
-              <span className="px-2">&#124;</span>
-              <span>
-                {t("serviceEquipment.labels.eligible")}:{" "}
-                {getEligibility(
-                  itemInfo.bswdEligible,
-                  itemInfo.csgdseEligible,
-                  t,
-                )}
+    <div className="border rounded-lg p-4 space-y-3">
+      <div className="flex justify-between items-center">
+        <div>
+          <h4 className="font-semibold">
+            {itemInfo.name}{" "}
+            {itemInfo.isSuggested && (
+              <span className="rounded-full p-1 bg-yellow-500 ml-2">
+                <i className="fa-solid fa-thumbs-up text-white"></i>
               </span>
-            </>
-          ) : (
-            <div>
+            )}
+          </h4>
+          <p>
+            <span>
+              {t("serviceEquipment.labels.cap")}:{" "}
+              {typeof itemInfo.cap === "number" ? `$${itemInfo.cap}` : itemInfo.cap}
+            </span>
+            <span className="px-2">&#124;</span>
+            <span>
               {t("serviceEquipment.labels.eligible")}:{" "}
               {getEligibility(
                 itemInfo.bswdEligible,
                 itemInfo.csgdseEligible,
                 t,
               )}
-            </div>
-          )}
-        </p>
+            </span>
+          </p>
+        </div>
+
+        <button
+          onClick={handleAddItem}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          className={`border rounded-md px-2 font-semibold text-sm h-10 transition-colors ${
+            isAdded
+              ? "bg-green-100 text-green-700 border-green-400 hover:bg-red-100 hover:text-red-700 hover:border-red-400"
+              : "bg-white hover:bg-teal-50 hover:border-teal-600 hover:text-teal-600"
+          }`}
+        >
+          {isAdded
+            ? hovered
+              ? t("serviceEquipment.buttons.removeItem")
+              : t("serviceEquipment.buttons.added")
+            : type === "equipment"
+              ? t("serviceEquipment.buttons.addItem")
+              : t("serviceEquipment.buttons.addService")}
+        </button>
       </div>
-      <button
-        onClick={handleAddItem}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        className={`border rounded-md px-2 font-semibold text-sm h-10 transition-colors ${
-          isAdded
-            ? "bg-green-100 text-green-700 border-green-400 hover:bg-red-100 hover:text-red-700 hover:border-red-400"
-            : "bg-white hover:bg-teal-50 hover:border-teal-600 hover:text-teal-600"
-        }`}
-      >
-        {isAdded
-          ? hovered
-            ? t("serviceEquipment.buttons.removeItem")
-            : t("serviceEquipment.buttons.added")
-          : type === "equipment"
-            ? t("serviceEquipment.buttons.addItem")
-            : t("serviceEquipment.buttons.addService")}
-      </button>
+
+      {isAdded && (
+        <div className="rounded-lg border border-gray-200 bg-white">
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-full bg-brand-dark-blue/10 flex items-center justify-center">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4 text-brand-dark-blue"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M6 7h12l-1 14H7L6 7Z" />
+                  <path d="M9 7V5a3 3 0 0 1 6 0v2" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">
+                  {t("serviceEquipment.affiliate.title")}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {t("serviceEquipment.affiliate.note")}
+                </p>
+              </div>
+            </div>
+
+            <a
+              href={links[0]?.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-semibold text-brand-dark-blue hover:underline"
+            >
+              {t("serviceEquipment.affiliate.openFirstOption")}
+            </a>
+          </div>
+
+          <div className="border-t border-gray-100 px-4 py-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {links.map((l) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-white hover:border-brand-dark-blue/40 hover:text-brand-dark-blue transition"
+                >
+                  {l.label}
+                </a>
+              ))}
+            </div>
+
+            <p className="mt-2 text-[11px] leading-4 text-gray-500">
+              {t("serviceEquipment.affiliate.disclaimer")}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-// Helper Function
-// Retrieve eligible string according to bswd and csg-dse status
 function getEligibility(
   bswd: boolean,
   csgdse: boolean,
   t: (key: string) => string,
 ) {
-  if (bswd && csgdse) {
-    return t("serviceEquipment.eligibility.both");
-  } else if (bswd) {
-    return t("serviceEquipment.eligibility.bswd");
-  } else if (csgdse) {
-    return t("serviceEquipment.eligibility.csgdse");
-  } else {
-    throw new Error("Both BSWD and CSG-DSE are not eligible");
-  }
+  if (bswd && csgdse) return t("serviceEquipment.eligibility.both");
+  if (bswd) return t("serviceEquipment.eligibility.bswd");
+  if (csgdse) return t("serviceEquipment.eligibility.csgdse");
+  throw new Error("Both BSWD and CSG-DSE are not eligible");
 }
