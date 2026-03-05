@@ -111,9 +111,9 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
           <input
             id="federal-need"
             type="number"
+            placeholder="$0"
             min={0}
             className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
-            value={Number.isNaN(federalNeed) ? "" : federalNeed}
             onChange={(e) =>
               setField("federalNeed", Number(e.currentTarget.value))
             }
@@ -129,9 +129,9 @@ export function OsapInfoStep({ formData, setFormData }: OsapInfoStepProps) {
           <input
             id="provincial-need"
             type="number"
+            placeholder="$0"
             min={0}
             className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-dark-blue"
-            value={Number.isNaN(provincialNeed) ? "" : provincialNeed}
             onChange={(e) =>
               setField("provincialNeed", Number(e.currentTarget.value))
             }
