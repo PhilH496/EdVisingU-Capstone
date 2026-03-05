@@ -363,6 +363,9 @@ export function StudentInfoStep({ formData, setFormData }: StudentInfoStepProps)
             </PopoverTrigger>
             <PopoverContent className="w-auto overflow-hidden p-0" align="start">
               <Calendar
+                defaultMonth={new Date(2000, 0)}
+                startMonth={new Date(1960, 0)}
+                endMonth={new Date(2010, 0)}
                 mode="single"
                 selected={dob.date}
                 captionLayout="dropdown"
