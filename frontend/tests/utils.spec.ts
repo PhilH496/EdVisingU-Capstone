@@ -1,17 +1,20 @@
 import { test, expect, Page } from '@playwright/test';
 import { deleteTestData, generateNumericId, signUpTestUser, deleteTestUser, TEST_USER_EMAIL, TEST_USER_PASSWORD, openDatePicker } from './utils';
 
+const EXISTING_EMAIL = "phiillyh1000@gmail.com";
+const EXISTING_PASSWORD = "TestPass123!";
+
 const studentID = generateNumericId(8);
 const applicationID = 'APP-' + studentID;
 const OEN = generateNumericId(9);
 const SIN = generateNumericId(9);
 
 async function login(page: Page) {
-  await page.goto('http://localhost:3000/login');
-  await page.getByLabel('Email').fill(TEST_USER_EMAIL);
+  await page.goto('/login');
+  await page.getByLabel('Email address').fill(TEST_USER_EMAIL);
   await page.getByLabel('Password').fill(TEST_USER_PASSWORD);
-  await page.getByRole('button', { name: 'Sign In' }).click();
-  await page.waitForURL('http://localhost:3000/application');
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await page.waitForURL(/\/application/);
 }
 
 test.describe('Student Form Tests', () => {
@@ -182,5 +185,15 @@ test.describe('Student Form Tests', () => {
     await page.getByRole('button', { name: 'Send message' }).click();
     await page.waitForSelector('#chatbotResponse');
     await expect(page.locator('#chatbotResponse').last()).toContainText('Yes');
+  });
+
+  test('student dashboard', async ({ page }) => {
+    await page.goto('/login');
+    await page.getByLabel('Email address').fill(EXISTING_EMAIL);
+    await page.getByLabel('Password').fill(EXISTING_PASSWORD);
+    await page.getByRole('button', { name: 'Sign in' }).click();
+    await page.waitForURL(/\/student-dashboard/);
+    await expect((page.getByRole('heading', { name: 'Application Status Dashboard' }))
+    ).toBeVisible({ timeout: 10000 });
   });
 });
