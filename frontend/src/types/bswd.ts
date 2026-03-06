@@ -79,6 +79,7 @@ export interface ItemDisplay {
   suggestionTags: string[];
   isSuggested?: boolean;
   suggestionScore?: number;
+  leastRequirements: string[];
 }
 
 export interface RequestedItem {

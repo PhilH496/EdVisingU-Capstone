@@ -47,6 +47,7 @@ export function ServiceAndEquip({
         "vision",
         "hearing",
       ],
+      leastRequirements: [],
     },
     {
       id: 2,
@@ -62,6 +63,7 @@ export function ServiceAndEquip({
         "vision",
         "hearing",
       ],
+      leastRequirements: [],
     },
     {
       id: 3,
@@ -70,6 +72,7 @@ export function ServiceAndEquip({
       bswdEligible: true,
       csgdseEligible: true,
       suggestionTags: ["vision", "learning", "cognitive", "dexterity"],
+      leastRequirements: ["hearing"],
     },
   ];
 
@@ -82,6 +85,7 @@ export function ServiceAndEquip({
       bswdEligible: true,
       csgdseEligible: true,
       suggestionTags: ["learning", "attention/concentration", "dexterity"],
+      leastRequirements: [],
     },
     {
       id: 2,
@@ -97,6 +101,7 @@ export function ServiceAndEquip({
         "dexterity",
         "communication",
       ],
+      leastRequirements: [],
     },
     {
       id: 3,
@@ -110,6 +115,7 @@ export function ServiceAndEquip({
         "attention/concentration",
         "mental health",
       ],
+      leastRequirements: [],
     },
   ];
 

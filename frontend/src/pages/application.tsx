@@ -58,28 +58,28 @@ function BSWDApplicationPage() {
         try {
           // Get student_id from email
           const { data: studentData } = await supabase
-            .from('student')
-            .select('student_id')
-            .eq('email', user.email)
+            .from("student")
+            .select("student_id")
+            .eq("email", user.email)
             .single();
 
           if (studentData) {
             // Check if application exists
             const { data: existingApp } = await supabase
-              .from('applications')
-              .select('id')
-              .eq('student_id', studentData.student_id.toString())
+              .from("applications")
+              .select("id")
+              .eq("student_id", studentData.student_id.toString())
               .limit(1)
               .single();
 
             if (existingApp) {
               // Student already submitted, redirect to dashboard
-              router.push('/student-dashboard');
+              router.push("/student-dashboard");
             }
           }
         } catch (error) {
           // Ignore errors - let user stay on form page
-          console.log('No existing submission found, proceeding with form');
+          console.log("No existing submission found, proceeding with form");
         }
       }
     };
@@ -173,91 +173,94 @@ function BSWDApplicationPage() {
 
   const TOTAL_STEPS = stepsInfo.length;
 
-  const isStepComplete = useCallback((stepCheck: number): boolean => {
-    switch (stepCheck) {
-      case 1:
-        return Boolean(
-          formData.studentId &&
-          formData.studentId.length >= 7 &&
-          formData.studentId.length <= 8 &&
-          formData.firstName &&
-          formData.lastName &&
-          formData.email &&
-          formData.dateOfBirth &&
-          formData.oen.length === 9 &&
-          formData.sin.replace(/\D/g, "").length === 9 &&
-          formData.address &&
-          formData.city &&
-          formData.province &&
-          formData.postalCode &&
-          formData.postalCode.replace(/\s/g, "").length === 6 &&
-          formData.country &&
-          formData.hasOsapApplication !== undefined,
-        );
+  const isStepComplete = useCallback(
+    (stepCheck: number): boolean => {
+      switch (stepCheck) {
+        case 1:
+          return Boolean(
+            formData.studentId &&
+            formData.studentId.length >= 7 &&
+            formData.studentId.length <= 8 &&
+            formData.firstName &&
+            formData.lastName &&
+            formData.email &&
+            formData.dateOfBirth &&
+            formData.oen.length === 9 &&
+            formData.sin.replace(/\D/g, "").length === 9 &&
+            formData.address &&
+            formData.city &&
+            formData.province &&
+            formData.postalCode &&
+            formData.postalCode.replace(/\s/g, "").length === 6 &&
+            formData.country &&
+            formData.hasOsapApplication !== undefined,
+          );
 
-      case 2: {
-        if (formData.submittedDisabilityElsewhere === true) {
+        case 2: {
+          if (formData.submittedDisabilityElsewhere === true) {
+            return Boolean(
+              formData.institution &&
+              formData.institutionType &&
+              formData.studyType &&
+              formData.studyPeriodStart &&
+              formData.studyPeriodEnd &&
+              formData.previousInstitution,
+            );
+          }
           return Boolean(
             formData.institution &&
             formData.institutionType &&
             formData.studyType &&
             formData.studyPeriodStart &&
-            formData.studyPeriodEnd &&
-            formData.previousInstitution,
+            formData.studyPeriodEnd,
           );
         }
-        return Boolean(
-          formData.institution &&
-          formData.institutionType &&
-          formData.studyType &&
-          formData.studyPeriodStart &&
-          formData.studyPeriodEnd,
-        );
-      }
 
-      case 3: {
-        formData.osapOnFileStatus = "APPROVED"; // TEMP WILL EVENTUALLY COME BACK AND REMOVE THIS
-        const hasChosenOnFile =
-          formData.osapOnFileStatus === "APPROVED" ||
-          formData.osapOnFileStatus === "NONE";
+        case 3: {
+          formData.osapOnFileStatus = "APPROVED"; // TEMP WILL EVENTUALLY COME BACK AND REMOVE THIS
+          const hasChosenOnFile =
+            formData.osapOnFileStatus === "APPROVED" ||
+            formData.osapOnFileStatus === "NONE";
 
-        const appTypeOk =
-          formData.osapOnFileStatus === "APPROVED"
-            ? formData.osapApplication !== "none"
-            : true;
+          const appTypeOk =
+            formData.osapOnFileStatus === "APPROVED"
+              ? formData.osapApplication !== "none"
+              : true;
 
-        const needsOk =
-          formData.osapOnFileStatus === "APPROVED"
-            ? !Number.isNaN(Number(formData.federalNeed)) &&
-              !Number.isNaN(Number(formData.provincialNeed)) &&
-              Number(formData.federalNeed) >= 0 &&
-              Number(formData.provincialNeed) >= 0
-            : true;
+          const needsOk =
+            formData.osapOnFileStatus === "APPROVED"
+              ? !Number.isNaN(Number(formData.federalNeed)) &&
+                !Number.isNaN(Number(formData.provincialNeed)) &&
+                Number(formData.federalNeed) >= 0 &&
+                Number(formData.provincialNeed) >= 0
+              : true;
 
-        const restrictionsOk = true;
+          const restrictionsOk = true;
 
-        return hasChosenOnFile && appTypeOk && needsOk && restrictionsOk;
-      }
-
-      case 4: {
-        if (formData.needsPsychoEdAssessment && !formData.email?.trim()) {
-          return false;
+          return hasChosenOnFile && appTypeOk && needsOk && restrictionsOk;
         }
-        return true;
-      }
 
-      case 5: {
-        return true;
-      }
+        case 4: {
+          if (formData.needsPsychoEdAssessment && !formData.email?.trim()) {
+            return false;
+          }
+          return true;
+        }
 
-      case 6: {
-        return isConfirmed;
-      }
+        case 5: {
+          return true;
+        }
 
-      default:
-        return false;
-    }
-  }, [formData, isConfirmed]);
+        case 6: {
+          return isConfirmed;
+        }
+
+        default:
+          return false;
+      }
+    },
+    [formData, isConfirmed],
+  );
 
   const canProceed = useMemo(() => {
     return isStepComplete(currentStep) && !saving;
@@ -295,36 +298,47 @@ function BSWDApplicationPage() {
     } catch (err) {
       // Handle submission errors with detailed information
       let errorMessage = "Failed to submit application. Please try again.";
-      
+
       if (err instanceof Error) {
         errorMessage = err.message;
-        
+
         // Check for specific error patterns
-        if (err.message.includes('Student ID') && err.message.includes('already exists')) {
+        if (
+          err.message.includes("Student ID") &&
+          err.message.includes("already exists")
+        ) {
           // Student ID or Application already exists - show the full message
           errorMessage = err.message;
-        } else if (err.message.includes('OEN') && err.message.includes('already in use')) {
+        } else if (
+          err.message.includes("OEN") &&
+          err.message.includes("already in use")
+        ) {
           // OEN already exists - show the full message
           errorMessage = err.message;
-        } else if (err.message.includes('duplicate key')) {
+        } else if (err.message.includes("duplicate key")) {
           // Generic duplicate error
-          errorMessage = "A record with this information already exists. Please verify your Student ID and OEN.";
-        } else if (err.message.includes('foreign key')) {
-          errorMessage = "Database relationship error. Please contact support with error: " + err.message;
-        } else if (err.message.includes('null value')) {
-          errorMessage = "Required field is missing. Please check all fields are filled correctly.";
-        } else if (err.message.includes('permission')) {
-          errorMessage = "Permission denied. Please make sure you're logged in.";
+          errorMessage =
+            "A record with this information already exists. Please verify your Student ID and OEN.";
+        } else if (err.message.includes("foreign key")) {
+          errorMessage =
+            "Database relationship error. Please contact support with error: " +
+            err.message;
+        } else if (err.message.includes("null value")) {
+          errorMessage =
+            "Required field is missing. Please check all fields are filled correctly.";
+        } else if (err.message.includes("permission")) {
+          errorMessage =
+            "Permission denied. Please make sure you're logged in.";
         }
       }
-      
+
       setError(errorMessage);
       setSaving(false);
       console.error("Detailed submission error:", err);
       console.error("Form data at error:", formData);
-      
+
       // Scroll to top to show error message
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -459,7 +473,7 @@ function BSWDApplicationPage() {
   return (
     <div>
       <FormLayout
-        title={t('title')}
+        title={t("title")}
         headerAction={
           <div className="flex items-center gap-3">
             {profile?.role === "admin" && (
