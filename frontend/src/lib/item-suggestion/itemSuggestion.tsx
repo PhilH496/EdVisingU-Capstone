@@ -5,11 +5,9 @@ function getSuggestionScore(
   functionalLimitations: string[],
 ): number {
   // Check if there are common elements in functionalLimitations and leastRequirements
-  if (
-    functionalLimitations.filter((limitation) =>
-      new Set(item.leastRequirements).has(limitation),
-    ).length != 0
-  ) {
+  const limitationSet = new Set(functionalLimitations);
+  const leastRequirementsSet = new Set(item.leastRequirements);
+  if (limitationSet.intersection(leastRequirementsSet).size !== 0) {
     return 0;
   }
 
@@ -38,11 +36,9 @@ function getItemsWithSuggestionScore(
 
 function shouldSuggestItem(item: ItemDisplay, functionalLimitations: string[]) {
   // Check if there are common elements in functionalLimitations and leastRequirements
-  if (
-    functionalLimitations.filter((limitation) =>
-      new Set(item.leastRequirements).has(limitation),
-    ).length != 0
-  ) {
+  const limitationSet = new Set(functionalLimitations);
+  const leastRequirementsSet = new Set(item.leastRequirements);
+  if (limitationSet.intersection(leastRequirementsSet).size !== 0) {
     return false;
   }
 
