@@ -4,6 +4,14 @@ function getSuggestionScore(
   item: ItemDisplay,
   functionalLimitations: string[],
 ): number {
+  // Check if there are common elements in functionalLimitations and leastRequirements
+  const limitationSet = new Set(functionalLimitations);
+  const leastRequirementsSet = new Set(item.leastRequirements);
+  if (limitationSet.intersection(leastRequirementsSet).size !== 0) {
+    return 0;
+  }
+
+  // Don't have any in common
   const calculatedScore = item.suggestionTags.reduce((prev, curr) => {
     if (functionalLimitations.includes(curr)) {
       return prev + 1;
@@ -26,11 +34,15 @@ function getItemsWithSuggestionScore(
   return addedScore;
 }
 
-function shouldSuggestItem(
-  suggestionTags: string[],
-  functionalLimitations: string[],
-) {
-  for (const suggestionTag of suggestionTags) {
+function shouldSuggestItem(item: ItemDisplay, functionalLimitations: string[]) {
+  // Check if there are common elements in functionalLimitations and leastRequirements
+  const limitationSet = new Set(functionalLimitations);
+  const leastRequirementsSet = new Set(item.leastRequirements);
+  if (limitationSet.intersection(leastRequirementsSet).size !== 0) {
+    return false;
+  }
+
+  for (const suggestionTag of item.suggestionTags) {
     for (const functionalLimitation of functionalLimitations) {
       if (suggestionTag === functionalLimitation) {
         return true;
@@ -62,10 +74,7 @@ export function getItemsWithSuggestion(
     if (seenFirstNotMatching) return item;
 
     // Check if the item should be suggested
-    const isSuggested = shouldSuggestItem(
-      item.suggestionTags,
-      functionalLimitations,
-    );
+    const isSuggested = shouldSuggestItem(item, functionalLimitations);
     // First time seeing non matching
     if (isSuggested === false) {
       seenFirstNotMatching = true;
